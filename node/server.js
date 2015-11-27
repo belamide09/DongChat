@@ -29,7 +29,7 @@ app.get("/getOnlineUsers",function(req,res){
 		include: [User]
 	}).done(function(results) {
 
-		res.render('online_users.html');
+		res.render('online_users.html',{results:results});
 
 	})
 

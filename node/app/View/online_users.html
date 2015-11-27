@@ -1,0 +1,11 @@
+<% for(var x = 0; x < results.length; x++) { %>
+  <% var name = results[x]['user']['firstname'] + ' ' + results[x]['user']['lastname'] %>
+  <div class="user">
+		<div class="image">
+			<img src="/user_image/<%= results[x]['user']['photo'] %>">
+		</div>
+		<div class="name">
+		  <%= name %>
+	 	</div>
+	</div>
+<% } %>
