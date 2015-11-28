@@ -149,6 +149,16 @@ io.on('connection',function(socket) {
 		})
 	})
 
+	socket.on('save_chat',function(data) {
+		OnairUser.find({
+			where: {
+				peer: data['sender_peer']
+			}
+		}).done(function(result) {
+			var sender_id = result['dataValues']['id'];
+		})
+	})
+
 });
 
 server.on('connection', function(id) { 

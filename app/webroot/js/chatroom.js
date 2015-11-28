@@ -23,6 +23,7 @@ function peerEvts() {
   peer.on('call', function(call){
     var c = confirmation = confirm(call.peer + ' want\'s to video chat with you');
     if ( c == true ) {
+      socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
       call.answer(window.localStream);
       StartCall(call);
     }
