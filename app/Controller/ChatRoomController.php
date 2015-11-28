@@ -2,6 +2,7 @@
 App::uses('AppController', 'Controller');
 class ChatRoomController extends AppController {
 	public $uses = array(
+		'OnairUser',
 		'RoomMember'
 	);
 	public function index($id) {
@@ -14,7 +15,14 @@ class ChatRoomController extends AppController {
 		$this->set('my_id',$this->Auth->user('id'));
 		$this->set('room_id',$id);
 	}
-	public function getChatRoomMembers() {
-
+	public function getPeer() {
+		if ( $this->request->is('post') ) {
+			$this->autoRender = false;
+			$user = $this->OnairUser->findById($this->request->data['user_id']);
+			$response['peer'] = $user['OnairUser']['peer'];
+			echo json_encode($response);
+		} else {
+			return $this->redirect('/');
+		}
 	}
 }

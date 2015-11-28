@@ -17,8 +17,7 @@ app.set('views', __dirname + '\\app\\View\\');
 app.engine('html', require('ejs').renderFile);
 
 // Model
-var OnlineUser 	= require('./app/Model/OnlineUser.js');
-var UsePeer 		= require('./app/Model/UsePeer.js');
+var OnairUser 	= require('./app/Model/OnairUser.js');
 var User 				= require('./app/Model/User.js');
 var Room 				= require('./app/Model/Room.js');
 var RoomMember 	= require('./app/Model/RoomMember.js');
@@ -29,6 +28,26 @@ var room_lists = {};
 
 io.on('connection',function(socket) {
 
+	socket.on('add_onair_user',function(data) {
+		console.log( data );
+		OnairUser.count({
+			where: {id:data['user_id']}
+		}).done(function(count) {
+			if ( count == 0 ) {
+				OnairUser.create({
+					id 								: data['user_id'],
+					peer							: data['peer_id'],
+					created_datetime	: new Date(),
+					created_ip				: getIp(socket)
+				});
+			} else {
+				OnairUser.update({peer: data['peer_id']},{
+		      where: { id : data['user_id'] }
+		    });
+			}
+		})
+
+	});
 	socket.on('get_all_rooms',function(data) {
 
 		Room.findAll().done(function(results) {

@@ -17,8 +17,8 @@ var room_id = "<?php echo $room_id?>";
 				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>
 			</div>
 		</div>
-		<div id="partner-webcam">
-
+		<div id="partner-webcam-container">
+		<video id="partner-webcam" autoplay></video>
 		</div>
 		<div id="chatbox-contaner">
 			<div id="conversations">

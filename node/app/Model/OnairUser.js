@@ -5,14 +5,15 @@ var con = new seq('dongchat', 'root', '');
 
 exports.connection = con;
 
-var OnlineUser = con.define('online_users', {
+var OnairUser = con.define('onair_users', {
 	id : {
     type 				: seq.INTEGER,
     primaryKey 	: true
   },
+  peer 						: seq.STRING,
   created_datetime: seq.DATE,
   created_ip			: seq.STRING
 },
 {timestamps : false});
 
-module.exports = OnlineUser;
+module.exports = OnairUser;
