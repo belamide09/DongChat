@@ -24,7 +24,7 @@
 			</div>
 			<div id="chatbox-input">
 				<?php echo $this->Form->create('Conversation');?>
-				<input type="submit" class="btn btn-primary" id="send">
+				<input type="submit" value="Send" class="btn btn-primary" id="send">
 				<textarea class="form-control"> </textarea>
 			</div>
 		</div>
