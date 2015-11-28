@@ -21,6 +21,7 @@ var OnairUser 	= require('./app/Model/OnairUser.js');
 var User 				= require('./app/Model/User.js');
 var Room 				= require('./app/Model/Room.js');
 var RoomMember 	= require('./app/Model/RoomMember.js');
+var ChatHistory = require('./app/Model/ChatHistory.js');
 
 var room_lists = {};
 
@@ -156,6 +157,11 @@ io.on('connection',function(socket) {
 			}
 		}).done(function(result) {
 			var sender_id = result['dataValues']['id'];
+			ChatHistory.create({
+				sender_id			: sender_id,
+				recipient_id	: data['recipient_id'],
+				started 			: new Date()
+			});
 		})
 	})
 

@@ -5,7 +5,7 @@ var con = new seq('dongchat', 'root', '');
 
 exports.connection = con;
 
-var ChatHistory = con.define('room_members', {
+var ChatHistory = con.define('chat_history', {
 	id : {
     type 				: seq.INTEGER,
     primaryKey 	: true
