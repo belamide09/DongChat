@@ -4,7 +4,7 @@ $(document).ready(function() {
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
   });
-	socket.emit('get_chatroom_members',{user_id:my_id});
+	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
 
 	socket.on('return_chatroom_members',function(data) {
 		if ( data['user_id'] == my_id ) {

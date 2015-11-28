@@ -29,10 +29,10 @@ var room_lists = {};
 
 io.on('connection',function(socket) {
 
-	socket.on('get_all_rooms',function() {
+	socket.on('get_all_rooms',function(data) {
 
 		Room.findAll().done(function(results) {
-			io.emit('return_rooms',results);
+			io.emit('return_rooms',{user_id:data['user_id'],results:results});
 		});
 
 	});
@@ -97,8 +97,9 @@ io.on('connection',function(socket) {
 		RoomMember.findAll({
 			where: {
 				user_id: { 
-					$ne: data['user_id']
-				}
+					$ne: data['user_id'],
+				},
+				room_id: data['room_id']
 			},
 			include: [User]
 		}).done(function(members) {
@@ -115,7 +116,17 @@ io.on('connection',function(socket) {
 				room_id: data['room_id']
 			}
 		}).done(function() {
-			io.emit('remove_room_member',data);
+			RoomMember.count({
+				where: {
+					room_id: data['room_id']
+				}
+			}).done(function(count) {
+				if ( count == 0 ) {
+					Room.destroy({where: {id:data['room_id']}});
+				}
+				io.emit('remove_room_member',data);
+				io.emit('remove_room',data);
+			})
 		})
 	})
 
