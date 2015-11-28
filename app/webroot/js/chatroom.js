@@ -34,7 +34,7 @@ $(document).ready(function() {
 
   // Show this peer's ID.
   peer.on('open', function(id){
-    addOnline();  
+
   });
   peerEvts();
   getVideoStream();
@@ -73,11 +73,6 @@ $(document).ready(function() {
       $('#my-webcam').prop('src', URL.createObjectURL(stream));
       window.localStream = stream;
     }, function(){ $('#step1-error').show(); });
-  }
-
-  function addOnline() {
-    var url = '/Room/addOnlineUser';
-    $.post(url,{peer:peer.id});
   }
 
 });

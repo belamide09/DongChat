@@ -37,10 +37,10 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		echo $this->Html->css('bootstrap');
 		echo $this->Html->css('bootstrap.min');
 		echo $this->Html->css('style');
-		echo $this->Html->css('chatroom');
 
 		echo $this->Html->script('jquery-1.10.2');
 		echo $this->Html->script('jquery-ui');
+		echo $this->Html->script('http://localhost:3000/socket.io/socket.io.js');
 	?>
 </head>
 <body>
