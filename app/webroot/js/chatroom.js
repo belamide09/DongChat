@@ -5,7 +5,7 @@ var c;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 peer = new Peer({
-  host: '192.168.0.187',
+  host: 'localhost',
   port: '9000',
   path: '/',
   debug: 0
@@ -13,7 +13,10 @@ peer = new Peer({
 
 peer.on('open', function(peer_id){
 
- socket.emit('add_onair_user',{user_id:my_id,peer_id:peer_id});
+  setTimeout(function() {
+    socket.emit('add_onair_user',{user_id:my_id,peer_id:peer_id});
+    socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
+  },1000);
 
 });
 peerEvts();
@@ -24,6 +27,10 @@ function peerEvts() {
     var c = confirmation = confirm(call.peer + ' want\'s to video chat with you');
     if ( c == true ) {
       socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
+      setTimeout(function() {
+        socket.emit('end_chat',{user_id:my_id});
+        peer._cleanup();
+      },300000);
       call.answer(window.localStream);
       StartCall(call);
     }
@@ -64,7 +71,6 @@ function PrepareCall(requestedPeer) {
   c.on('error', function(err) { alert(err); });
   var call = peer.call(requestedPeer, window.localStream);
   StartCall(call);
-  console.log( call );
 }
 
 function Call(user_id) {

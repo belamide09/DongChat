@@ -10,6 +10,7 @@ var router			= express.Router();
 var getIP       = require('ipware')().get_ip;
 var dateFormat  = require('dateformat');
 var seq 				= require('sequelize');
+var md5 				= require('MD5');
 
 var server 			= PeerServer({port: 9000, path: '/', proxied: false});
 
@@ -49,6 +50,17 @@ io.on('connection',function(socket) {
 		})
 
 	});
+
+	socket.on('disconnect',function() {
+		var user_id = socket.handshake.query['user_id'];
+		OnairUser.destroy({
+			where: {
+				id: user_id
+			}
+		});
+
+	})
+
 	socket.on('get_all_rooms',function(data) {
 
 		Room.findAll().done(function(results) {
@@ -114,6 +126,9 @@ io.on('connection',function(socket) {
 		RoomMember.belongsTo(User,{
 			foreignKey: 'user_id'
 		});
+		RoomMember.belongsTo(OnairUser,{
+			foreignKey: 'user_id'
+		});
 		RoomMember.findAll({
 			where: {
 				user_id: { 
@@ -121,7 +136,7 @@ io.on('connection',function(socket) {
 				},
 				room_id: data['room_id']
 			},
-			include: [User]
+			include: [User,OnairUser]
 		}).done(function(members) {
 			io.emit('return_chatroom_members',{user_id:data['user_id'],members:members});
 		});
@@ -156,13 +171,55 @@ io.on('connection',function(socket) {
 				peer: data['sender_peer']
 			}
 		}).done(function(result) {
+			var chat_hash = md5(new Date());
 			var sender_id = result['dataValues']['id'];
 			ChatHistory.create({
+				chat_hash			: chat_hash,
 				sender_id			: sender_id,
 				recipient_id	: data['recipient_id'],
-				started 			: new Date()
+				started 			: new Date(),
+				end						: null
 			});
+			OnairUser.update({chat_hash: chat_hash},{
+	      where: {
+	       id: [data['recipient_id'],sender_id]
+	      }
+	    });
+	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: data['recipient_id']});
 		})
+	})
+
+	socket.on('end_chat',function(data) {
+
+		OnairUser.find({
+			where: {
+				id: data['user_id']
+			}
+		}).done(function(result) {
+			if (result !== null ) {
+				ChatHistory.update({end: new Date()},{
+		      where: {
+		       chat_hash: result['dataValues']['chat_hash'],
+		       end			: null
+		      }
+		    });
+		    OnairUser.update({chat_hash: null},{
+		      where: {
+		       chat_hash: result['dataValues']['chat_hash']
+		      }
+		    });
+		    OnairUser.findAll({
+		    	attributes: ['id'],
+		    	where: {
+		    		chat_hash: result['dataValues']['chat_hash']
+		    	}
+		    }).done(function(users) {
+					io.emit('update_users_status',users);
+					io.emit('notify_timesup',users);
+		    })
+			}
+		})
+
 	})
 
 });
@@ -170,8 +227,27 @@ io.on('connection',function(socket) {
 server.on('connection', function(id) { 
 	console.log( id + ' has connected to the server' );
 });
-server.on('disconnect', function(id) { 
+server.on('disconnect', function(id) {
 	console.log( id + ' has disconnected to the server' );
+	OnairUser.find({
+		where: {
+			peer: id
+		}
+	}).done(function(result) {
+		if ( result !== null ) {
+			OnairUser.update({chat_hash: null},{
+	      where: {
+	       chat_hash: result['dataValues']['chat_hash']
+	      }
+	    });
+			ChatHistory.update({end: new Date()},{
+	      where: {
+	       chat_hash: result['dataValues']['chat_hash'],
+	       end			: null
+	      }
+	    });
+		}
+	})
 });
 
 var ExpressPeerServer = require('peer').ExpressPeerServer;

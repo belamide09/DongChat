@@ -3,8 +3,7 @@ App::uses('AppController', 'Controller');
 App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
 class UsersController extends AppController {
   public $uses = array(
-    'User',
-    'OnlineUser'
+    'User'
   );
 	public function beforeFilter() {
 		parent::beforeFilter();
@@ -34,7 +33,6 @@ class UsersController extends AppController {
             );
             $this->Cookie->write('adminRememberMe',$cookeData,true,$cookieTime);
           }
-          $this->appendOnlineUser($user['id']);
           $this->Auth->login($user);
           
           //added referrer
@@ -75,13 +73,4 @@ class UsersController extends AppController {
     return $this->redirect('/users/login');
   }
 
-  public function appendOnlineUser($id) {
-    $data = array('OnlineUser' =>array(
-      'id'                => $id,
-      'created_datetime'  => date('YmdHis'),
-      'created_ip'        => $this->request->clientIp()
-      )
-    );
-    $this->OnlineUser->save($data);
-  }
 }

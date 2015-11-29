@@ -10,6 +10,7 @@ var ChatHistory = con.define('chat_history', {
     type 				: seq.INTEGER,
     primaryKey 	: true
   },
+  chat_hash 			: seq.STRING,
   sender_id				: seq.INTEGER,
   recipient_id		: seq.INTEGER,
   started					: seq.DATE,
