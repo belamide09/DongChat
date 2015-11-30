@@ -1,8 +1,12 @@
-var socket = io.connect('http://localhost:3000',{query:"user_id="+my_id});
+var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function() {
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
+  });
+
+  socket.on('refresh_rooms',function() {
+  	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   });
 
 	socket.on('return_chatroom_members',function(data) {
@@ -45,12 +49,11 @@ $(document).ready(function() {
 	});
 
 	socket.on('remove_room_member',function(data) {
+		console.log( data );
 		if ( data['user_id'] == my_id ) {
 			location.reload();
 		} else {
-			if ( data['room_id'] == room_id ) {
-				$(".user-"+data['user_id']).remove();
-			}
+			$(".user-"+data['user_id']).remove();
 		}
 	});
 
@@ -76,12 +79,23 @@ $(document).ready(function() {
 
 	});
 
+	socket.on('set_users_available',function(data) {
+		console.log( data );
+		if ( data ) {
+			$(".user-"+data['id']+' .btn-call').removeAttr('disabled');
+			$(".user-"+data['id']+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
+			$(".user-"+data['id']+' .btn-call').html('Call');
+		}
+
+	})
+
 	socket.on('update_users_status',function(data) {
 
 		for(var x in data) {
 			if ( data[x]['id'] == my_id ) {
 				alert('Your chat is now time\'s up!');
 				peer._cleanup();
+				$("#partner-webcam").attr('src',null);
 			}
 		}
 

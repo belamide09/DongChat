@@ -12,6 +12,7 @@ var room_id = "<?php echo $room_id?>";
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
 			</div>
+			<div id="remaining-time"> Time Remaining : 05:00 </div>
 			<div id="members">
 				<div id="member-list"></div>
 				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>

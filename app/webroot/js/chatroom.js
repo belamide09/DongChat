@@ -1,11 +1,12 @@
 
+var chat_hash = "";
 var peer;
 var c;
 // Compatibility shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 peer = new Peer({
-  host: 'localhost',
+  host: '192.168.0.187',
   port: '9000',
   path: '/',
   debug: 0
@@ -24,16 +25,19 @@ getVideoStream();
 
 function peerEvts() {
   peer.on('call', function(call){
-    var c = confirmation = confirm(call.peer + ' want\'s to video chat with you');
-    if ( c == true ) {
-      socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-      setTimeout(function() {
-        socket.emit('end_chat',{user_id:my_id});
-        peer._cleanup();
-      },300000);
-      call.answer(window.localStream);
-      StartCall(call);
-    }
+    var url = '/ChatRoom/getName';
+    $.post(url,{peer:call.peer},function(data) {
+      var c = confirmation = confirm(data['name'] + ' want\'s to video chat with you');
+      if ( c == true ) {
+        socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
+        setTimeout(function() {
+          socket.emit('end_chat',{user_id:my_id});
+          peer._cleanup();
+        },300000);
+        call.answer(window.localStream);
+        StartCall(call);
+      }
+    },'JSON');
   });
   peer.on('error', function(err){
   });
@@ -47,6 +51,7 @@ function peerEvts() {
 function connect(c) {
   c.on('close', function() {
     window.existingCall.close();
+    $("#partner-webcam").attr('src',null);
   });
 }
 
