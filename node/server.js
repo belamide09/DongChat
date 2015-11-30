@@ -59,6 +59,7 @@ io.on('connection',function(socket) {
 		io.emit('remove_room_member',{user_id:user_id});
 		
     if ( typeof chathash_arr[user_id] != "undefined" ) {
+    	io.emit('end_chat',{chat_hash:chathash_arr[user_id]});
     	OnairUser.destroy({
 				where: {
 					id: user_id
@@ -231,16 +232,20 @@ io.on('connection',function(socket) {
 			chathash_arr[recipient_id] 	= chat_hash;
 			chathash_arr[sender_id] 		= chat_hash;
 	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
+	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash});
+	    io.emit('start_chattime',{chat_hash:chat_hash});
 		})
 	})
 
 	socket.on('end_chat',function(data) {
+		var user_id = data['user_id'];
 		OnairUser.find({
 			where: {
-				id: data['user_id']
+				id: user_id
 			}
 		}).done(function(result) {
 			if (result !== null ) {
+				io.emit('end_chat',{chat_hash:result['dataValues']['chat_hash']});
 				ChatHistory.update({end: new Date()},{
 		      where: {
 		       chat_hash: result['dataValues']['chat_hash'],

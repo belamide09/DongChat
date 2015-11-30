@@ -2,6 +2,10 @@
 var chat_hash = "";
 var peer;
 var c;
+var onchat     = false;
+var chat_time  = 300;
+var remaining_time  = chat_time;
+var connected_peer;
 // Compatibility shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -29,30 +33,19 @@ function peerEvts() {
     $.post(url,{peer:call.peer},function(data) {
       var c = confirmation = confirm(data['name'] + ' want\'s to video chat with you');
       if ( c == true ) {
+        var end_chat = chat_time * 1000
         socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-        setTimeout(function() {
-          socket.emit('end_chat',{user_id:my_id});
-          peer._cleanup();
-        },300000);
+        setTimeout(endChat,end_chat);
         call.answer(window.localStream);
         StartCall(call);
+        connected_peer = call.peer;
       }
     },'JSON');
   });
-  peer.on('error', function(err){
-  });
-
-  peer.on('connection', connect);
-
-  peer.on('error', function(err) {
-  })
 }
 
 function connect(c) {
-  c.on('close', function() {
-    window.existingCall.close();
-    $("#partner-webcam").attr('src',null);
-  });
+
 }
 
 
@@ -81,6 +74,7 @@ function PrepareCall(requestedPeer) {
 function Call(user_id) {
   var url = '/ChatRoom/getPeer';
   $.post(url,{user_id,user_id},function(data) {
+    connected_peer = data['peer'];
     PrepareCall(data['peer']);
   },'JSON');
 }
@@ -94,6 +88,26 @@ function StartCall (call) {
   });
   window.existingCall = call;
   conn = peer.connect(call.peer);
+}
+
+function endChat() {
+  socket.emit('end_chat',{user_id:my_id});
+  peer._cleanup();
+  remaining_time = chat_time;
+  onchat = false;
+  $("#remaining_time").text('Remaining time : '+convertTime(remaining_time));
+}
+
+function convertTime(time) {
+  var minutes = Math.floor(time / 60);
+  var seconds = time % 60;
+  if ( minutes < 10 ) {
+    minutes = '0'+minutes;
+  }
+  if ( seconds < 10 ) {
+    seconds = '0'+seconds;
+  }
+  return minutes+":"+seconds;
 }
 
 // Make sure things clean up properly.

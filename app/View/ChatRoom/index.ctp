@@ -12,7 +12,7 @@ var room_id = "<?php echo $room_id?>";
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
 			</div>
-			<div id="remaining-time"> Time Remaining : 05:00 </div>
+			<div id="remaining-time"> Remaining time : 05:00 </div>
 			<div id="members">
 				<div id="member-list"></div>
 				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>
@@ -25,9 +25,9 @@ var room_id = "<?php echo $room_id?>";
 			<div id="conversations">
 			</div>
 			<div id="chatbox-input">
-				<?php echo $this->Form->create('Conversation');?>
+				<?php echo $this->Form->create('Conversation',array('id'=>'message-form'));?>
 				<input type="submit" value="Send" class="btn btn-primary" id="send">
-				<textarea class="form-control"> </textarea>
+				<textarea class="form-control" id="txt-message"> </textarea>
 			</div>
 		</div>
 	</div>

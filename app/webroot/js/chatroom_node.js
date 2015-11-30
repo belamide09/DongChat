@@ -1,5 +1,13 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function() {
+	
+	$("#message-form").click(function(e) {
+		e.preventDefault();
+		var message = $("#txt-message").val();
+		console.log( message );
+	})	
+
+	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
@@ -7,6 +15,37 @@ $(document).ready(function() {
 
   socket.on('refresh_rooms',function() {
   	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
+  });
+
+  socket.on('append_chathash',function(data) {
+  	if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
+  		chat_hash = data['chat_hash'];
+  	}
+  });
+
+  socket.on('end_chat',function(data) {
+  	if ( data['chat_hash'] == chat_hash ) {
+  		peer._cleanup();
+		  remaining_time = chat_time;
+		  onchat = false;
+		  $("#remaining_time").text('Remaining time : '+convertTime(remaining_time));
+  	}
+  });
+
+  socket.on('start_chattime',function(data) {
+  	if ( data['chat_hash'] == chat_hash ) {
+      onchat = true;
+      var timer = setInterval(function() {
+        remaining_time--;
+        $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+        if ( remaining_time == 0 || !onchat ) {
+        	remaining_time = chat_time;
+        	onchat = false;
+        	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+          clearInterval(timer);
+        }
+      },1000);
+  	}
   });
 
 	socket.on('return_chatroom_members',function(data) {
@@ -21,7 +60,7 @@ $(document).ready(function() {
 					if ( members[x]['onair_user']['chat_hash'] == "" ) {
 						member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
 					} else {
-						member_container += '<span class="btn btn-danger btn-xs btn-call" onclick="Call('+member['id']+')">On chat</span>';
+						member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
 					}
 					member_container += '<table class="member"><tr>';
 					member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
@@ -49,7 +88,6 @@ $(document).ready(function() {
 	});
 
 	socket.on('remove_room_member',function(data) {
-		console.log( data );
 		if ( data['user_id'] == my_id ) {
 			location.reload();
 		} else {
@@ -80,7 +118,6 @@ $(document).ready(function() {
 	});
 
 	socket.on('set_users_available',function(data) {
-		console.log( data );
 		if ( data ) {
 			$(".user-"+data['id']+' .btn-call').removeAttr('disabled');
 			$(".user-"+data['id']+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
