@@ -19,6 +19,9 @@
 	background: #000;
 	margin: 10px;
 }
+#partner-webcam {
+	margin-top: 10px;
+}
 #side {
 	width: 250px;
 	height: 96%;

@@ -19,7 +19,7 @@ var room_id = "<?php echo $room_id?>";
 			</div>
 		</div>
 		<div id="partner-webcam-container">
-		<video id="partner-webcam" autoplay></video>
+			<center> <video id="partner-webcam" autoplay></video> </center>
 		</div>
 		<div id="chatbox-contaner">
 			<div id="conversations">

@@ -57,51 +57,11 @@ io.on('connection',function(socket) {
 	socket.on('disconnect',function() {
 		var user_id = socket.handshake.query['user_id'];
 		io.emit('remove_room_member',{user_id:user_id});
-		
-    if ( typeof chathash_arr[user_id] != "undefined" ) {
-    	io.emit('end_chat',{chat_hash:chathash_arr[user_id]});
-    	OnairUser.destroy({
-				where: {
-					id: user_id
-				}
-			});
-    	OnairUser.find({
-	    	attributes: ['id'],
-	    	where: {
-	    		chat_hash	: chathash_arr[user_id]
-	    	}
-	    }).done(function(user) {
-	    	if ( user != null ) {
-					ChatHistory.update({end: new Date()},{
-			      where: {
-			       chat_hash: chathash_arr[user_id],
-			       end			: null
-			      }
-			    });
-
-		    	OnairUser.update({chat_hash: null},{
-			      where: {
-			       chat_hash: chathash_arr[user_id]
-			      }
-			    }).done(function() {
-						delete chathash_arr[user_id];
-						io.emit('set_users_available',user);
-			    })
-			  } else {
-			  	io.emit('refresh_rooms');
-			  }
-
-			});
-		} else {
-			OnairUser.destroy({
-				where: {
-					id: user_id
-				}
-			}).done(function() {
-				io.emit('refresh_rooms');
-			})
-		}
-
+		OnairUser.destroy({
+			where: {
+				id: user_id
+			}
+		});
 	})
 
 	socket.on('get_all_rooms',function(data) {
@@ -239,37 +199,31 @@ io.on('connection',function(socket) {
 
 	socket.on('end_chat',function(data) {
 		var user_id = data['user_id'];
-		OnairUser.find({
-			where: {
-				id: user_id
-			}
-		}).done(function(result) {
-			if (result !== null ) {
-				io.emit('end_chat',{chat_hash:result['dataValues']['chat_hash']});
-				ChatHistory.update({end: new Date()},{
-		      where: {
-		       chat_hash: result['dataValues']['chat_hash'],
-		       end			: null
-		      }
-		    });
-		    OnairUser.update({chat_hash: null},{
-		      where: {
-		       chat_hash: result['dataValues']['chat_hash']
-		      }
-		    });
-		    OnairUser.findAll({
-		    	attributes: ['id'],
-		    	where: {
-		    		chat_hash: result['dataValues']['chat_hash']
-		    	}
-		    }).done(function(users) {
-		    	delete chathash_arr[user_id];
-					io.emit('update_users_status',users);
-					io.emit('notify_timesup',users);
-		    })
-			}
-		})
-
+		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
+			var chat_hash = chathash_arr[user_id];
+    	delete chathash_arr[user_id];
+			io.emit('end_chat',{chat_hash:chat_hash});
+			ChatHistory.update({end: new Date()},{
+	      where: {
+	       chat_hash: chat_hash,
+	       end			: null
+	      }
+	    });
+	    OnairUser.update({chat_hash: null},{
+	      where: {
+	       chat_hash: chat_hash
+	      }
+	    });
+	    OnairUser.findAll({
+	    	attributes: ['id'],
+	    	where: {
+	    		chat_hash: chat_hash
+	    	}
+	    }).done(function(users) {
+				io.emit('update_users_status',{user_id:user_id,ended:data['ended'],users:users});
+				io.emit('update_users_status',users);
+	    })
+		}
 	})
 
 });

@@ -4,7 +4,7 @@ $(document).ready(function() {
 	$("#message-form").click(function(e) {
 		e.preventDefault();
 		var message = $("#txt-message").val();
-		console.log( message );
+		c.send(message);
 	})	
 
 	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
@@ -127,12 +127,17 @@ $(document).ready(function() {
 	})
 
 	socket.on('update_users_status',function(data) {
-
-		for(var x in data) {
-			if ( data[x]['id'] == my_id ) {
-				alert('Your chat is now time\'s up!');
+		var users = data['users'];
+		for(var x in users) {
+			if ( users[x]['id'] == my_id ) {
 				peer._cleanup();
+				remaining_time = chat_time;
 				$("#partner-webcam").attr('src',null);
+				if ( data['ended'] ) {
+					alert('Your chat is now time\'s up!');
+				} else {
+					alert('( You/Your chat partner ) has been disconnected');
+				}
 			}
 		}
 

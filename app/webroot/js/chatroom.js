@@ -31,11 +31,26 @@ function peerEvts() {
   peer.on('call', function(call){
     var url = '/ChatRoom/getName';
     $.post(url,{peer:call.peer},function(data) {
-      var c = confirmation = confirm(data['name'] + ' want\'s to video chat with you');
-      if ( c == true ) {
+      var confirmation = confirm(data['name'] + ' want\'s to video chat with you');
+      if ( confirmation == true ) {
+
+        c = peer.connect(call.peer, {
+          label: 'chat',
+          serialization: 'none',
+          metadata: {message: 'hi i want to chat with you!'}
+        });
+        c.on('close',function(){
+          endChat(false);
+        });
+        c.on('data', function(data) {
+          console.log( data );
+        });
+
         var end_chat = chat_time * 1000
         socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-        setTimeout(endChat,end_chat);
+        setTimeout(function() {
+          endChat(true);
+        },end_chat);
         call.answer(window.localStream);
         StartCall(call);
         connected_peer = call.peer;
@@ -45,7 +60,9 @@ function peerEvts() {
 }
 
 function connect(c) {
-
+  c.on('close', function() {
+    console.log( 'connection died' );
+  });
 }
 
 
@@ -62,9 +79,6 @@ function PrepareCall(requestedPeer) {
     label: 'chat',
     serialization: 'none',
     metadata: {message: 'hi i want to chat with you!'}
-  });
-  c.on('open', function() {
-    connect(c);
   });
   c.on('error', function(err) { alert(err); });
   var call = peer.call(requestedPeer, window.localStream);
@@ -90,12 +104,8 @@ function StartCall (call) {
   conn = peer.connect(call.peer);
 }
 
-function endChat() {
-  socket.emit('end_chat',{user_id:my_id});
-  peer._cleanup();
-  remaining_time = chat_time;
-  onchat = false;
-  $("#remaining_time").text('Remaining time : '+convertTime(remaining_time));
+function endChat(ended) {
+  socket.emit('end_chat',{user_id:my_id,ended: ended});
 }
 
 function convertTime(time) {
