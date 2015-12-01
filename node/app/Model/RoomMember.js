@@ -12,6 +12,7 @@ var RoomMember = con.define('room_members', {
   },
   room_id					: seq.INTEGER,
   user_id					: seq.INTEGER,
+  ready 					: seq.INTEGER,
   created_datetime: seq.DATE,
   created_ip			: seq.STRING
 },

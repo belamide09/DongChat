@@ -62,6 +62,9 @@ io.on('connection',function(socket) {
 				id: user_id
 			}
 		});
+		RoomMember.update({ready:0},{
+			where: { user_id : user_id }
+		});
 	})
 
 	socket.on('get_all_rooms',function(data) {
@@ -108,20 +111,23 @@ io.on('connection',function(socket) {
 				RoomMember.create({
 					room_id						: data['room_id'],
 					user_id						: data['user_id'],
+					ready 						: 0,
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
+					User.belongsTo(OnairUser,{
+						foreignKey: 'id'
+					});
 					User.find({
-						where: {id: data['user_id']}
+						where: {id: data['user_id']},
+						include: [OnairUser]
 					}).done(function (member) {
-						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
 						io.emit('redirect_user_to_room',data);
 					})
 				});
 
 			}
 		})
-
 	})
 
 	socket.on('get_chatroom_members',function(data) {
@@ -146,8 +152,22 @@ io.on('connection',function(socket) {
 
 	})
 
-	socket.on('leave_room',function(data) {
+	socket.on('ready',function(data) {
+		RoomMember.update({ready:1},{
+			where: {
+				user_id : data['user_id'],
+				room_id	: data['room_id']
+			}
+		}).done(function() {
+			io.emit('change_status_to_ready',data);
+		});
+	})
 
+	socket.on('start_chat',function(data) {
+		io.emit('start_chat',data);
+	})
+
+	socket.on('leave_room',function(data) {
 		RoomMember.destroy({
 			where: {
 				user_id: data['user_id'],
@@ -169,61 +189,9 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('save_chat',function(data) {
-		OnairUser.find({
-			where: {
-				peer: data['sender_peer']
-			}
-		}).done(function(result) {
-			var chat_hash = md5(new Date());
-			var sender_id = result['dataValues']['id'];
-			var recipient_id = data['recipient_id'];
-			ChatHistory.create({
-				chat_hash			: chat_hash,
-				sender_id			: sender_id,
-				recipient_id	: recipient_id,
-				started 			: new Date(),
-				end						: null
-			});
-			OnairUser.update({chat_hash: chat_hash},{
-	      where: {
-	       id: [recipient_id,sender_id]
-	      }
-	    });
-			chathash_arr[recipient_id] 	= chat_hash;
-			chathash_arr[sender_id] 		= chat_hash;
-	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
-	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash});
-	    io.emit('start_chattime',{chat_hash:chat_hash});
-		})
 	})
 
 	socket.on('end_chat',function(data) {
-		var user_id = data['user_id'];
-		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
-			var chat_hash = chathash_arr[user_id];
-    	delete chathash_arr[user_id];
-			io.emit('end_chat',{chat_hash:chat_hash});
-			ChatHistory.update({end: new Date()},{
-	      where: {
-	       chat_hash: chat_hash,
-	       end			: null
-	      }
-	    });
-	    OnairUser.update({chat_hash: null},{
-	      where: {
-	       chat_hash: chat_hash
-	      }
-	    });
-	    OnairUser.findAll({
-	    	attributes: ['id'],
-	    	where: {
-	    		chat_hash: chat_hash
-	    	}
-	    }).done(function(users) {
-				io.emit('update_users_status',{user_id:user_id,ended:data['ended'],users:users});
-				io.emit('update_users_status',users);
-	    })
-		}
 	})
 
 });
@@ -233,25 +201,6 @@ server.on('connection', function(id) {
 });
 server.on('disconnect', function(id) {
 	console.log( id + ' has disconnected to the server' );
-	// OnairUser.find({
-	// 	where: {
-	// 		peer: id
-	// 	}
-	// }).done(function(result) {
-	// 	if ( result !== null ) {
-	// 		OnairUser.update({chat_hash: null},{
-	//       where: {
-	//        chat_hash: result['dataValues']['chat_hash']
-	//       }
-	//     });
-	// 		ChatHistory.update({end: new Date()},{
-	//       where: {
-	//        chat_hash: result['dataValues']['chat_hash'],
-	//        end			: null
-	//       }
-	//     });
-	// 	}
-	// })
 });
 
 var ExpressPeerServer = require('peer').ExpressPeerServer;
@@ -261,7 +210,9 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 app.get('/', function(req, res, next) { res.send('Hello world!'); });
 
 
-http.listen(3000);
+http.listen(3000,function() {
+	OnairUser.truncate();
+});
 
 function getIp(socket) {
   var socketId  = socket.id;

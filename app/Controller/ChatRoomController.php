@@ -3,6 +3,7 @@ App::uses('AppController', 'Controller');
 class ChatRoomController extends AppController {
 	public $uses = array(
 		'OnairUser',
+		'Room',
 		'RoomMember'
 	);
 	private function isOnAir() {
@@ -17,33 +18,24 @@ class ChatRoomController extends AppController {
 			} else if ( $room['RoomMember']['room_id'] !== $id ) {
 				return $this->redirect('/');
 			}
+			$host = $this->isHost($room['RoomMember']['room_id']);
 			$this->set('my_id',$this->Auth->user('id'));
 			$this->set('room_id',$id);
+			$this->set(compact('host'));
 		} else {
 			echo "<big>Please login and logout</big>";
 			die();
 		}
 	}
-	public function getName() {
-		if ( $this->request->is('post') ) {
-			$this->autoRender = false;
-			$peer = $this->request->data['peer'];
-			$user = $this->OnairUser->findByPeer($peer);
-			$name = $user['User']['firstname'].' '.$user['User']['lastname'];
-			$response['name'] = $name;
-			echo json_encode($response);
-		} else {
-			return $this->redirect('/');
-		}
-	}
-	public function getPeer() {
-		if ( $this->request->is('post') ) {
-			$this->autoRender = false;
-			$user = $this->OnairUser->findById($this->request->data['user_id']);
-			$response['peer'] = $user['OnairUser']['peer'];
-			echo json_encode($response);
-		} else {
-			return $this->redirect('/');
-		}
+	private function isHost($room) {
+		$conditions = array(
+			'id' 		=> $room,
+			'host' 	=> $this->Auth->user('id')
+		);
+		$room = $this->Room->find('first',array(
+			'conditions' => $conditions
+			)
+		);
+		return isset($room['Room']) ? true : false;
 	}
 }

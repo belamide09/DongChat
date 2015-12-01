@@ -15,11 +15,16 @@ var room_id = "<?php echo $room_id?>";
 			<div id="remaining-time"> Remaining time : 05:00 </div>
 			<div id="members">
 				<div id="member-list"></div>
-				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>
+				<div>
+					<a href="#" class="btn btn-success btn-sm btn-ready">Ready</a>
+				<?php if ( $host ):?>
+					<a href="#" class="btn btn-primary btn-sm btn-start" disabled>Start Chat</a>
+				<?php endif; ?>
+					<a href="#" class="btn btn-danger btn-sm btn-leave">Leave</a>
+				</div>
 			</div>
 		</div>
-		<div id="partner-webcam-container">
-			<center> <video id="partner-webcam" autoplay></video> </center>
+		<div id="group-webcam-container">
 		</div>
 		<div id="chatbox-contaner">
 			<div id="conversations">

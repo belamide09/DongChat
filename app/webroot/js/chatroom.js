@@ -1,11 +1,12 @@
 
-var chat_hash = "";
+var chat_hash       = "";
 var peer;
 var c;
-var onchat     = false;
-var chat_time  = 300;
+var onchat          = false;
+var chat_time       = 300;
 var remaining_time  = chat_time;
-var connected_peer;
+var group_members   = {};
+
 // Compatibility shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -29,33 +30,20 @@ getVideoStream();
 
 function peerEvts() {
   peer.on('call', function(call){
-    var url = '/ChatRoom/getName';
-    $.post(url,{peer:call.peer},function(data) {
-      var confirmation = confirm(data['name'] + ' want\'s to video chat with you');
-      if ( confirmation == true ) {
-
-        c = peer.connect(call.peer, {
-          label: 'chat',
-          serialization: 'none',
-          metadata: {message: 'hi i want to chat with you!'}
-        });
-        c.on('close',function(){
-          endChat(false);
-        });
-        c.on('data', function(data) {
-          console.log( data );
-        });
-
-        var end_chat = chat_time * 1000
-        socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-        setTimeout(function() {
-          endChat(true);
-        },end_chat);
-        call.answer(window.localStream);
-        StartCall(call);
-        connected_peer = call.peer;
-      }
-    },'JSON');
+    c = peer.connect(call.peer, {
+      label: 'chat',
+      serialization: 'none',
+      metadata: {message: 'hi i want to chat with you!'}
+    });
+    c.on('close',function(){
+      endChat(false);
+    });
+    c.on('data', function(data) {
+      console.log( data );
+    });
+    call.answer(window.localStream);
+    StartCall(call);
+    connected_peer = call.peer;
   });
 }
 
@@ -85,23 +73,31 @@ function PrepareCall(requestedPeer) {
   StartCall(call);
 }
 
-function Call(user_id) {
-  var url = '/ChatRoom/getPeer';
-  $.post(url,{user_id,user_id},function(data) {
-    connected_peer = data['peer'];
-    PrepareCall(data['peer']);
-  },'JSON');
+function StartGroupChat() {
+  for(var x in group_members) {
+    var member = group_members[x];
+    PrepareCall(group_members[x]['peer']);
+  }
 }
 
-function StartCall (call) { 
+function StartCall(call) { 
   if (window.existingCall) {
     window.existingCall.close();
   }
+  $("#group-webcam-container").append('<video class="video-'+call.peer+' video" autoplay></video>');
   call.on('stream', function(stream){
-    $('#partner-webcam').prop('src', URL.createObjectURL(stream));
+    $('.video-'+call.peer).prop('src', URL.createObjectURL(stream));
   });
   window.existingCall = call;
   conn = peer.connect(call.peer);
+}
+
+function eachActiveConnection(fn) {
+  var conns = peer.connections[peerId];
+  for (var i = 0, ii = conns.length; i < ii; i += 1) {
+    var conn = conns[i];
+    fn(conn, $(this));
+  }
 }
 
 function endChat(ended) {
