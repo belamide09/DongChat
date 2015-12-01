@@ -18,13 +18,13 @@ peer = new Peer({
 });
 
 peer.on('open', function(peer_id){
-
   setTimeout(function() {
     socket.emit('add_onair_user',{user_id:my_id,peer_id:peer_id});
     socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   },1000);
 
 });
+
 peerEvts();
 getVideoStream();
 
@@ -47,6 +47,14 @@ function connect(c) {
   }
 }
 
+function conEvents() {
+  for(var peer_id in peer.connections) {
+    for(var x in peer.connections[peer_id]) {
+      connect(peer.connections[peer_id][x]);
+    }
+  }
+}
+
 
 function getVideoStream() {
   navigator.getUserMedia({audio: true, video: true}, function(stream){
@@ -62,6 +70,11 @@ function PrepareCall(requestedPeer) {
     serialization: 'none',
     metadata: {message: 'hi i want to chat with you!'}
   });
+
+  c.on('open', function() {
+    connect(c);
+  });
+
   peer.on('connection', connect);
   var call = peer.call(requestedPeer, window.localStream);
   StartCall(call);
