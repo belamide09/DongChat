@@ -30,20 +30,7 @@ getVideoStream();
 
 function peerEvts() {
   peer.on('call', function(call){
-    c = peer.connect(call.peer, {
-      label: 'chat',
-      serialization: 'none',
-      metadata: {message: 'hi i want to chat with you!'}
-    });
-    c.on('close',function(){
-      endChat(false);
-    });
-    c.on('data', function(data) {
-      console.log( data );
-    });
     call.answer(window.localStream);
-    StartCall(call);
-    connected_peer = call.peer;
   });
 }
 
@@ -68,9 +55,9 @@ function PrepareCall(requestedPeer) {
     serialization: 'none',
     metadata: {message: 'hi i want to chat with you!'}
   });
-  c.on('error', function(err) { alert(err); });
+  // c.on('error', function(err) { alert(err); });
   var call = peer.call(requestedPeer, window.localStream);
-  StartCall(call);
+  // StartCall(call);
 }
 
 function StartGroupChat() {
@@ -89,7 +76,6 @@ function StartCall(call) {
     $('.video-'+call.peer).prop('src', URL.createObjectURL(stream));
   });
   window.existingCall = call;
-  conn = peer.connect(call.peer);
 }
 
 function eachActiveConnection(fn) {
