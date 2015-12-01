@@ -1,10 +1,15 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function() {
 	var ready 		= false;
-	$("#message-form").click(function(e) {
+	$("#message-form").submit(function(e) {
 		e.preventDefault();
 		var message = $("#txt-message").val();
-		c.send(message);
+		eachActiveConnection(function(c, $c) {
+      if (c.label === 'chat') {
+				c.send(message);
+      	console.log ( message );
+      }
+    });
 	})
 	$(".btn-ready").click(function() {
 		if ( ready == false ) {
@@ -14,7 +19,7 @@ $(document).ready(function() {
 	})
 
 	$(".btn-start").click(function() {
-		socket.emit('start_chat',{room_id:room_id});
+		StartGroupChat();
 		return false;
 	})
 
@@ -66,6 +71,7 @@ $(document).ready(function() {
 
 	socket.on('return_chatroom_members',function(data) {
 		if ( data['user_id'] == my_id ) {
+			$("#group-webcam-container").html("");
 			var members = data['members'];
 			var member_container = '<ul>';
 			for( var x in members) {
@@ -84,6 +90,9 @@ $(document).ready(function() {
 					group_members[member['id']]['peer'] = onair['peer'];
 					group_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
 					group_members[member['id']]['ready'] = members[x]['ready'];
+
+
+  				$("#group-webcam-container").append('<video class="video-'+onair['peer']+' video" autoplay></video>');
 				}
 			}
 			member_container += '</ul>';
@@ -95,6 +104,9 @@ $(document).ready(function() {
 		if ( data['user_id'] == my_id ) {
 			location.reload();
 		} else {
+			if ( typeof group_members[data['user_id']] !== 'undefined' ) {
+				$('.video-'+group_members[data['user_id']]['peer']).remove();
+			}
 			delete group_members[data['user_id']];
 			$(".user-"+data['user_id']).remove();
 		}

@@ -31,13 +31,20 @@ getVideoStream();
 function peerEvts() {
   peer.on('call', function(call){
     call.answer(window.localStream);
+    StartCall(call);
   });
+  peer.on('connection', connect);
 }
 
 function connect(c) {
-  c.on('close', function() {
-    console.log( 'connection died' );
-  });
+  if (c.label === 'chat') {
+    c.on('data', function(data) {
+      console.log( data );
+    });
+    c.on('close', function() {
+      console.log( 'connection died' );
+    });
+  }
 }
 
 
@@ -55,9 +62,9 @@ function PrepareCall(requestedPeer) {
     serialization: 'none',
     metadata: {message: 'hi i want to chat with you!'}
   });
-  // c.on('error', function(err) { alert(err); });
+  peer.on('connection', connect);
   var call = peer.call(requestedPeer, window.localStream);
-  // StartCall(call);
+  StartCall(call);
 }
 
 function StartGroupChat() {
@@ -71,23 +78,25 @@ function StartCall(call) {
   if (window.existingCall) {
     window.existingCall.close();
   }
-  $("#group-webcam-container").append('<video class="video-'+call.peer+' video" autoplay></video>');
   call.on('stream', function(stream){
     $('.video-'+call.peer).prop('src', URL.createObjectURL(stream));
   });
   window.existingCall = call;
 }
 
-function eachActiveConnection(fn) {
-  var conns = peer.connections[peerId];
-  for (var i = 0, ii = conns.length; i < ii; i += 1) {
-    var conn = conns[i];
-    fn(conn, $(this));
-  }
-}
 
 function endChat(ended) {
   socket.emit('end_chat',{user_id:my_id,ended: ended});
+}
+
+function eachActiveConnection(fn) {
+  for(var peer_id in peer.connections) {
+    var conns = peer.connections[peer_id];
+    for (var i = 0, ii = conns.length; i < ii; i += 1) {
+      var conn = conns[i];
+      fn(conn, $(this));
+    }
+  }
 }
 
 function convertTime(time) {
