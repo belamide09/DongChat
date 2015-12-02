@@ -85,21 +85,21 @@ $(document).ready(function() {
 
 	socket.on('append_new_room_member',function(data) {
 		if ( data['room_id'] == room_id && data['member']['id'] != my_id) {
-			var member = data['member'];
-			var member_container = "";
-			member_container += '<li class="user-'+member['id']+'">';
-			member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
-			member_container += '<table class="member"><tr>';
-			member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
-			member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
-			member_container += '</tr></table></li>';
-			$("#member-list ul").append(member_container);
-			room_members[member['id']] = {};
-			room_members[member['id']]['peer'] = data['member']['onair_user']['peer'];
-			room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
-
-
-			connectPeer(data['member']['onair_user']['peer']);
+			if ( data['member']['onair_user'] != null ) {
+				var member = data['member'];
+				var member_container = "";
+				member_container += '<li class="user-'+member['id']+'">';
+				member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
+				member_container += '<table class="member"><tr>';
+				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
+				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
+				member_container += '</tr></table></li>';
+				$("#member-list ul").append(member_container);
+				room_members[member['id']] = {};
+				room_members[member['id']]['peer'] = data['member']['onair_user']['peer'];
+				room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
+				connectPeer(data['member']['onair_user']['peer']);
+			}
 		}
 	});
 
