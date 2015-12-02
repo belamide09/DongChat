@@ -2,6 +2,31 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function () {
 
+	socket.emit('get_messages',{user_id:my_id});
+
+	$("#form-chatbox").submit(function(e) {
+		e.preventDefault();
+		var msg = $("#txt-message").val();
+		if ( msg.trim() != '' ) {
+			var data = {};
+			data['name'] = my_name;
+			data['message'] = msg;
+			socket.emit('send_message',data);
+			$("#txt-message").val("");
+		}
+	})
+
+	socket.on('return_messages',function(data) {
+		if ( data['user_id'] == my_id ) {
+			var messages = data['messages'];
+			for(var x in messages) {
+				var message = messages[x]['name']+' - '+messages[x]['message'];
+				var message = '<div class="message">'+message+'</div>';
+				$("#conversations").prepend(message);
+			}
+		}
+	})
+
 	socket.emit('get_all_rooms',{user_id:my_id});
 
 	socket.on('return_rooms',function(data) {
@@ -41,9 +66,16 @@ $(document).ready(function () {
 	});
 
 	socket.on('remove_room',function(data) {
-		console.log( data );
 		$(".room-"+data['room_id']).remove();
 	});
+
+	socket.on('append_message',function(data) {
+
+		var message = data['name']+' - '+data['message'];
+		var message = '<div class="message">'+message+'</div>';
+		$("#conversations").prepend(message);
+
+	})
 
 });
 

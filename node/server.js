@@ -26,6 +26,7 @@ var ChatHistory = require('./app/Model/ChatHistory.js');
 
 var room_lists 		= {};
 var chathash_arr 	= {};
+var messages 			= [];
 
 // For node server
 
@@ -106,6 +107,19 @@ io.on('connection',function(socket) {
 			}
 		});
 	})
+
+	socket.on('get_messages',function(data) {
+		io.emit('return_messages',{messages:messages,user_id:data['user_id']})
+	});
+
+
+	socket.on('send_message',function(data) {
+
+		messages.push(data);
+		io.emit('append_message',data);
+
+	})
+
 
 	socket.on('join_room',function(data) {
 		

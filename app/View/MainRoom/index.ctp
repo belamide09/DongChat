@@ -1,4 +1,5 @@
 <script> var my_id = "<?php echo $my_id; ?>"; </script>
+<script> var my_name = "<?php echo $my_name; ?>"; </script>
 <?php echo $this->Html->css('mainroom')?>
 <?php echo $this->Html->script('peer')?>
 <?php echo $this->Html->script('mainroom')?>
@@ -23,9 +24,10 @@
 			<div id="conversations">
 			</div>
 			<div id="chatbox-input">
-				<?php echo $this->Form->create('Conversation');?>
+				<?php echo $this->Form->create('Conversation',array('id'=>'form-chatbox'));?>
 				<input type="submit" value="Send" class="btn btn-primary" id="send">
-				<textarea class="form-control"> </textarea>
+				<textarea id="txt-message" class="form-control"> </textarea>
+				<?php echo $this->Form->end()?>
 			</div>
 		</div>
 	</div>

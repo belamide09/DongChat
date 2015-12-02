@@ -90,6 +90,15 @@
 	height: 715px;
 	background: #ddd;
 	margin: 1% auto;
+	padding: 3px;
+	overflow-y: auto;
+}
+#conversations .message {
+	padding: 5px;
+	background: #fff;
+	border-radius: 3px;
+	font: 15px "Trebuchet MS",sans-serif;
+	margin: 3px 2px;
 }
 #chatbox-input {
 	width: 99%;
