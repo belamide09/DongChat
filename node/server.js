@@ -27,6 +27,7 @@ var ChatHistory = require('./app/Model/ChatHistory.js');
 var room_lists 		= {};
 var chathash_arr 	= {};
 var messages 			= [];
+var room_conversations = [];
 
 // For node server
 
@@ -112,14 +113,26 @@ io.on('connection',function(socket) {
 		io.emit('return_messages',{messages:messages,user_id:data['user_id']})
 	});
 
+	socket.on('get_room_messages',function(data) {
+
+		var messages = GetRoomMessages(data['room_id']);
+		io.emit('return_room_messages',{messages:room_conversations,user_id:data['user_id']})
+	});
+
 
 	socket.on('send_message',function(data) {
 
-		messages.push(data);
 		if ( messages.length == 100 ) {
 			messages = messages.slice(1);
 		}
 		io.emit('append_message',data);
+
+	})
+
+	socket.on('send_room_message',function(data) {
+
+		room_conversations.push(data);
+		io.emit('append_room_message',data);
 
 	})
 
@@ -260,6 +273,16 @@ io.on('connection',function(socket) {
 				io.emit('notify_end_chat',{users:users,ended:ended});
 	    })
 		}
+	}
+
+	function GetRoomMessages(room_id) {
+		var messages = [];
+		for(var x in room_conversations) {
+			if ( room_conversations[x]['room_id'] == room_id) {
+				messages.push(room_conversations[x]);
+			}
+		}
+		return messages;
 	}
 
 });

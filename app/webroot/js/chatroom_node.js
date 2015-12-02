@@ -1,20 +1,48 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function() {
-	
+		
+	socket.emit('get_room_messages',{user_id:my_id,room_id:room_id});
+
 	$("#message-form").submit(function(e) {
 		e.preventDefault();
 		var msg = $("#txt-message").val();
 		$("#txt-message").val("");
 		if ( msg.trim() != '' ) {
-			SendMessage(msg);
+			var data = {};
+			data['name'] 		= my_name;
+			data['room_id'] = room_id;
+			data['message'] = msg;
+			socket.emit('send_room_message',data)
 		}
-	})	
+	});
 
 	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
   });
+
+  socket.on('return_room_messages',function(data) {
+		if ( data['user_id'] == my_id ) {
+			var messages = data['messages'];
+			for(var x in messages) {
+				var message = messages[x]['name']+' - '+messages[x]['message'];
+				var message = '<div class="message">'+message+'</div>';
+				$("#conversations").prepend(message);
+			}
+		}
+	})
+
+  socket.on('append_room_message',function(data) {
+
+  	console.log( data );
+  	if ( data['room_id'] == room_id ) {
+  		var message = data['name']+' - '+data['message'];
+			var message = '<div class="message">'+message+'</div>';
+			$("#conversations").prepend(message);
+  	}
+
+  })
 
   socket.on('refresh_rooms',function() {
   	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
@@ -71,11 +99,6 @@ $(document).ready(function() {
 					room_members[member['id']] = {};
 					room_members[member['id']]['peer'] = members[x]['onair_user']['peer'];
 					room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
-
-					var peer_id = members[x]['onair_user']['peer'];
-					if ( typeof peer.connections[peer_id] == 'undefined' ) {
-						connectPeer(members[x]['onair_user']['peer']);
-					}
 				}
 			}
 			member_container += '</ul>';
@@ -98,7 +121,6 @@ $(document).ready(function() {
 				room_members[member['id']] = {};
 				room_members[member['id']]['peer'] = data['member']['onair_user']['peer'];
 				room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
-				connectPeer(data['member']['onair_user']['peer']);
 			}
 		}
 	});
