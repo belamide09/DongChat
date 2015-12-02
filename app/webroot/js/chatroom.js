@@ -59,7 +59,6 @@ function connect(c) {
       $("#conversations").append(message);
     });
     c.on('close', function() {
-      endChat();
       window.existingCall.close();
     });
   }

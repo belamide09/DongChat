@@ -32,7 +32,6 @@ var chathash_arr 	= {};
 io.on('connection',function(socket) {
 
 	socket.on('add_onair_user',function(data) {
-		console.log( data );
 		OnairUser.count({
 			where: {id:data['user_id']}
 		}).done(function(count) {
@@ -71,7 +70,9 @@ io.on('connection',function(socket) {
 			where: {
 				id: user_id
 			}
-		});
+		}).done(function(result) {
+			EndChat(user_id,false);
+		})
 	})
 
 	socket.on('get_all_rooms',function(data) {
@@ -213,6 +214,10 @@ io.on('connection',function(socket) {
 
 	socket.on('end_chat',function(data) {
 		var user_id = data['user_id'];
+		EndChat(user_id,true);
+	})
+
+	function EndChat(user_id,ended) {
 		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
 			var chat_hash = chathash_arr[user_id];
     	delete chathash_arr[user_id];
@@ -234,11 +239,11 @@ io.on('connection',function(socket) {
 	    		chat_hash: chat_hash
 	    	}
 	    }).done(function(users) {
-				io.emit('update_users_status',{user_id:user_id,ended:data['ended'],users:users});
 				io.emit('update_users_status',users);
+				io.emit('notify_end_chat',{users:users,ended:ended});
 	    })
 		}
-	})
+	}
 
 });
 

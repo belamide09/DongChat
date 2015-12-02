@@ -143,7 +143,7 @@ $(document).ready(function() {
 
 	})
 
-	socket.on('update_users_status',function(data) {
+	socket.on('notify_end_chat',function(data) {
 		var users = data['users'];
 		for(var x in users) {
 			if ( users[x]['id'] == my_id ) {
