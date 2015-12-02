@@ -43,7 +43,17 @@ io.on('connection',function(socket) {
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
-					io.emit('refresh_rooms');
+
+					User.belongsTo(OnairUser,{
+						foreignKey: 'id'
+					});
+					User.find({
+						where: {id: data['user_id']},
+						include: [OnairUser]
+					}).done(function (member) {
+						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
+					})
+
 				})
 			} else {
 				OnairUser.update({peer: data['peer_id']},{
@@ -111,8 +121,12 @@ io.on('connection',function(socket) {
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
+					User.belongsTo(OnairUser,{
+						foreignKey: 'id'
+					});
 					User.find({
-						where: {id: data['user_id']}
+						where: {id: data['user_id']},
+						include: [OnairUser]
 					}).done(function (member) {
 						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
 						io.emit('redirect_user_to_room',data);
@@ -233,25 +247,6 @@ server.on('connection', function(id) {
 });
 server.on('disconnect', function(id) {
 	console.log( id + ' has disconnected to the server' );
-	// OnairUser.find({
-	// 	where: {
-	// 		peer: id
-	// 	}
-	// }).done(function(result) {
-	// 	if ( result !== null ) {
-	// 		OnairUser.update({chat_hash: null},{
-	//       where: {
-	//        chat_hash: result['dataValues']['chat_hash']
-	//       }
-	//     });
-	// 		ChatHistory.update({end: new Date()},{
-	//       where: {
-	//        chat_hash: result['dataValues']['chat_hash'],
-	//        end			: null
-	//       }
-	//     });
-	// 	}
-	// })
 });
 
 var ExpressPeerServer = require('peer').ExpressPeerServer;

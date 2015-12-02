@@ -1,5 +1,6 @@
 <script> 
 var my_id = "<?php echo $my_id?>";
+var my_name = "<?php echo $my_name?>";
 var room_id = "<?php echo $room_id?>";
 </script>
 <?php echo $this->Html->script('peer')?>

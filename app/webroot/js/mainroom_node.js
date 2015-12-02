@@ -12,7 +12,7 @@ $(document).ready(function () {
 				var row = data[x];
 				room_container += '<li class="room-'+row['id']+'"><div class="room">';
 				room_container += '<span class="btn btn-primary btn-xs btn-join" onclick="JoinRoom('+data[x]['id']+')">Join</span>';
-				room_container += '<div class="room-description">'+row['name']+' - '+row['members']+' members </div>';
+				room_container += '<div class="room-description">'+row['name']+'</div>';
 				room_container += '</div></li>';
 			}
 			room_container += "</ul>";
@@ -26,7 +26,7 @@ $(document).ready(function () {
 			var room_container = "";
 			room_container = '<li class="room-'+data['id']+'"><div class="room">';
 			room_container += '<span class="btn btn-primary btn-xs btn-join" onclick="JoinRoom('+data['id']+')">Join</span>';
-			room_container += '<div class="room-description">'+data['name']+' - '+data['members']+' members </div>';
+			room_container += '<div class="room-description">'+data['name']+'</div>';
 			room_container += '</div></li>';
 			$("#room-list ul").append(room_container);
 		} else {
