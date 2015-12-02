@@ -122,6 +122,7 @@ io.on('connection',function(socket) {
 
 	socket.on('send_message',function(data) {
 
+		messages.push(data);
 		if ( messages.length == 100 ) {
 			messages = messages.slice(1);
 		}
