@@ -6,6 +6,7 @@ var chat_time  = 300;
 var remaining_time  = chat_time;
 var room_members    = {};
 var connected_peer;
+var timer;
 // Compatibility shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
