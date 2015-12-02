@@ -1,4 +1,10 @@
 <legend><?php echo __('Registration') ?></legend>
+<?php $authSuccess = $this->Session->flash('auth'); ?>
+<?php if($authSuccess): ?>
+  <div class="alert alert-success">
+    <?php echo $authSuccess; ?>
+  </div>
+<?php endif; ?>
 <?php echo $this->Form->create('User'); ?>
 <table class="table table-bordered teacher-details">
   <tr>

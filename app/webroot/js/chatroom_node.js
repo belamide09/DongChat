@@ -66,7 +66,7 @@ $(document).ready(function() {
 		  chat_hash = "";
 		  onchat = false;
 		  $(".btn-end-chat").hide();
-		  $("#remaining_time").text('Remaining time : '+convertTime(remaining_time));
+		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  clearInterval(timer);
   	}
   });

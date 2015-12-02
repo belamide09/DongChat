@@ -64,7 +64,10 @@ class UsersController extends AppController {
         'gender'      => $request['gender']
         )
       );
-      $this->User->save($data);
+      if ( $this->User->save($data) ) {
+        $this->Session->setFlash(__('You have successfully registered'),'default',array(),'auth');
+        return $this->redirect('/users/signup');
+      }
     }
 	}
 
