@@ -248,6 +248,32 @@ io.on('connection',function(socket) {
 		EndChat(user_id,true);
 	})
 
+	socket.on('disconnect_chat',function(data) {
+		var user_id = data['user_id'];
+		var chat_hash = chathash_arr[user_id];
+		delete chathash_arr[user_id];
+		ChatHistory.update({end: new Date()},{
+      where: {
+       chat_hash: chat_hash,
+       end			: null
+      }
+    });
+    OnairUser.update({chat_hash: null},{
+      where: {
+       chat_hash: chat_hash
+      }
+    });
+    OnairUser.findAll({
+    	attributes: ['id'],
+    	where: {
+    		chat_hash: chat_hash
+    	}
+    }).done(function(users) {
+			io.emit('update_users_status',users);
+			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id});
+    })
+	})
+
 	function EndChat(user_id,ended) {
 		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
 			var chat_hash = chathash_arr[user_id];

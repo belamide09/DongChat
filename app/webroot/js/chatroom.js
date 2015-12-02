@@ -1,5 +1,4 @@
 
-var chat_hash = "";
 var peer;
 var c;
 var onchat     = false;

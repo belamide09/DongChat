@@ -28,10 +28,13 @@
 	float: right;
 	margin: 10px;
 }
-#remaining-time {
+#remaining-time-container {
 	background: #fff;
 	font-weight: bold;
 	padding: 5px;
+}
+.btn-end-chat {
+	display: none;
 }
 #my-webcam-container {
 	width: 100%;

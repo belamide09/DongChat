@@ -1,6 +1,6 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
-$(document).ready(function() {
-		
+$(document).ready(function() {	
+	var chat_hash = "";
 	socket.emit('get_room_messages',{user_id:my_id,room_id:room_id});
 
 	$("#message-form").submit(function(e) {
@@ -22,6 +22,13 @@ $(document).ready(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
   });
 
+  $(".btn-end-chat").click(function() {
+  	var confirmation = confirm('Are you sure you want to end this chat?');
+  	if ( confirmation == true ) {
+	  	socket.emit('disconnect_chat',{user_id:my_id});
+	  }
+  })
+
   socket.on('return_room_messages',function(data) {
 		if ( data['user_id'] == my_id ) {
 			var messages = data['messages'];
@@ -35,7 +42,6 @@ $(document).ready(function() {
 
   socket.on('append_room_message',function(data) {
 
-  	console.log( data );
   	if ( data['room_id'] == room_id ) {
   		var message = data['name']+' - '+data['message'];
 			var message = '<div class="message">'+message+'</div>';
@@ -57,15 +63,33 @@ $(document).ready(function() {
   socket.on('end_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
 		  remaining_time = chat_time;
+		  chat_hash = "";
 		  onchat = false;
+		  $(".btn-end-chat").hide();
 		  $("#remaining_time").text('Remaining time : '+convertTime(remaining_time));
+		  clearInterval(timer);
   	}
   });
 
+  socket.on('notify_disconnect_chat',function(data) {
+  	if ( data['chat_hash'] == chat_hash ) {
+  		if ( data['user_id'] != my_id ) {
+  			alert(room_members[data['user_id']]['name']+' has disconnected the chat');
+  		}
+			$(".btn-end-chat").hide();
+  		chat_hash = "";
+  		remaining_time = chat_time;
+    	onchat = false;
+    	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+    	clearInterval(timer);
+  	}
+  })
+
   socket.on('start_chattime',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
+  		$(".btn-end-chat").show();
       onchat = true;
-      var timer = setInterval(function() {
+      timer = setInterval(function() {
         remaining_time--;
         $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
         if ( remaining_time == 0 || !onchat ) {
@@ -169,13 +193,13 @@ $(document).ready(function() {
 		var users = data['users'];
 		for(var x in users) {
 			if ( users[x]['id'] == my_id ) {
-				peer._cleanup();
+				$(".btn-end-chat").hide();
 				remaining_time = chat_time;
 				$("#partner-webcam").attr('src',null);
 				if ( data['ended'] ) {
 					alert('Your chat is now time\'s up!');
 				} else {
-					alert('( You/Your chat partner ) has been disconnected');
+					alert('( You/Your chat partner ) has been disconnected from the server');
 				}
 			}
 		}
