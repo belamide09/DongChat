@@ -53,18 +53,7 @@ class UsersController extends AppController {
 
 	public function signup() {
     if ( $this->request->is('post') ) {
-      $request  = $this->request->data['User'];
-      $data     = array('User' => array(
-        'email'       => $request['email'],
-        'password'    =>  AuthComponent::password($request['password']),
-        'status'      => 1,
-        'firstname'   => $request['firstname'],
-        'middlename'  => $request['middlename'],
-        'lastname'    => $request['lastname'],
-        'gender'      => $request['gender']
-        )
-      );
-      if ( $this->User->save($data) ) {
+      if ( $this->User->save($this->request->data) ) {
         $this->Session->setFlash(__('You have successfully registered'),'default',array(),'auth');
         return $this->redirect('/users/signup');
       }

@@ -1,3 +1,8 @@
+<style>
+#img-profile {
+  max-height: 400px;
+}
+</style>
 <legend><?php echo __('Registration') ?></legend>
 <?php $authSuccess = $this->Session->flash('auth'); ?>
 <?php if($authSuccess): ?>
@@ -5,7 +10,7 @@
     <?php echo $authSuccess; ?>
   </div>
 <?php endif; ?>
-<?php echo $this->Form->create('User'); ?>
+<?php echo $this->Form->create('User',array('enctype'=>'multipart/form-data')); ?>
 <table class="table table-bordered teacher-details">
   <tr>
     <td><?php echo __('First name') ?><span class="required">*</span></td>
@@ -115,7 +120,7 @@
     </div>
       <?php
         echo $this->Form->input('photo', array(
-          'name' => 'data[Profile][photo]',
+          'name' => 'data[User][photo]',
           'type' => 'file',
           'accept' => 'image/*',
           'class' => 'file',
@@ -136,3 +141,25 @@
   </tr>
 </table>
 <?php echo $this->Form->end(); ?>
+
+<script>
+$(document).ready(function() {
+  $(document).on("change", "#uploadFile",function(){
+    var files = !!this.files ? this.files : [];
+    imagePreview(files, "#img-profile");
+  });
+  function imagePreview(files, event) {
+    if (!files.length || !window.FileReader) return;
+    
+    
+    if (/^image/.test( files[0].type)){ 
+        var reader = new FileReader();
+        reader.readAsDataURL(files[0]);
+        imageName = files[0].name;
+        reader.onloadend = function(){ 
+            $(event).attr("src", this.result);
+        }
+    }
+  }
+});
+</script>
