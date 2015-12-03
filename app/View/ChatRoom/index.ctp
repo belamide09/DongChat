@@ -13,19 +13,10 @@ var room_id = "<?php echo $room_id?>";
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
 			</div>
-			<div id="remaining-time-container">
-				<span id="remaining-time">
-					Remaining time : 05:00
-				</span>
-				<a href="#" class="btn-end-chat btn btn-danger btn-xs pull-right">End chat</a>
-			</div>
 			<div id="members">
 				<div id="member-list"></div>
 				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>
 			</div>
-		</div>
-		<div id="partner-webcam-container">
-			<center> <video id="partner-webcam" autoplay></video> </center>
 		</div>
 		<div id="chatbox-container">
 			<div id="conversations">

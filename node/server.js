@@ -40,7 +40,6 @@ io.on('connection',function(socket) {
 			if ( count == 0 ) {
 				OnairUser.create({
 					id 								: data['user_id'],
-					peer							: data['peer_id'],
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
@@ -56,10 +55,6 @@ io.on('connection',function(socket) {
 					})
 
 				})
-			} else {
-				OnairUser.update({peer: data['peer_id']},{
-		      where: { id : data['user_id'] }
-		    });
 			}
 		})
 
@@ -212,6 +207,36 @@ io.on('connection',function(socket) {
 				io.emit('remove_room',data);
 			})
 		})
+	})
+	
+	socket.on('request_call',function(data) {
+
+		io.emit('request_call',data);
+
+	})
+
+	socket.on('generate_chat_hash',function(data) {
+
+		var chat_hash = md5(new Date());
+		var sender_id = data['sender_id'];
+		var recipient_id = data['recipient_id'];
+		ChatHistory.create({
+			chat_hash			: chat_hash,
+			sender_id			: sender_id,
+			recipient_id	: recipient_id,
+			started 			: new Date(),
+			end						: null
+		}).done(function() {
+			OnairUser.update({chat_hash: chat_hash},{
+	      where: {
+	       id: [recipient_id,sender_id]
+	      }
+	    }).done(function() {
+	    	io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
+	    	io.emit('redirect_to_chat',{chat_hash:chat_hash});
+	    })
+		})
+
 	})
 
 	socket.on('save_chat',function(data) {

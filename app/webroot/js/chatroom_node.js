@@ -54,6 +54,23 @@ $(document).ready(function() {
   	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   });
 
+  socket.on('request_call',function(data) {
+
+  	if ( data['user_id'] == my_id ) {
+	  	var confirmation = confirm(data['name']+' want\'s to video chat with you');
+	  	if ( confirmation == true ) {
+	  		socket.emit('generate_chat_hash',{recipient_id:my_id,sender_id:data['sender_id']});
+	  	}
+	  }
+
+  });
+
+  socket.on('redirect_to_chat',function(data) {
+
+  	window.open('/VideoCall/'+data['chat_hash']);
+
+  })
+
   socket.on('append_chathash',function(data) {
   	if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
   		chat_hash = data['chat_hash'];
@@ -181,6 +198,7 @@ $(document).ready(function() {
 	});
 
 	socket.on('set_users_available',function(data) {
+
 		if ( data ) {
 			$(".user-"+data['id']+' .btn-call').removeAttr('disabled');
 			$(".user-"+data['id']+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');

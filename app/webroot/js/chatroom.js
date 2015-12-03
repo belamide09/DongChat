@@ -55,7 +55,8 @@ function getVideoStream() {
 }
 
 function Call(user_id) {
-  redirectToVideoCall();
+  socket.emit('request_call',{sender_id:my_id,user_id:user_id,name:my_name});
+  // redirectToVideoCall();
   // var call = peer.call(room_members[user_id]['peer'], window.localStream);
   // StartCall(call);
 }

@@ -28,11 +28,6 @@
 	float: right;
 	margin: 10px;
 }
-#remaining-time-container {
-	background: #fff;
-	font-weight: bold;
-	padding: 5px;
-}
 .btn-end-chat {
 	display: none;
 }
@@ -85,14 +80,14 @@
 }
 #chatbox-container {
 	width: 700px;
-	height: 280px;
+	height: 790px;
 	background: #fff;
 	margin: 2% 1%;
 	border: 1px solid transparent;
 }
 #conversations {
 	width: 99%;
-	height: 200px;
+	height: 700px;
 	background: #ddd;
 	margin: 1% auto;
 	padding: 10px;

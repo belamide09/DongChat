@@ -1,4 +1,6 @@
+<?php echo $this->Html->script('peer')?>
 <?php echo $this->Html->css('video_call')?>
+<?php echo $this->Html->script('video_call')?>
 <div id="chatroom-container">
 	<div id="chatroom">
 		<div id="side">
