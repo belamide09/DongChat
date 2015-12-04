@@ -25,12 +25,8 @@
  * to use (in this case, /app/View/Pages/home.ctp)...
  */
 	Router::connect('/', array('controller' => 'mainroom', 'action' => 'index'));
-	Router::connect(
-    '/ChatRoom/:id',
-    ['controller' => 'ChatRoom', 'action' => 'index'],
-    ['id' => '\d+', 'pass' => ['id']]
-	);
-Router::connect('/VideoCall',array('controller' => 'VideoCall', 'action' => 'index'));
+	Router::connect('/ChatRoom/:id',array('controller' => 'ChatRoom', 'action' => 'index'));
+	Router::connect('/VideoCall',array('controller' => 'VideoCall', 'action' => 'index'));
 
 // Users
 Router::connect('/logout', array('controller' => 'users', 'action' => 'logout'));

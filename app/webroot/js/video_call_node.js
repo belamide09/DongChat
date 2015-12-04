@@ -80,6 +80,7 @@ $(document).ready(function() {
   	if ( data['user_id'] == my_id ) {
   		var peer = data['partner']['peer'];
   		partner_id = data['partner']['id'];
+  		$(".btn-end-chat").show();
   		ReconnectToPeer(peer);
   	}
   })
@@ -87,6 +88,9 @@ $(document).ready(function() {
   socket.on('notify_reconnect',function(data) {
   	if ( data['partner'] == partner_id ) {
   		var message = '<div class="message">'+data['name']+' has been reconnected from the chat</div>';
+  		$("#conversations").append(message);
+  	} else if ( data['partner'] == my_id ) {
+  		var message = '<div class="message">You have reconnected from the chat</div>';
   		$("#conversations").append(message);
   	}
   })
@@ -103,14 +107,11 @@ $(document).ready(function() {
         	remaining_time = chat_time;
         	onchat = false;
         	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+        	endChat();
           clearInterval(timer);
         }
       },1000);
 	  }
-  })
-
-  socket.on('notify_reconnect',function(data) {
-
   })
 
   socket.on('end_chat',function(data) {
@@ -118,6 +119,7 @@ $(document).ready(function() {
 		  remaining_time = chat_time;
 		  chat_hash = "";
 		  onchat = false;
+		  $("#conversations").html("");
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  clearInterval(timer);
@@ -127,8 +129,9 @@ $(document).ready(function() {
   socket.on('notify_disconnect_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
   		if ( data['user_id'] != my_id ) {
-  			alert(room_members[data['user_id']]['name']+' has disconnected the chat');
+  			alert(data['name']+' has forcely end the chat');
   		}
+  		chat_hash = "";
 			$(".btn-end-chat").hide();
   		remaining_time = chat_time;
     	onchat = false;
@@ -138,6 +141,7 @@ $(document).ready(function() {
   })
 
   socket.on('start_chattime',function(data) {
+  	$("#conversations").html("");
   	if ( data['chat_hash'] == chat_hash ) {
   		$(".btn-end-chat").show();
       onchat = true;
@@ -158,7 +162,6 @@ $(document).ready(function() {
 		if ( data['user_id'] == my_id ) {
 			var members = data['members'];
 			var member_container = '<ul>';
-			room_members = {};
 			for( var x in members) {
 				if ( members[x]['onair_user'] != null && members[x]['onair_user']['on_video_room'] == 1 ) {
 					var member = members[x]['user'];
@@ -172,9 +175,6 @@ $(document).ready(function() {
 					member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
 					member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 					member_container += '</tr></table></li>';
-					room_members[member['id']] = {};
-					room_members[member['id']]['peer'] = members[x]['onair_user']['peer'];
-					room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
 				}
 			}
 			member_container += '</ul>';
@@ -188,15 +188,16 @@ $(document).ready(function() {
 				var member = data['member'];
 				var member_container = "";
 				member_container += '<li class="user-'+member['id']+'">';
-				member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
+				if ( data['member']['onair_user']['chat_hash'] == '' ) {
+					member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
+				} else {
+					member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
+				}
 				member_container += '<table class="member"><tr>';
 				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
 				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 				member_container += '</tr></table></li>';
 				$("#member-list ul").append(member_container);
-				room_members[member['id']] = {};
-				room_members[member['id']]['peer'] = data['member']['onair_user']['peer'];
-				room_members[member['id']]['name'] = member['firstname']+' '+member['lastname'];
 			}
 		}
 	});
@@ -206,7 +207,6 @@ $(document).ready(function() {
 			location.reload();
 		} else {
 			$(".user-"+data['user_id']).remove();
-			delete room_members[data['user_id']];
 		}
 	});
 

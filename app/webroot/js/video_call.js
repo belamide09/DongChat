@@ -4,7 +4,6 @@ var onchat     = false;
 var chat_time  = 300;
 var remaining_time  = chat_time;
 var room_members    = {};
-var connected_peer;
 var timer;	
 var partner_id;
 var chat_hash = "";
@@ -18,12 +17,10 @@ peer = new Peer({
   debug: 0
 });
 peer.on('open', function(peer_id){
-
   setTimeout(function() {
   	socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer_id,video_chat:true});
     socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   },1000);
-
 });
 peerEvts();
 getVideoStream();
@@ -66,6 +63,14 @@ function getVideoStream() {
   }, function(){ $('#step1-error').show(); });
 }
 
+function Connect(c) {
+  if (c.label == 'chat' ) {
+    c.on('data',function(data) {
+      console.log(data);
+    })
+  }
+}
+
 function ReconnectToPeer(peer_id) {
   var call = peer.call(peer_id, window.localStream);
   StartCall(call);
@@ -90,6 +95,19 @@ function StartCall(call) {
     $('#partner-webcam').prop('src', URL.createObjectURL(stream));
   });
   window.existingCall = call;
+}
+
+function endChat() {
+  socket.emit('end_chat',{user_id:my_id,ended:true});
+}
+
+function SendMessage(msg) {
+  for(var peer_id in peer.connections) {
+    for(var x in peer.connections[peer_id]) {
+      var conn = peer.connections[peer_id];
+      connect(conn);
+    }
+  }
 }
 
 function convertTime(time) {

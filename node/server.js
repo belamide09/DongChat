@@ -96,7 +96,7 @@ io.on('connection',function(socket) {
 				id: user_id
 			}
 		}).done(function(result) {
-			io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash});
+			io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
 		})
 	})
 
@@ -349,7 +349,7 @@ io.on('connection',function(socket) {
     	}
     }).done(function(users) {
 			io.emit('update_users_status',users);
-			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id});
+			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
     })
 	})
 
