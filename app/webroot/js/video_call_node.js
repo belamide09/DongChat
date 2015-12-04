@@ -1,7 +1,6 @@
 var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
 $(document).ready(function() {	
 	var chat_hash = "";
-	socket.emit('get_room_messages',{user_id:my_id,room_id:room_id});
 
 	$("#message-form").submit(function(e) {
 		e.preventDefault();
@@ -40,15 +39,6 @@ $(document).ready(function() {
 		}
 	})
 
-  socket.on('append_room_message',function(data) {
-
-  	if ( data['room_id'] == room_id ) {
-  		var message = data['name']+' - '+data['message'];
-			var message = '<div class="message">'+message+'</div>';
-			$("#conversations").prepend(message);
-  	}
-
-  })
 
   socket.on('refresh_rooms',function() {
   	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
@@ -148,6 +138,7 @@ $(document).ready(function() {
 				var member = data['member'];
 				var member_container = "";
 				member_container += '<li class="user-'+member['id']+'">';
+				member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
 				member_container += '<table class="member"><tr>';
 				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
 				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';

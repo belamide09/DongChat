@@ -20,7 +20,7 @@ peer = new Peer({
 peer.on('open', function(peer_id){
 
   setTimeout(function() {
-    socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer_id});
+    socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer_id,video_chat:false});
     socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   },1000);
 

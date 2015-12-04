@@ -40,6 +40,7 @@ io.on('connection',function(socket) {
 			if ( count == 0 ) {
 				OnairUser.create({
 					id 								: data['user_id'],
+					on_video_room			: data['video_chat'],
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
@@ -112,6 +113,7 @@ io.on('connection',function(socket) {
 
 		var messages = GetRoomMessages(data['room_id']);
 		io.emit('return_room_messages',{messages:room_conversations,user_id:data['user_id']})
+
 	});
 
 
@@ -166,7 +168,6 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('get_chatroom_members',function(data) {
-
 		RoomMember.belongsTo(User,{
 			foreignKey: 'user_id'
 		});

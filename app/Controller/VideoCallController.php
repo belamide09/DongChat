@@ -21,6 +21,7 @@ class VideoCallController extends AppController {
 			$this->set('room_id',$room['RoomMember']['room_id']);
 		} else {
 			echo "<big>Please login and logout</big>";
+			die();
 		}
 	}
 	public function getName() {
