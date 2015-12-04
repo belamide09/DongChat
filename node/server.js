@@ -101,11 +101,9 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('get_all_rooms',function(data) {
-
 		Room.findAll().done(function(results) {
 			io.emit('return_rooms',{user_id:data['user_id'],results:results});
 		});
-
 	});
 
 	socket.on('create_room',function(data) {
@@ -137,28 +135,21 @@ io.on('connection',function(socket) {
 	});
 
 	socket.on('get_room_messages',function(data) {
-
 		var messages = GetRoomMessages(data['room_id']);
 		io.emit('return_room_messages',{messages:room_conversations,user_id:data['user_id']})
-
 	});
 
 
 	socket.on('send_message',function(data) {
-
-		messages.push(data);
 		if ( messages.length == 100 ) {
 			messages = messages.slice(1);
 		}
 		io.emit('append_message',data);
-
 	})
 
 	socket.on('send_room_message',function(data) {
-
 		room_conversations.push(data);
 		io.emit('append_room_message',data);
-
 	})
 
 
@@ -216,7 +207,6 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('leave_room',function(data) {
-
 		RoomMember.destroy({
 			where: {
 				user_id: data['user_id'],
@@ -239,7 +229,6 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('video_chat_room',function(data) {
-
 		console.log('data');
 		OnairUser.destroy({
 			where: {
@@ -248,17 +237,13 @@ io.on('connection',function(socket) {
 		}).done(function() {
 			io.emit('redirect_to_chat',data);
 		})
-
 	})
 	
 	socket.on('request_call',function(data) {
-
 		io.emit('request_call',data);
-
 	})
 
 	socket.on('go_back_to_room',function(data) {
-
 		OnairUser.destroy({
 			where: {
 				id: data['user_id']
@@ -266,11 +251,9 @@ io.on('connection',function(socket) {
 		}).done(function(result) {
 			io.emit('go_back_to_room',data);
 		})
-
 	})
 
 	socket.on('generate_chat_hash',function(data) {
-
 		var chat_hash = md5(new Date());
 		var sender_id = data['sender_id'];
 		var recipient_id = data['recipient_id'];
@@ -290,7 +273,6 @@ io.on('connection',function(socket) {
 	    	io.emit('redirect_to_chat',{chat_hash:chat_hash});
 	    })
 		})
-
 	})
 
 	socket.on('save_chat',function(data) {
