@@ -337,18 +337,27 @@ io.on('connection',function(socket) {
        end			: null
       }
     });
-    OnairUser.update({chat_hash: null},{
-      where: {
-       chat_hash: chat_hash
-      }
-    });
-    OnairUser.findAll({
+    OnairUser.find({
     	attributes: ['id'],
     	where: {
-    		chat_hash: chat_hash
+    		chat_hash: chat_hash,
+    		id: {
+    			$ne: user_id
+    		}
     	}
-    }).done(function(users) {
-			io.emit('update_users_status',users);
+    }).done(function(user) {
+	    var users = [user_id];
+	    OnairUser.update({chat_hash: null},{
+	      where: {
+	       chat_hash: chat_hash
+	      }
+	    });
+	   	if ( user != null ) {
+	    	var partner_id = user['dataValues']['id'];
+	    	users.push(partner_id);
+	    	delete chathash_arr[partner_id];
+	    }
+			io.emit('update_users_status',{users});
 			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
     })
 	})

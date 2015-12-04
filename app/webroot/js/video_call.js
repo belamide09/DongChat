@@ -65,8 +65,9 @@ function getVideoStream() {
 
 function Connect(c) {
   if (c.label == 'chat' ) {
-    c.on('data',function(data) {
-      console.log(data);
+    c.on('data',function(msg) {
+      var message = '<div class="message">Chat Mate: '+msg+'</div>';
+      $("#conversations").prepend(message);
     })
   }
 }
@@ -87,7 +88,11 @@ function Call(user_id) {
 	},'JSON');
 }
 
-function StartCall(call) { 
+function StartCall(call) {
+  var conn = peer.connect(call.peer, {
+    label: 'chat'
+  });
+  Connect(conn);
   if (window.existingCall) {
     window.existingCall.close();
   }
@@ -99,15 +104,6 @@ function StartCall(call) {
 
 function endChat() {
   socket.emit('end_chat',{user_id:my_id,ended:true});
-}
-
-function SendMessage(msg) {
-  for(var peer_id in peer.connections) {
-    for(var x in peer.connections[peer_id]) {
-      var conn = peer.connections[peer_id];
-      connect(conn);
-    }
-  }
 }
 
 function convertTime(time) {

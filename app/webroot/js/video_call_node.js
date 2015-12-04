@@ -5,11 +5,16 @@ $(document).ready(function() {
 		var msg = $("#txt-message").val();
 		$("#txt-message").val("");
 		if ( msg.trim() != '' ) {
-			var data = {};
-			data['name'] 		= my_name;
-			data['room_id'] = room_id;
-			data['message'] = msg;
-			socket.emit('send_room_message',data)
+			for(var peer_id in peer.connections) {
+			  for(var x in peer.connections[peer_id]) {
+			    var conn = peer.connections[peer_id][x];
+			    if ( conn.label == 'chat' ) {
+			    	conn.send(msg);
+			    }
+			  }
+			}
+      var message = '<div class="message">You: '+msg+'</div>';
+			$("#conversations").prepend(message);
 		}
 	});
 
@@ -72,26 +77,32 @@ $(document).ready(function() {
   	if ( data['chat_hash'] == chat_hash ) {
   		var message = '<div class="message">Your chat partner has been disconnected... Please wait until the time finish</div>';
   		message += '<div class="message">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
-  		$("#conversations").append(message);
+  		$("#conversations").prepend(message);
   	}
   })
 
   socket.on('reconnect_chat',function(data) {
   	if ( data['user_id'] == my_id ) {
-  		var peer = data['partner']['peer'];
-  		partner_id = data['partner']['id'];
-  		$(".btn-end-chat").show();
-  		ReconnectToPeer(peer);
+  		if ( data['partner'] != null ) {
+	  		var peer = data['partner']['peer'];
+	  		partner_id = data['partner']['id'];
+	  		$(".btn-end-chat").show();
+	  		ReconnectToPeer(peer);
+	  	} else {
+	  		var message = '<div class="message">Your chat partner has been disconnected... Please wait until the time finish</div>';
+	  		message += '<div class="message">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
+	  		$("#conversations").prepend(message);
+	  	}
   	}
   })
 
   socket.on('notify_reconnect',function(data) {
   	if ( data['partner'] == partner_id ) {
   		var message = '<div class="message">'+data['name']+' has been reconnected from the chat</div>';
-  		$("#conversations").append(message);
+  		$("#conversations").prepend(message);
   	} else if ( data['partner'] == my_id ) {
   		var message = '<div class="message">You have reconnected from the chat</div>';
-  		$("#conversations").append(message);
+  		$("#conversations").prepend(message);
   	}
   })
 
@@ -122,6 +133,7 @@ $(document).ready(function() {
 		  $("#conversations").html("");
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+		  peer._cleanup();
 		  clearInterval(timer);
   	}
   });
@@ -135,6 +147,7 @@ $(document).ready(function() {
 			$(".btn-end-chat").hide();
   		remaining_time = chat_time;
     	onchat = false;
+    	$("#partner-webcam").attr('src',null);
     	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
     	clearInterval(timer);
   	}
@@ -224,10 +237,10 @@ $(document).ready(function() {
 
 	socket.on('update_users_status',function(data) {
 
-		for(var x in data) {
-			$(".user-"+data[x]['id']+' .btn-call').removeAttr('disabled');
-			$(".user-"+data[x]['id']+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
-			$(".user-"+data[x]['id']+' .btn-call').html('Call');
+		for(var id in data) {
+			$(".user-"+id+' .btn-call').removeAttr('disabled');
+			$(".user-"+id+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
+			$(".user-"+id+' .btn-call').html('Call');
 		}
 
 	});
@@ -247,13 +260,13 @@ $(document).ready(function() {
 		for(var x in users) {
 			if ( users[x]['id'] == my_id ) {
 				$(".btn-end-chat").hide();
+				onchat = false;
 				remaining_time = chat_time;
+				peer._cleanup();
+				$("#conversations").html("");
+				$(".btn-end-chat").hide();
 				$("#partner-webcam").attr('src',null);
-				if ( data['ended'] ) {
-					alert('Your chat is now time\'s up!');
-				} else {
-					alert('( You/Your chat partner ) has been disconnected from the server');
-				}
+				alert('Your chat is now time\'s up!');
 			}
 		}
 
