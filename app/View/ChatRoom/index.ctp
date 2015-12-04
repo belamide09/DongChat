@@ -15,7 +15,10 @@ var room_id = "<?php echo $room_id?>";
 			</div>
 			<div id="members">
 				<div id="member-list"></div>
-				<div> <input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave"></div>
+				<div>
+					<a href="/VideoCall" class="btn btn-primary btn-sm">Video Chat</a>
+					<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
+				</div>
 			</div>
 		</div>
 		<div id="chatbox-container">

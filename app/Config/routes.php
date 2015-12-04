@@ -30,11 +30,7 @@
     ['controller' => 'ChatRoom', 'action' => 'index'],
     ['id' => '\d+', 'pass' => ['id']]
 	);
-Router::connect(
-	'/VideoCall/:chat_hash',
-	['controller' => 'VideoCall', 'action' => 'index'],
-	['pass' => ['chat_hash']]
-);
+Router::connect('/VideoCall/:chat_hash',array('controller' => 'VideoCall', 'action' => 'index'));
 
 	// Users
 	Router::connect('/logout', array('controller' => 'users', 'action' => 'logout'));
