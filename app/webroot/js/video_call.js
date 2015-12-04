@@ -106,6 +106,12 @@ function endChat() {
   socket.emit('end_chat',{user_id:my_id,ended:true});
 }
 
+function ClosePeer() {
+  for(var peer_id in peer.connections) {
+    peer._cleanupPeer(peer_id)
+  }
+}
+
 function convertTime(time) {
   var minutes = Math.floor(time / 60);
   var seconds = time % 60;

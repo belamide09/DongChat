@@ -75,22 +75,22 @@ $(document).ready(function() {
 
   socket.on('notify_disconnect_chat_partner',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
-  		var message = '<div class="message">Your chat partner has been disconnected... Please wait until the time finish</div>';
-  		message += '<div class="message">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
+  		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
+  		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
   		$("#conversations").prepend(message);
   	}
   })
 
   socket.on('reconnect_chat',function(data) {
   	if ( data['user_id'] == my_id ) {
+  		$(".btn-end-chat").show();
   		if ( data['partner'] != null ) {
 	  		var peer = data['partner']['peer'];
 	  		partner_id = data['partner']['id'];
-	  		$(".btn-end-chat").show();
 	  		ReconnectToPeer(peer);
 	  	} else {
-	  		var message = '<div class="message">Your chat partner has been disconnected... Please wait until the time finish</div>';
-	  		message += '<div class="message">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
+	  		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
+	  		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
 	  		$("#conversations").prepend(message);
 	  	}
   	}
@@ -115,9 +115,6 @@ $(document).ready(function() {
         remaining_time--;
         $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
         if ( remaining_time < 0 || !onchat ) {
-        	remaining_time = chat_time;
-        	onchat = false;
-        	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
         	endChat();
           clearInterval(timer);
         }
@@ -133,7 +130,7 @@ $(document).ready(function() {
 		  $("#conversations").html("");
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
-		  peer._cleanup();
+		  ClosePeer();
 		  clearInterval(timer);
   	}
   });
@@ -143,10 +140,12 @@ $(document).ready(function() {
   		if ( data['user_id'] != my_id ) {
   			alert(data['name']+' has forcely end the chat');
   		}
+  		$("#conversations").html("");
   		chat_hash = "";
 			$(".btn-end-chat").hide();
   		remaining_time = chat_time;
     	onchat = false;
+    	ClosePeer();
     	$("#partner-webcam").attr('src',null);
     	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
     	clearInterval(timer);
@@ -224,7 +223,6 @@ $(document).ready(function() {
 	});
 
 	socket.on('disable_chat_user',function(data) {
-
 		$(".user-"+data['sender_id']+' .btn-call').attr('disabled','disabled');
 		$(".user-"+data['sender_id']+' .btn-call').attr('class','btn btn-danger btn-xs btn-call');
 		$(".user-"+data['sender_id']+' .btn-call').html('On chat');
@@ -232,28 +230,15 @@ $(document).ready(function() {
 		$(".user-"+data['recipient_id']+' .btn-call').attr('disabled','disabled');
 		$(".user-"+data['recipient_id']+' .btn-call').attr('class','btn btn-danger btn-xs btn-call');
 		$(".user-"+data['recipient_id']+' .btn-call').html('On chat');
-
 	})
 
 	socket.on('update_users_status',function(data) {
-
-		for(var id in data) {
-			$(".user-"+id+' .btn-call').removeAttr('disabled');
-			$(".user-"+id+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
-			$(".user-"+id+' .btn-call').html('Call');
+		for(var x in data) {
+			$(".user-"+data[x]+' .btn-call').removeAttr('disabled');
+			$(".user-"+data[x]+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
+			$(".user-"+data[x]+' .btn-call').html('Call');
 		}
-
 	});
-
-	socket.on('set_users_available',function(data) {
-
-		if ( data ) {
-			$(".user-"+data['id']+' .btn-call').removeAttr('disabled');
-			$(".user-"+data['id']+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
-			$(".user-"+data['id']+' .btn-call').html('Call');
-		}
-
-	})
 
 	socket.on('notify_end_chat',function(data) {
 		var users = data['users'];
@@ -262,14 +247,13 @@ $(document).ready(function() {
 				$(".btn-end-chat").hide();
 				onchat = false;
 				remaining_time = chat_time;
-				peer._cleanup();
+				ClosePeer();
 				$("#conversations").html("");
 				$(".btn-end-chat").hide();
 				$("#partner-webcam").attr('src',null);
 				alert('Your chat is now time\'s up!');
 			}
 		}
-
 	});
 
 })
