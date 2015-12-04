@@ -22,6 +22,7 @@ var room_id = "<?php echo $room_id?>";
 			<div id="members">
 				<div id="member-list"></div>
 				<div>
+					<a href="#" class="btn btn-success btn-sm pull-right btn-back">Go back to chatroom</a>
 					<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
 				</div>
 			</div>

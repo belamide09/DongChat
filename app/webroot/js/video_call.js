@@ -5,7 +5,9 @@ var chat_time  = 300;
 var remaining_time  = chat_time;
 var room_members    = {};
 var connected_peer;
-var timer;
+var timer;	
+var partner_id;
+var chat_hash = "";
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -27,20 +29,32 @@ peerEvts();
 getVideoStream();
 
 function peerEvts() {
-  peer.on('call', function(call){
-    var confirmation = confirm(getName(call.peer) + ' want\'s to video chat with you');
-    if ( confirmation == true ) {
+  peer.on('call', function(call) {
 
-      var end_chat = chat_time * 1000
-      socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-      call.answer(window.localStream);
-      StartCall(call);
+  	if ( chat_hash == '' ) {
+	  	var url = 'VideoCall/getName';
+	  	$.post(url,{peer:call.peer},function(data) {
 
-      setTimeout(function() {
-        endChat(true);
-      },end_chat);
+	  		var confirmation = confirm(data['name']+' want\'s to video chat with you');
+	  		if ( confirmation == true ) {
 
-    }
+	  			partner_id = data['id'];
+		  		var end_chat = chat_time * 1000
+				  socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
+				  call.answer(window.localStream);
+				  StartCall(call);
+
+				  setTimeout(function() {
+				    endChat(true);
+				  },end_chat);
+
+				}
+
+	  	},'JSON');
+	  } else {
+	  	call.answer(window.localStream);
+		  StartCall(call);
+	  }
 
   });
 }
@@ -50,6 +64,32 @@ function getVideoStream() {
     $('#my-webcam').prop('src', URL.createObjectURL(stream));
     window.localStream = stream;
   }, function(){ $('#step1-error').show(); });
+}
+
+function ReconnectToPeer(peer_id) {
+  var call = peer.call(peer_id, window.localStream);
+  StartCall(call);
+}
+
+function Call(user_id) {
+	var url = '/VideoCall/getPeer';
+	$.post(url,{user_id:user_id},function(data) {
+
+		partner_id = user_id;
+	  var call = peer.call(data['peer'], window.localStream);
+	  StartCall(call);
+
+	},'JSON');
+}
+
+function StartCall(call) { 
+  if (window.existingCall) {
+    window.existingCall.close();
+  }
+  call.on('stream', function(stream){
+    $('#partner-webcam').prop('src', URL.createObjectURL(stream));
+  });
+  window.existingCall = call;
 }
 
 function convertTime(time) {

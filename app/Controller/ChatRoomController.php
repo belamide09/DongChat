@@ -26,26 +26,4 @@ class ChatRoomController extends AppController {
 			die();
 		}
 	}
-	public function getName() {
-		if ( $this->request->is('post') ) {
-			$this->autoRender = false;
-			$peer = $this->request->data['peer'];
-			$user = $this->OnairUser->findByPeer($peer);
-			$name = $user['User']['firstname'].' '.$user['User']['lastname'];
-			$response['name'] = $name;
-			echo json_encode($response);
-		} else {
-			return $this->redirect('/');
-		}
-	}
-	public function getPeer() {
-		if ( $this->request->is('post') ) {
-			$this->autoRender = false;
-			$user = $this->OnairUser->findById($this->request->data['user_id']);
-			$response['peer'] = $user['OnairUser']['peer'];
-			echo json_encode($response);
-		} else {
-			return $this->redirect('/');
-		}
-	}
 }

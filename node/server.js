@@ -34,13 +34,16 @@ var room_conversations = [];
 io.on('connection',function(socket) {
 
 	socket.on('add_onair_user',function(data) {
+		var user_id = data['user_id'];
 		OnairUser.count({
 			where: {id:data['user_id']}
 		}).done(function(count) {
 			if ( count == 0 ) {
 				OnairUser.create({
-					id 								: data['user_id'],
+					id 								: user_id,
 					on_video_room			: data['video_chat'],
+					peer							: data['peer_id'],
+					chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
 					created_datetime	: new Date(),
 					created_ip				: getIp(socket)
 				}).done(function() {
@@ -49,10 +52,33 @@ io.on('connection',function(socket) {
 						foreignKey: 'id'
 					});
 					User.find({
-						where: {id: data['user_id']},
+						where: {id: user_id},
 						include: [OnairUser]
 					}).done(function (member) {
 						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
+						if ( typeof chathash_arr[user_id] != 'undefined' ) {
+							var chat_hash = chathash_arr[user_id];
+							io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
+							OnairUser.find({
+								where: {
+									chat_hash: chat_hash,
+									id: { $ne: user_id }
+								}
+							}).done(function(user) {
+								io.emit('reconnect_chat',{user_id:user_id,partner:user});
+								io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
+							})
+							ChatHistory.find({
+								where: {
+									chat_hash: chat_hash
+								}
+							}).done(function(result) {
+								var now = new Date() / 1000;
+								var start = result['dataValues']['started'] / 1000;
+								var remaining_time = (300 - Math.round(now - start,2));
+								io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
+							})
+						}
 					})
 
 				})
@@ -62,14 +88,15 @@ io.on('connection',function(socket) {
 	});
 
 	socket.on('disconnect',function() {
-		var user_id = socket.handshake.query['user_id'];
+		var user_id 	= socket.handshake.query['user_id'];
+		var chat_hash = chathash_arr[user_id];
 		io.emit('remove_room_member',{user_id:user_id});
 		OnairUser.destroy({
 			where: {
 				id: user_id
 			}
 		}).done(function(result) {
-			EndChat(user_id,false);
+			io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash});
 		})
 	})
 
@@ -208,11 +235,37 @@ io.on('connection',function(socket) {
 				io.emit('remove_room',data);
 			})
 		})
+
+	})
+
+	socket.on('video_chat_room',function(data) {
+
+		console.log('data');
+		OnairUser.destroy({
+			where: {
+				id: data['user_id']
+			}
+		}).done(function() {
+			io.emit('redirect_to_chat',data);
+		})
+
 	})
 	
 	socket.on('request_call',function(data) {
 
 		io.emit('request_call',data);
+
+	})
+
+	socket.on('go_back_to_room',function(data) {
+
+		OnairUser.destroy({
+			where: {
+				id: data['user_id']
+			}
+		}).done(function(result) {
+			io.emit('go_back_to_room',data);
+		})
 
 	})
 

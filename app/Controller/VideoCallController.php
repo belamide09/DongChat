@@ -29,7 +29,9 @@ class VideoCallController extends AppController {
 			$this->autoRender = false;
 			$peer = $this->request->data['peer'];
 			$user = $this->OnairUser->findByPeer($peer);
+			$id = $user['User']['id'];
 			$name = $user['User']['firstname'].' '.$user['User']['lastname'];
+			$response['id'] = $id;
 			$response['name'] = $name;
 			echo json_encode($response);
 		} else {
