@@ -243,7 +243,7 @@ $(document).ready(function() {
 	socket.on('notify_end_chat',function(data) {
 		var users = data['users'];
 		for(var x in users) {
-			if ( users[x]['id'] == my_id ) {
+			if ( users[x] == my_id ) {
 				$(".btn-end-chat").hide();
 				onchat = false;
 				remaining_time = chat_time;

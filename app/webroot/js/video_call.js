@@ -107,6 +107,7 @@ function endChat() {
 }
 
 function ClosePeer() {
+  peer.connections = {};
   for(var peer_id in peer.connections) {
     peer._cleanupPeer(peer_id)
   }
