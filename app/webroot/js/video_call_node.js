@@ -256,4 +256,10 @@ $(document).ready(function() {
 		}
 	});
 
+	socket.on('notify_kill_chat',function(data) {
+		if ( data['chat_hash'] == chat_hash ) {
+			alert('The administrator has forcely kill your chat.');
+		}
+	})
+
 })

@@ -337,6 +337,10 @@ io.on('connection',function(socket) {
     })
 	})
 
+	socket.on('kill_chat',function(data) {
+		io.emit('notify_kill_chat',data);
+	})
+
 	function EndChat(user_id,ended) {
 		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
 			var chat_hash = chathash_arr[user_id];
