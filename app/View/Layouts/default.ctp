@@ -40,7 +40,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 		echo $this->Html->script('jquery-1.10.2');
 		echo $this->Html->script('jquery-ui');
-		echo $this->Html->script('http://localhost:3000/socket.io/socket.io.js');
+		echo $this->Html->script('http://192.168.0.187:3000/socket.io/socket.io.js');
 	?>
 </head>
 <body>

@@ -5,24 +5,23 @@ class ChatRoomController extends AppController {
 		'OnairUser',
 		'RoomMember'
 	);
-	public function index($id) {
-		$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
-		if ( !isset($room['RoomMember']) ) {
-			return $this->redirect('/');
-		} else if ( $room['RoomMember']['room_id'] !== $id ) {
-			return $this->redirect('/');
-		}
-		$this->set('my_id',$this->Auth->user('id'));
-		$this->set('room_id',$id);
+	private function isOnAir() {
+		$onair = $this->OnairUser->findById($this->Auth->user('id'));
+		return isset($onair['OnairUser']) ? true : false;
 	}
-	public function getPeer() {
-		if ( $this->request->is('post') ) {
-			$this->autoRender = false;
-			$user = $this->OnairUser->findById($this->request->data['user_id']);
-			$response['peer'] = $user['OnairUser']['peer'];
-			echo json_encode($response);
+	public function index() {
+		if ( !$this->isOnAir() ) {
+			$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
+			$my_name = $this->Auth->user('firstname').' '.$this->Auth->user('lastname');
+			if ( !isset($room['RoomMember']) ) {
+				return $this->redirect('/');
+			}
+			$this->set('my_id',$this->Auth->user('id'));
+			$this->set(compact('my_name'));
+			$this->set('room_id',$room['RoomMember']['room_id']);
 		} else {
-			return $this->redirect('/');
+			echo "<big>Please login and logout</big>";
+			die();
 		}
 	}
 }

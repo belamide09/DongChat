@@ -13,23 +13,28 @@
 	margin: 1%;
 	border: 1px solid transparent;
 }
-#conversations-container {
+#partner-webcam-container {
 	width: 700px;
-	height: 100%;
-	background: #ddd;
+	height: 500px;
+	background: #000;
 	margin: 10px;
 }
-#conversations {
-	width: 650px;
-	height: 80%;
-	background: #000;
+#partner-webcam {
+	margin-top: 10px;
 }
 #side {
 	width: 250px;
 	height: 96%;
 	float: right;
-	margin-top: 20px;
-	margin-right: 10px;
+	margin: 10px;
+}
+#remaining-time-container {
+	background: #fff;
+	font-weight: bold;
+	padding: 5px;
+}
+.btn-end-chat {
+	display: none;
 }
 #my-webcam-container {
 	width: 100%;
@@ -40,65 +45,61 @@
 	width: 100%;
 	height: 100%;
 }
-#rooms {
+#members {
 	width: 100%;
-	height: 580px;
+	height: 550px;
 	background: #fff;
-	margin-top: 2%;
+	margin-top: 8%;
 	padding: 5px;
 }
-#rooms ul {
+#members ul {
 	-webkit-padding-start: 0;
 	padding: 0;
   list-style-type: none;
 }
-#rooms li {
+#members ul li {
 	padding: 1px;
 }
-#rooms .room {
-	background: green;
-	padding: 10px;
-	cursor: pointer;
+#member-list {
+	width: 100%;
+	height: 500px;
 }
-#rooms .room .room-description {
-	color: #000;
-	font: 15px "Trebuchet MS",sans-serif;
+#member-list .member-image {
+	width: 50px;
+	height: 40px;
+	overflow: hidden;
+	background: #000;
+	float: left;
 }
-#rooms .room .btn-join {
+#member-list .member-image img {
+	max-width: 50px;
+	max-height: 40px;
+}
+.btn-call {
 	float: right;
+	margin: 10px;
 }
-#rooms #room-list {
-	height: 480px;
-}
-.txt-room-name {
-	width: 75%;
-}
-.btn-new-room {
-	float: right;
-	margin: 5px;
-}
-#chatbox-contaner {
+#chatbox-container {
 	width: 700px;
-	height: 730px;
+	height: 280px;
 	background: #fff;
 	margin: 2% 1%;
 	border: 1px solid transparent;
 }
 #conversations {
-	background: #000;
 	width: 99%;
-	height: 715px;
+	height: 200px;
 	background: #ddd;
 	margin: 1% auto;
-	padding: 3px;
+	padding: 10px;
 	overflow-y: auto;
+	font: 12px "Trebucher MS",sans-serif;
 }
 #conversations .message {
-	padding: 5px;
 	background: #fff;
-	border-radius: 3px;
-	font: 15px "Trebuchet MS",sans-serif;
-	margin: 3px 2px;
+	border-radius: 2px;
+	margin: 3px 1px;
+	padding: 3px;
 }
 #chatbox-input {
 	width: 99%;
@@ -109,8 +110,8 @@
 }
 #chatbox-input textarea {
 	margin: 2px;
-	width: 80%;
-	height: 100%; 
+	width: 85%;
+	height: 50px; 
 }
 #chatbox-input #send {
 	float: right;

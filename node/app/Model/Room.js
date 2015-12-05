@@ -12,7 +12,6 @@ var Room = con.define('rooms', {
     primaryKey 	: true
   },
   name						: seq.INTEGER,
-  members					: seq.INTEGER,
   host 						: seq.STRING,
   created_datetime: seq.DATE,
   created_ip			: seq.STRING

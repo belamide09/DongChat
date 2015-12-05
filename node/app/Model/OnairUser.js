@@ -10,7 +10,9 @@ var OnairUser = con.define('onair_users', {
     type 				: seq.INTEGER,
     primaryKey 	: true
   },
+  chat_hash 			: seq.STRING,
   peer 						: seq.STRING,
+  on_video_room		: seq.STRING,
   created_datetime: seq.DATE,
   created_ip			: seq.STRING
 },
