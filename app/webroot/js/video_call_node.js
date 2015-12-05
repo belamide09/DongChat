@@ -4,7 +4,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		var msg = $("#txt-message").val();
 		$("#txt-message").val("");
-		if ( msg.trim() != '' ) {
+		if ( msg.trim() != '' && onchat ) {
 			for(var peer_id in peer.connections) {
 			  for(var x in peer.connections[peer_id]) {
 			    var conn = peer.connections[peer_id][x];
@@ -133,6 +133,7 @@ $(document).ready(function() {
 		  ClosePeer();
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
+		  partner_id = "";
 		  if ( data['kill'] == 1 ) {
 		  	alert('The administrator kill this chat...');
 		  }
@@ -141,7 +142,7 @@ $(document).ready(function() {
 
   socket.on('notify_disconnect_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
-  		if ( data['user_id'] != my_id ) {
+  		if ( data['user_id'] == partner_id ) {
   			alert(data['name']+' has forcely end the chat');
   		}
     	remaining_time = chat_time;
@@ -151,8 +152,10 @@ $(document).ready(function() {
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
+
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
+		  partner_id = "";
   	}
   })
 

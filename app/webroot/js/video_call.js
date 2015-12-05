@@ -17,10 +17,7 @@ peer = new Peer({
   debug: 0
 });
 peer.on('open', function(peer_id){
-  setTimeout(function() {
-  	socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer_id,video_chat:true});
-    socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
-  },1000);
+
 });
 peerEvts();
 getVideoStream();
@@ -60,6 +57,8 @@ function getVideoStream() {
   navigator.getUserMedia({audio: true, video: true}, function(stream){
     $('#my-webcam').prop('src', URL.createObjectURL(stream));
     window.localStream = stream;
+    socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer.id,video_chat:true});
+    socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
   }, function(){ $('#step1-error').show(); });
 }
 
