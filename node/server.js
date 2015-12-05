@@ -337,6 +337,7 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('kill_chat',function(data) {
+		console.log(data);
 		var chat_id 	= data['chat_id'];
 		var chat_hash = data['chat_hash'];
 		var sender_id = data['sender_id'];
@@ -346,7 +347,8 @@ io.on('connection',function(socket) {
 		io.emit('end_chat',{chat_hash:chat_hash,kill:1});
 		ChatHistory.update({end: new Date()},{
       where: {
-       chat_hash: chat_hash
+       chat_hash: chat_hash,
+       end : null
       }
     });
     OnairUser.update({chat_hash: null},{

@@ -6,6 +6,7 @@
 .notification {
 	width: 1000px;
 	margin: 10px auto;
+	display: none;
 }
 thead {
 	background: #ddd;
@@ -71,10 +72,15 @@ $(document).ready(function() {
 			var chat_hash = $(this).attr('chat-hash');
 			var sender_id = $(this).attr('sender-id');
 			var recipient_id = $(this).attr('recipient-id');
-			socket.emit('kill_chat',{chat_hash:chat_hash,sender_id:sender_id,recipient_id:recipient_id});
+			socket.emit('kill_chat',{chat_id:chat_id,chat_hash:chat_hash,sender_id:sender_id,recipient_id:recipient_id});
 		}
 		return false;
 	})
+	socket.on('notify_new_chat',function(data){ 
+		$(".notification").fadeIn(1000, function() {
+			$(this).fadeOut(1500);
+		});
+	});
 	socket.on('remove_chat',function(data) {
 		$(".chat-"+data['chat_id']).fadeOut();
 	})
