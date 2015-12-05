@@ -132,6 +132,9 @@ $(document).ready(function() {
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
 		  clearInterval(timer);
+		  if ( data['kill'] == 1 ) {
+		  	alert('The administrator kill this chat...');
+		  }
   	}
   });
 
@@ -239,27 +242,5 @@ $(document).ready(function() {
 			$(".user-"+data[x]+' .btn-call').html('Call');
 		}
 	});
-
-	socket.on('notify_end_chat',function(data) {
-		var users = data['users'];
-		for(var x in users) {
-			if ( users[x] == my_id ) {
-				$(".btn-end-chat").hide();
-				onchat = false;
-				remaining_time = chat_time;
-				ClosePeer();
-				$("#conversations").html("");
-				$(".btn-end-chat").hide();
-				$("#partner-webcam").attr('src',null);
-				alert('Your chat is now time\'s up!');
-			}
-		}
-	});
-
-	socket.on('notify_kill_chat',function(data) {
-		if ( data['chat_hash'] == chat_hash ) {
-			alert('The administrator has forcely kill your chat.');
-		}
-	})
 
 })

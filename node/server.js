@@ -308,8 +308,7 @@ io.on('connection',function(socket) {
 		delete chathash_arr[user_id];
 		ChatHistory.update({end: new Date()},{
       where: {
-       chat_hash: chat_hash,
-       end			: null
+       chat_hash: chat_hash
       }
     });
     OnairUser.find({
@@ -338,7 +337,24 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('kill_chat',function(data) {
-		io.emit('notify_kill_chat',data);
+		var chat_hash = data['chat_hash'];
+		var sender_id = data['sender_id'];
+		var recipient_id = data['recipient_id'];
+  	delete chathash_arr[sender_id];
+  	delete chathash_arr[recipient_id];
+		io.emit('end_chat',{chat_hash:chat_hash,kill:1});
+		ChatHistory.update({end: new Date()},{
+      where: {
+       chat_hash: chat_hash
+      }
+    });
+    OnairUser.update({chat_hash: null},{
+      where: {
+       chat_hash: chat_hash
+      }
+    });
+    var users = [sender_id,recipient_id];
+		io.emit('update_users_status',users);
 	})
 
 	function EndChat(user_id,ended) {
@@ -348,8 +364,7 @@ io.on('connection',function(socket) {
 			io.emit('end_chat',{chat_hash:chat_hash});
 			ChatHistory.update({end: new Date()},{
 	      where: {
-	       chat_hash: chat_hash,
-	       end			: null
+	       chat_hash: chat_hash
 	      }
 	    });
 
