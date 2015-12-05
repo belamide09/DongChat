@@ -17,9 +17,9 @@ th,td {
 			<th> # </th>
 			<th> Chathash </th>
 			<th> Started </td>
-			<th> End </th>
 			<th> Sender </th>
 			<th> Recipient </th>
+			<th> Action </th>
 		</tr>
 	</thead>
 	<tbody>
@@ -28,9 +28,11 @@ th,td {
 			<td> <?php echo $row['ChatHistory']['id']?> </td>
 			<td> <?php echo $row['ChatHistory']['chat_hash']?> </td>
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
-			<td> <?php echo $row['ChatHistory']['end'] ? $row['ChatHistory']['end'] : '--'?> </td>
 			<td> <?php echo $row['Sender']['firstname'].' '.$row['Sender']['lastname']?> </td>
 			<td> <?php echo $row['Recipient']['firstname'].' '.$row['Recipient']['lastname']?> </td>
+			<td>
+				<a href="#" class="btn btn-danger btn-xs">Kill <i class="fa fa-trash"></i></a>
+			</td>
 		</tr>
 	<?php endforeach; ?>
 	</tbody>
