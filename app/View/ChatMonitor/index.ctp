@@ -18,7 +18,7 @@ th,td {
 <center> <h2> Chat Monitor </h2> </center>
 <div class="notification"> 
 	<div class="alert alert-success">
-	  New chat has been created, Refresh to view it.
+	  New chat has been created, <a href="">Refresh</a> to view it.
 	</div>
 </div>
 <table class="table table-bordered" id="table-history">
