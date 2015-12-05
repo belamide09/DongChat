@@ -62,11 +62,6 @@ $(document).ready(function() {
 				if ( members[x]['onair_user'] != null ) {
 					var member = members[x]['user'];
 					member_container += '<li class="user-'+member['id']+'">';
-					if ( members[x]['onair_user']['chat_hash'] == "" ) {
-						member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
-					} else {
-						member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
-					}
 					member_container += '<table class="member"><tr>';
 					member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
 					member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
@@ -84,7 +79,6 @@ $(document).ready(function() {
 				var member = data['member'];
 				var member_container = "";
 				member_container += '<li class="user-'+member['id']+'">';
-				member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
 				member_container += '<table class="member"><tr>';
 				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
 				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
