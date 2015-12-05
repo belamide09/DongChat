@@ -108,7 +108,6 @@ io.on('connection',function(socket) {
 								chat_hash: chat_hash
 							}
 						}).done(function(result) {
-							console.log( result );
 							var sender_id = result['dataValues']['sender_id'];
 							var recipient_id = result['dataValues']['recipient_id'];
 				    	delete chathash_arr[sender_id];
