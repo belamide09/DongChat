@@ -77,9 +77,7 @@ $(document).ready(function() {
 		return false;
 	})
 	socket.on('notify_new_chat',function(){ 
-		$(".notification").fadeIn(1000, function() {
-			$(this).fadeOut(1500);
-		});
+		$(".notification").fadeIn(1000);
 	});
 	socket.on('remove_chat',function(data) {
 		$("."+data['chat_hash']).fadeOut();
