@@ -1,7 +1,7 @@
 <?php
 App::uses('AppController', 'Controller');
 App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
-class UsersController extends AppController {
+class UserController extends AppController {
   public $uses = array(
     'User'
   );
@@ -55,14 +55,14 @@ class UsersController extends AppController {
     if ( $this->request->is('post') ) {
       if ( $this->User->save($this->request->data) ) {
         $this->Session->setFlash(__('You have successfully registered'),'default',array(),'auth');
-        return $this->redirect('/users/signup');
+        return $this->redirect('/signup');
       }
     }
 	}
 
   public function logout() {
     $this->Auth->logout();
-    return $this->redirect('/users/login');
+    return $this->redirect('/login');
   }
 
 }

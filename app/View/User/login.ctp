@@ -31,7 +31,7 @@
       <div class="form-group">
       <div class="col-sm-offset-3 col-sm-10">
         <button type="submit" class="btn btn-primary"><?php echo __('Sign In') ?></button>
-        <?php echo $this->Html->link('Sign Up','/users/signup',array('class' => 'btn btn-success'))?>
+        <?php echo $this->Html->link('Sign Up','/signup',array('class' => 'btn btn-success'))?>
       </div>
     </div>
   </form>

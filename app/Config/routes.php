@@ -29,7 +29,9 @@
 	Router::connect('/VideoCall',array('controller' => 'VideoCall', 'action' => 'index'));
 
 // Users
-Router::connect('/logout', array('controller' => 'users', 'action' => 'logout'));
+Router::connect('/login', array('controller' => 'User', 'action' => 'login'));
+Router::connect('/signup', array('controller' => 'User', 'action' => 'signup'));
+Router::connect('/logout', array('controller' => 'User', 'action' => 'logout'));
 
 /**
  * Load all plugin routes. See the CakePlugin documentation on

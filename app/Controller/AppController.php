@@ -32,8 +32,19 @@ App::uses('Controller', 'Controller');
  */
 class AppController extends Controller {
 	public $components = array(
-		'Auth',
-		'Session'
+		'Session',
+		'Auth' => array(
+      'authenticate'=>array(
+        'Form'=>array(
+          'fields'=>array('username'=>'username','password'=>'password')
+        )
+      ),
+      'loginRedirect' => array('controller' => 'MainRoom', 'action' => 'index'),
+      'logoutRedirect' => '/logout',
+      'loginAction' => '/login',
+      'authError' => 'You must be logged in to view this page.',
+      'loginError' => 'Invalid Email or Password entered, please try again.'
+    )
 	);
 	public function beforeFilter() {
 	}
