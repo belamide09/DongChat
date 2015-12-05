@@ -294,6 +294,7 @@ io.on('connection',function(socket) {
 	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
 	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash});
 	    io.emit('start_chattime',{chat_hash:chat_hash});
+	    io.emit('notify_new_chat');
 		})
 	})
 
@@ -333,11 +334,11 @@ io.on('connection',function(socket) {
 	    }
 			io.emit('update_users_status',users);
 			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+			io.emit('remove_chat',{chat_hash:chat_hash});
     })
 	})
 
 	socket.on('kill_chat',function(data) {
-		console.log(data);
 		var chat_id 	= data['chat_id'];
 		var chat_hash = data['chat_hash'];
 		var sender_id = data['sender_id'];
@@ -358,7 +359,7 @@ io.on('connection',function(socket) {
     });
     var users = [sender_id,recipient_id];
 		io.emit('update_users_status',users);
-		io.emit('remove_chat',{chat_id:chat_id});
+		io.emit('remove_chat',{chat_hash:chat_hash});
 	})
 
 	function EndChat(user_id,ended) {
@@ -370,6 +371,8 @@ io.on('connection',function(socket) {
 	      where: {
 	       chat_hash: chat_hash
 	      }
+	    }).done(function() {
+	    	console.log( result );
 	    });
 
 	    OnairUser.find({
@@ -394,6 +397,7 @@ io.on('connection',function(socket) {
 		    }
 				io.emit('update_users_status',users);
 				io.emit('notify_end_chat',{users:users,ended:ended});
+				io.emit('remove_chat',{chat_hash:chat_hash});
 	    })
 		}
 	}

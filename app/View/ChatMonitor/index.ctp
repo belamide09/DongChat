@@ -18,7 +18,7 @@ th,td {
 <center> <h2> Chat Monitor </h2> </center>
 <div class="notification"> 
 	<div class="alert alert-success">
-	  New chat has been created
+	  New chat has been created, Refresh to view it.
 	</div>
 </div>
 <table class="table table-bordered" id="table-history">
@@ -39,7 +39,7 @@ th,td {
 		<?php $chat_hash = $row['ChatHistory']['chat_hash']?>
 		<?php $sender_id = $row['ChatHistory']['sender_id']?>
 		<?php $recipient_id = $row['ChatHistory']['recipient_id']?>
-		<tr class="chat-<?php echo $row['ChatHistory']['id']?>">
+		<tr class="<?php echo $chat_hash?>">
 			<td> <?php echo $row['ChatHistory']['id']?> </td>
 			<td> <?php echo $row['ChatHistory']['chat_hash']?> </td>
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
@@ -76,13 +76,13 @@ $(document).ready(function() {
 		}
 		return false;
 	})
-	socket.on('notify_new_chat',function(data){ 
+	socket.on('notify_new_chat',function(){ 
 		$(".notification").fadeIn(1000, function() {
 			$(this).fadeOut(1500);
 		});
 	});
 	socket.on('remove_chat',function(data) {
-		$(".chat-"+data['chat_id']).fadeOut();
+		$("."+data['chat_hash']).fadeOut();
 	})
 })
 </script>
