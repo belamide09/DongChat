@@ -337,6 +337,7 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('kill_chat',function(data) {
+		var chat_id 	= data['chat_id'];
 		var chat_hash = data['chat_hash'];
 		var sender_id = data['sender_id'];
 		var recipient_id = data['recipient_id'];
@@ -355,6 +356,7 @@ io.on('connection',function(socket) {
     });
     var users = [sender_id,recipient_id];
 		io.emit('update_users_status',users);
+		io.emit('remove_chat',{chat_id:chat_id});
 	})
 
 	function EndChat(user_id,ended) {

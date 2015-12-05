@@ -34,6 +34,7 @@ th,td {
 	<tbody>
 <?php if ($data):?>
 	<?php foreach($data as $row):?>
+		<?php $chat_id = $row['ChatHistory']['id']?>
 		<?php $chat_hash = $row['ChatHistory']['chat_hash']?>
 		<?php $sender_id = $row['ChatHistory']['sender_id']?>
 		<?php $recipient_id = $row['ChatHistory']['recipient_id']?>
@@ -44,7 +45,9 @@ th,td {
 			<td> <?php echo $row['Sender']['firstname'].' '.$row['Sender']['lastname']?> </td>
 			<td> <?php echo $row['Recipient']['firstname'].' '.$row['Recipient']['lastname']?> </td>
 			<td>
-				<a href="#" class="btn btn-danger btn-xs btn-kill" sender-id="<?php echo $sender_id?>" recipient-id="<?php echo $recipient_id?>" chat-hash="<?php echo $chat_hash?>">
+				<a href="#" class="btn btn-danger btn-xs btn-kill" chat-id="<?php echo $chat_id?>" 
+					 sender-id="<?php echo $sender_id?>" recipient-id="<?php echo $recipient_id?>" 
+					 chat-hash="<?php echo $chat_hash?>">
 					Kill<i class="fa fa-stop"></i>
 				</a>
 			</td>
@@ -64,12 +67,16 @@ $(document).ready(function() {
 	$(".btn-kill").click(function() {
 		var confirmation = confirm('Are you sure you want to kill this chat?');
 		if ( confirmation == true ) {
+			var chat_id = $(this).attr('chat-id');
 			var chat_hash = $(this).attr('chat-hash');
 			var sender_id = $(this).attr('sender-id');
 			var recipient_id = $(this).attr('recipient-id');
 			socket.emit('kill_chat',{chat_hash:chat_hash,sender_id:sender_id,recipient_id:recipient_id});
 		}
 		return false;
+	})
+	socket.on('remove_chat',function(data) {
+		$(".chat-"+data['chat_id']).fadeOut();
 	})
 })
 </script>

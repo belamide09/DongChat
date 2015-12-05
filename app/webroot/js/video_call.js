@@ -1,7 +1,7 @@
 var peer;
 var c;
 var onchat     = false;
-var chat_time  = 300;
+var chat_time  = 10;
 var remaining_time  = chat_time;
 var room_members    = {};
 var timer;	

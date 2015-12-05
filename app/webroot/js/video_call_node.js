@@ -132,6 +132,7 @@ $(document).ready(function() {
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
 		  clearInterval(timer);
+		  timer = null;
 		  if ( data['kill'] == 1 ) {
 		  	alert('The administrator kill this chat...');
 		  }
@@ -152,6 +153,7 @@ $(document).ready(function() {
     	$("#partner-webcam").attr('src',null);
     	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
     	clearInterval(timer);
+    	timer = null;
   	}
   })
 
