@@ -90,6 +90,34 @@ io.on('connection',function(socket) {
 			}
 		}).done(function(result) {
 			io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+			if ( typeof chat_hash != 'undefined' ) {
+				OnairUser.count({
+					where: {
+						chat_hash: chat_hash
+					}
+				}).done(function(count) {
+					if ( count == 0 ) {
+						ChatHistory.update({end: new Date()},{
+				      where: {
+				       chat_hash: chat_hash,
+				       end : null
+				      }
+				    });
+				    ChatHistory.find({
+							where: {
+								chat_hash: chat_hash
+							}
+						}).done(function(result) {
+							console.log( result );
+							var sender_id = result['dataValues']['sender_id'];
+							var recipient_id = result['dataValues']['recipient_id'];
+				    	delete chathash_arr[sender_id];
+				    	delete chathash_arr[recipient_id];
+						})
+				    io.emit('remove_chat',{chat_hash:chat_hash});
+					}
+				})
+			}
 		})
 	})
 
@@ -371,8 +399,6 @@ io.on('connection',function(socket) {
 	      where: {
 	       chat_hash: chat_hash
 	      }
-	    }).done(function() {
-	    	console.log( result );
 	    });
 
 	    OnairUser.find({
