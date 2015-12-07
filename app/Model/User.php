@@ -1,5 +1,5 @@
 <?php
-App::uses('ImageResize','lib');
+App::uses('ImageResize','Lib');
 App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
 class User extends AppModel {
 
