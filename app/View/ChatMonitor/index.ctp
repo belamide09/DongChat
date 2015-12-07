@@ -29,6 +29,7 @@ th,td {
 			<th> Started </td>
 			<th> Sender </th>
 			<th> Recipient </th>
+			<th> Remaining time </th>
 			<th> Action </th>
 		</tr>
 	</thead>
