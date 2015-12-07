@@ -12,10 +12,8 @@ class UserController extends AppController {
 	public function login() {
 		if($this->request->is('post')){
       $username = $this->request->data['User']['email'];
-      $password = AuthComponent::password($this->request->data['User']['password']);
       $conditions = array(
-        'email' => $username,
-        'password' => $password
+        'email' => $username
       );
       $data = $this->User->find('first',array('conditions'=>$conditions));
       if(isset($data['User'])){
@@ -25,28 +23,13 @@ class UserController extends AppController {
           $error = __('Your account is not yet activated');
         }
         if(!$error){
-          if(isset($this->request->data['User']['rememberMe']) && $this->request->data['User']['rememberMe'] == 1){
-            $cookieTime = Configure::read("cookieTime");
-            $cookeData = array(
-              'aal' => myTools::encode($this->request->data['User']['login_id']),
-              'aap' => myTools::encode(AuthComponent::password($this->request->data['User']['password']))
-            );
-            $this->Cookie->write('adminRememberMe',$cookeData,true,$cookieTime);
-          }
           $this->Auth->login($user);
-          
-          //added referrer
-          $referrerVal = $this->Session->read('referrer');
-          /* destroy session variable: referrer */
-          $this->Session->delete('referrer');
-           
-          return $this->redirect('' != $referrerVal ? $referrerVal : '/');
-           
+          $this->redirect('/');
         }else{
           $this->Session->setFlash($error,'default',array(),'auth');
         }
       }else{
-        $this->Session->setFlash(__('Login ID or password is incorrect'),'default',array(),'auth');
+        $this->Session->setFlash(__('Incorrect Login ID'),'default',array(),'auth');
       }
     }
 	}

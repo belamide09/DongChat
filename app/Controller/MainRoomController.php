@@ -8,7 +8,7 @@ class MainRoomController extends AppController {
 
 	public function index() {
 		$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
-		$my_name = $this->Auth->user('firstname').' '.$this->Auth->user('lastname');
+		$my_name = $this->Auth->user('name');
 		$my_name = ucwords($my_name);
 		if ( isset($room['RoomMember']) ) {
 			return $this->redirect('/ChatRoom');

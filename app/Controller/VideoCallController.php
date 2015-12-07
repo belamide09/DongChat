@@ -12,7 +12,7 @@ class VideoCallController extends AppController {
 	public function index() {
 		if ( !$this->isOnAir() ) {
 			$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
-			$my_name = $this->Auth->user('firstname').' '.$this->Auth->user('lastname');
+			$my_name = $this->Auth->user('name');
 			if ( !isset($room['RoomMember']) ) {
 				return $this->redirect('/');
 			}
@@ -30,7 +30,7 @@ class VideoCallController extends AppController {
 			$peer = $this->request->data['peer'];
 			$user = $this->OnairUser->findByPeer($peer);
 			$id = $user['User']['id'];
-			$name = $user['User']['firstname'].' '.$user['User']['lastname'];
+			$name = $user['User']['name'];
 			$response['id'] = $id;
 			$response['name'] = $name;
 			echo json_encode($response);

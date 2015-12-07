@@ -14,20 +14,6 @@
         <?php echo $this->Form->text('email', array('label' => false, 'class'=>'form-control', 'placeholder'=>'Enter Email')) ?>
       </div>
     </div>
-    <div class="form-group">
-      <label for="inputPassword3" class="col-sm-3 control-label"><?php echo __('Enter Password') ?></label>
-      <div class="col-sm-5">
-        <?php echo $this->Form->input('password',array('label'=>false,'class'=>'form-control','placeholder'=>'Enter Password')) ?>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-sm-offset-3 col-sm-10">
-          <label>
-            <?php echo $this->Form->checkbox('rememberMe', array('hiddenField' => false)); ?>
-            <?php echo __('Remember me'); ?>
-          </label>
-      </div>
-    </div>
       <div class="form-group">
       <div class="col-sm-offset-3 col-sm-10">
         <button type="submit" class="btn btn-primary"><?php echo __('Sign In') ?></button>

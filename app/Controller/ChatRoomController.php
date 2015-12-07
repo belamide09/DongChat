@@ -12,7 +12,7 @@ class ChatRoomController extends AppController {
 	public function index() {
 		if ( !$this->isOnAir() ) {
 			$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
-			$my_name = $this->Auth->user('firstname').' '.$this->Auth->user('lastname');
+			$my_name = $this->Auth->user('name');
 			if ( !isset($room['RoomMember']) ) {
 				return $this->redirect('/');
 			}

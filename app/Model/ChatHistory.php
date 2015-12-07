@@ -4,9 +4,7 @@ class ChatHistory extends AppModel {
 		'Sender' => array(
 			'fields' => array(
 				'Sender.id',
-				'Sender.firstname',
-				'Sender.middlename',
-				'Sender.lastname'
+				'Sender.name'
 			),
 			'className' => 'User',
 			'foreignKey' => false,
@@ -17,9 +15,7 @@ class ChatHistory extends AppModel {
 		'Recipient' => array(
 			'fields' => array(
 				'Recipient.id',
-				'Recipient.firstname',
-				'Recipient.middlename',
-				'Recipient.lastname'
+				'Recipient.name'
 			),
 			'className' => 'User',
 			'foreignKey' => false,

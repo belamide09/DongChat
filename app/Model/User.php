@@ -5,7 +5,6 @@ class User extends AppModel {
 
 	public function beforeSave($options = array()) {
     $imageRes = new ImageResize();
-    $this->data['User']['password'] = AuthComponent::password($this->data['User']['password']);
     $this->data['User']['status'] 	= 1;
     if ( isset($this->data['User']['photo']) ) {
       $data = $this->data['User']['photo'];

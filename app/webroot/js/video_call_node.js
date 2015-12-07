@@ -192,7 +192,7 @@ $(document).ready(function() {
 					}
 					member_container += '<table class="member"><tr>';
 					member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
-					member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
+					member_container += '<td><div class="member-name">'+member['name']+'</div></td>';
 					member_container += '</tr></table></li>';
 				}
 			}
@@ -214,7 +214,7 @@ $(document).ready(function() {
 				}
 				member_container += '<table class="member"><tr>';
 				member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
-				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
+				member_container += '<td><div class="member-name">'+member['name']+'</div></td>';
 				member_container += '</tr></table></li>';
 				$("#member-list ul").append(member_container);
 			}

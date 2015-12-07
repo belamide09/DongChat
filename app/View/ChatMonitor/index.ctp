@@ -44,8 +44,8 @@ th,td {
 			<td> <?php echo $row['ChatHistory']['id']?> </td>
 			<td> <?php echo $row['ChatHistory']['chat_hash']?> </td>
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
-			<td> <?php echo $row['Sender']['firstname'].' '.$row['Sender']['lastname']?> </td>
-			<td> <?php echo $row['Recipient']['firstname'].' '.$row['Recipient']['lastname']?> </td>
+			<td> <?php echo $row['Sender']['name']?> </td>
+			<td> <?php echo $row['Recipient']['name']?> </td>
 			<td> </td>
 			<td>
 				<a href="#" class="btn btn-danger btn-xs btn-kill" chat-id="<?php echo $chat_id?>" 

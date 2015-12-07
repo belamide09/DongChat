@@ -29,8 +29,8 @@ th,td {
 			<td> <?php echo $row['ChatHistory']['chat_hash']?> </td>
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
 			<td> <?php echo $row['ChatHistory']['end'] ? $row['ChatHistory']['end'] : '--'?> </td>
-			<td> <?php echo $row['Sender']['firstname'].' '.$row['Sender']['lastname']?> </td>
-			<td> <?php echo $row['Recipient']['firstname'].' '.$row['Recipient']['lastname']?> </td>
+			<td> <?php echo $row['Sender']['name']?> </td>
+			<td> <?php echo $row['Recipient']['name']?> </td>
 		</tr>
 	<?php endforeach; ?>
 	</tbody>
