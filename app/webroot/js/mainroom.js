@@ -6,8 +6,8 @@ $(document).ready(function() {
   navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
   peer = new Peer({
-    host: '192.168.0.187',
-    port: '9000',
+    host: location.origin.split('//')[1],
+    port: '4500',
     path: '/',
     debug: 0
   });

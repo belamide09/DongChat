@@ -1,4 +1,4 @@
-var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id+"&name="+my_name});
+var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name});
 $(document).ready(function() {
 	$("#message-form").submit(function(e) {
 		e.preventDefault();
@@ -54,7 +54,7 @@ $(document).ready(function() {
 
   socket.on('go_back_to_room',function(data) {
   	if ( data['user_id'] == my_id ) {
-  		$(location).attr('href','/ChatRoom/'+room_id);
+  		$(location).attr('href','/dongdong/ChatRoom/');
   	}
   })
 
@@ -191,7 +191,7 @@ $(document).ready(function() {
 						member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
 					}
 					member_container += '<table class="member"><tr>';
-					member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
+					member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
 					member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 					member_container += '</tr></table></li>';
 				}
@@ -213,7 +213,7 @@ $(document).ready(function() {
 					member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
 				}
 				member_container += '<table class="member"><tr>';
-				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
+				member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
 				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 				member_container += '</tr></table></li>';
 				$("#member-list ul").append(member_container);

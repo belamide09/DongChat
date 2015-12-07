@@ -1,4 +1,4 @@
-var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
+var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id});
 $(document).ready(function() {
 	
 	socket.emit('get_room_messages',{user_id:my_id,room_id:room_id});
@@ -27,7 +27,7 @@ $(document).ready(function() {
 
   socket.on('redirect_to_chat',function(data) {
   	if ( data['user_id'] == my_id ) {
-  		$(location).attr('href','/VideoCall')
+  		$(location).attr('href','/dongdong/VideoCall')
 	  }
   })
 
@@ -63,7 +63,7 @@ $(document).ready(function() {
 					var member = members[x]['user'];
 					member_container += '<li class="user-'+member['id']+'">';
 					member_container += '<table class="member"><tr>';
-					member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
+					member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
 					member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 					member_container += '</tr></table></li>';
 				}
@@ -80,7 +80,7 @@ $(document).ready(function() {
 				var member_container = "";
 				member_container += '<li class="user-'+member['id']+'">';
 				member_container += '<table class="member"><tr>';
-				member_container += '<td><div class="member-image"><center><img src="/user_image/'+member['photo']+'"></center></div></td>';
+				member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
 				member_container += '<td><div class="member-name">'+member['firstname']+' '+member['lastname']+'</div></td>';
 				member_container += '</tr></table></li>';
 				$("#member-list ul").append(member_container);

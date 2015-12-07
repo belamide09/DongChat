@@ -12,7 +12,7 @@ var dateFormat  = require('dateformat');
 var seq 				= require('sequelize');
 var md5 				= require('MD5');
 
-var server 			= PeerServer({port: 9000, path: '/', proxied: false});
+var server 			= PeerServer({port: 4500, path: '/', proxied: false});
 
 app.set('views', __dirname + '\\app\\View\\');
 app.engine('html', require('ejs').renderFile);
@@ -319,7 +319,7 @@ io.on('connection',function(socket) {
 			chathash_arr[recipient_id] 	= chat_hash;
 			chathash_arr[sender_id] 		= chat_hash;
 	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
-	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash});
+	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash: chat_hash});
 	    io.emit('start_chattime',{chat_hash:chat_hash});
 	    io.emit('notify_new_chat');
 		})
@@ -453,7 +453,9 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 app.get('/', function(req, res, next) { res.send('Hello world!'); });
 
 
-http.listen(3000);
+http.listen(4000,function() {
+	OnairUser.truncate();
+});
 
 function getIp(socket) {
   var socketId  = socket.id;

@@ -1,5 +1,5 @@
 
-var socket = io.connect('http://192.168.0.187:3000',{query:"user_id="+my_id});
+var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id});
 $(document).ready(function () {
 
 	socket.emit('get_messages',{user_id:my_id});
