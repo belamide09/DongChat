@@ -54,7 +54,7 @@ $(document).ready(function() {
 
   socket.on('go_back_to_room',function(data) {
   	if ( data['user_id'] == my_id ) {
-  		$(location).attr('href','/dongdong/ChatRoom/');
+  		$(location).attr('href','/../ChatRoom/');
   	}
   })
 
