@@ -48,7 +48,7 @@
    <td>
     <div class="media">
       <div class="media-middle">
-        <img class="media-object custom-image" src="/img/emptyprofile.jpg" alt="" style="" id="img-profile">
+        <img class="media-object custom-image" src="/dongdong/img/emptyprofile.jpg" alt="" style="" id="img-profile">
       </div>
     </div>
       <?php
