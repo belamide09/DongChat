@@ -26,7 +26,7 @@ function peerEvts() {
   peer.on('call', function(call) {
 
   	if ( chat_hash == '' ) {
-	  	var url = 'VideoCall/getName';
+	  	var url = '/dongdong/VideoCall/getName';
 	  	$.post(url,{peer:call.peer},function(data) {
 
 	  		var confirmation = confirm(data['name']+' want\'s to video chat with you');
@@ -77,7 +77,7 @@ function ReconnectToPeer(peer_id) {
 }
 
 function Call(user_id) {
-	var url = '/VideoCall/getPeer';
+	var url = '/dongdong/VideoCall/getPeer';
 	$.post(url,{user_id:user_id},function(data) {
 
 		partner_id = user_id;

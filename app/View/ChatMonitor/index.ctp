@@ -45,6 +45,7 @@ th,td {
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
 			<td> <?php echo $row['Sender']['firstname'].' '.$row['Sender']['lastname']?> </td>
 			<td> <?php echo $row['Recipient']['firstname'].' '.$row['Recipient']['lastname']?> </td>
+			<td> </td>
 			<td>
 				<a href="#" class="btn btn-danger btn-xs btn-kill" chat-id="<?php echo $chat_id?>" 
 					 sender-id="<?php echo $sender_id?>" recipient-id="<?php echo $recipient_id?>" 
@@ -63,8 +64,8 @@ th,td {
 </table>
 <?php echo $this->element('paginator'); ?>
 <script>
+var socket = io.connect(location.origin+':4000');
 $(document).ready(function() {
-	var socket = io.connect('http://192.168.0.187:3000');
 	$(".btn-kill").click(function() {
 		var confirmation = confirm('Are you sure you want to kill this chat?');
 		if ( confirmation == true ) {
