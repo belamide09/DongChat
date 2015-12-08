@@ -61,7 +61,6 @@ $(document).ready(function() {
 			for( var x in members) {
 				if ( members[x]['onair_user'] != null ) {
 					var member = members[x]['user'];
-					console.log( member );
 					member_container += '<li class="user-'+member['id']+'">';
 					member_container += '<table class="member"><tr>';
 					member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';

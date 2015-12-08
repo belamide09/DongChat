@@ -10,7 +10,8 @@ var User = con.define('users', {
     type 				: seq.INTEGER,
     primaryKey 	: true
   },
-  name			: seq.STRING
+  name			: seq.STRING,
+  photo			: seq.STRING
 },
 {timestamps : false});
 

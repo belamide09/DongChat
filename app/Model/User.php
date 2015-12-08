@@ -2,7 +2,12 @@
 App::uses('ImageResize','Lib');
 App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
 class User extends AppModel {
-
+  public $validate = array(
+    'email' => array(
+      'rule' => array('isUnique'),
+      'message' => array('Email is already taken.')
+    )
+  );
 	public function beforeSave($options = array()) {
     $imageRes = new ImageResize();
     $this->data['User']['status'] 	= 1;

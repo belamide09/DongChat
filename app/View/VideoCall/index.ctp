@@ -32,6 +32,7 @@ var room_id = "<?php echo $room_id?>";
 		</div>
 		<div id="chatbox-container">
 			<div id="conversations">
+				<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>
 			</div>
 			<div id="chatbox-input">
 				<?php echo $this->Form->create('Conversation',array('id'=>'message-form'));?>

@@ -1,18 +1,24 @@
 
 // Modules
+var fs 					= require('fs');
 var express 		= require('express');
 var app 				= express();
 var mysql       = require("mysql");
+var options = {
+	key: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/inn-devel.key'),
+  cert: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/STAR_inn-devel_com.crt'),
+  ca: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/STAR_inn-devel_com.cer')
+};
 var PeerServer 	= require('peer').PeerServer;
-var http				= require('http').Server(app);
-var io 					= require('socket.io')(http);
+var https				= require('https').createServer(options,app);
+var io 					= require('socket.io')(https);
 var router			= express.Router();
 var getIP       = require('ipware')().get_ip;
 var dateFormat  = require('dateformat');
 var seq 				= require('sequelize');
 var md5 				= require('MD5');
 
-var server 			= PeerServer({port: 4500, path: '/', proxied: false});
+var server 			= PeerServer({port: 4500, path: '/', proxied: false, ssl: options});
 
 app.set('views', __dirname + '\\app\\View\\');
 app.engine('html', require('ejs').renderFile);
@@ -33,91 +39,79 @@ var room_conversations = [];
 
 io.on('connection',function(socket) {
 
+	if ( typeof socket.handshake.query['video_chat'] != 'undefined' ) {
+		// Reconnect
+		io.emit('connect_server',{user_id:socket.handshake.query['user_id']});
+	}
+
 	socket.on('add_onair_user',function(data) {
 		var user_id = data['user_id'];
-		OnairUser.create({
-			id 								: user_id,
-			on_video_room			: data['video_chat'],
-			peer							: data['peer_id'],
-			chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
-			created_datetime	: new Date(),
-			created_ip				: getIp(socket)
+		OnairUser.destroy({
+			where: {
+				id: user_id
+			}
 		}).done(function() {
 
-			User.belongsTo(OnairUser,{
-				foreignKey: 'id'
-			});
-			User.find({
-				where: {id: user_id},
-				include: [OnairUser]
-			}).done(function (member) {
-				io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
-				if ( typeof chathash_arr[user_id] != 'undefined' ) {
-					var chat_hash = chathash_arr[user_id];
-					io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
-					OnairUser.find({
-						where: {
-							chat_hash: chat_hash,
-							id: { $ne: user_id }
-						}
-					}).done(function(user) {
-						io.emit('reconnect_chat',{user_id:user_id,partner:user});
-						io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
-					})
-					ChatHistory.find({
-						where: {
-							chat_hash: chat_hash
-						}
-					}).done(function(result) {
-						var now = new Date() / 1000;
-						var start = result['dataValues']['started'] / 1000;
-						var remaining_time = (300 - Math.round(now - start,2));
-						io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
-					})
-				}
+			OnairUser.create({
+				id 								: user_id,
+				on_video_room			: data['video_chat'],
+				peer							: data['peer_id'],
+				chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
+				created_datetime	: new Date(),
+				created_ip				: getIp(socket)
+			}).done(function() {
+
+				User.belongsTo(OnairUser,{
+					foreignKey: 'id'
+				});
+				User.find({
+					where: {id: user_id},
+					include: [OnairUser]
+				}).done(function (member) {
+					io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
+					if ( typeof chathash_arr[user_id] != 'undefined' ) {
+						var chat_hash = chathash_arr[user_id];
+						io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
+						OnairUser.find({
+							where: {
+								chat_hash: chat_hash,
+								id: { $ne: user_id }
+							}
+						}).done(function(user) {
+							io.emit('reconnect_chat',{user_id:user_id,partner:user});
+							io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
+						})
+						ChatHistory.find({
+							where: {
+								chat_hash: chat_hash
+							}
+						}).done(function(result) {
+							var now = new Date() / 1000;
+							var start = result['dataValues']['started'] / 1000;
+							var remaining_time = (300 - Math.round(now - start,2));
+							io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
+						})
+					}
+				})
 			})
+
 		})
 
 	});
 
 	socket.on('disconnect',function() {
-		var user_id 	= socket.handshake.query['user_id'];
-		var chat_hash = chathash_arr[user_id];
-		io.emit('remove_room_member',{user_id:user_id});
-		OnairUser.destroy({
-			where: {
-				id: user_id
-			}
-		}).done(function(result) {
-			io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
-			if ( typeof chat_hash != 'undefined' ) {
-				OnairUser.count({
-					where: {
-						chat_hash: chat_hash
-					}
-				}).done(function(count) {
-					if ( count == 0 ) {
-						ChatHistory.update({end: new Date()},{
-				      where: {
-				       chat_hash: chat_hash,
-				       end : null
-				      }
-				    });
-				    ChatHistory.find({
-							where: {
-								chat_hash: chat_hash
-							}
-						}).done(function(result) {
-							var sender_id = result['dataValues']['sender_id'];
-							var recipient_id = result['dataValues']['recipient_id'];
-				    	delete chathash_arr[sender_id];
-				    	delete chathash_arr[recipient_id];
-						})
-				    io.emit('remove_chat',{chat_hash:chat_hash});
-					}
-				})
-			}
-		})
+		if ( typeof socket.handshake.query['user_id'] != null ) {
+			var user_id 	= socket.handshake.query['user_id'];
+			var chat_hash = chathash_arr[user_id];
+			io.emit('remove_room_member',{user_id:user_id});
+			OnairUser.destroy({
+				where: {
+					id: user_id
+				}
+			}).done(function(result) {
+				io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+			})
+		}
 	})
 
 	socket.on('get_all_rooms',function(data) {
@@ -454,7 +448,7 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 app.get('/', function(req, res, next) { res.send('Hello world!'); });
 
 
-http.listen(4000,function() {
+https.listen(4000,function() {
 	OnairUser.truncate();
 });
 

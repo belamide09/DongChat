@@ -1,4 +1,4 @@
-var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name});
+var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name+"&video_chat="+true});
 $(document).ready(function() {
 	$("#message-form").submit(function(e) {
 		e.preventDefault();
@@ -14,7 +14,7 @@ $(document).ready(function() {
 			  }
 			}
       var message = '<div class="message">You: '+msg+'</div>';
-			$("#conversations").prepend(message);
+			$("#conversations .reconnecting").after(message);
 		}
 	});
 
@@ -42,7 +42,7 @@ $(document).ready(function() {
 			for(var x in messages) {
 				var message = messages[x]['name']+' - '+messages[x]['message'];
 				var message = '<div class="message">'+message+'</div>';
-				$("#conversations").prepend(message);
+				$("#conversations .reconnecting").after(message);
 			}
 		}
 	})
@@ -54,7 +54,7 @@ $(document).ready(function() {
 
   socket.on('go_back_to_room',function(data) {
   	if ( data['user_id'] == my_id ) {
-  		$(location).attr('href','/../ChatRoom/');
+  		$(location).attr('href','ChatRoom');
   	}
   })
 
@@ -77,7 +77,17 @@ $(document).ready(function() {
   	if ( data['chat_hash'] == chat_hash ) {
   		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
   		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
-  		$("#conversations").prepend(message);
+  		$("#conversations .reconnecting").after(message);
+  		$("#partner-webcam").attr('src',null);
+  		peer._cleanup();
+  	}
+  })
+
+  socket.on('connect_server',function(data) {
+  	if ( data['user_id'] == my_id ) {
+			$(".reconnecting").hide();
+			init();
+  		console.log( 'You have just reconnect to server!' );
   	}
   })
 
@@ -91,7 +101,7 @@ $(document).ready(function() {
 	  	} else {
 	  		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
 	  		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
-	  		$("#conversations").prepend(message);
+	  		$("#conversations .reconnecting").after(message);
 	  	}
   	}
   })
@@ -99,10 +109,10 @@ $(document).ready(function() {
   socket.on('notify_reconnect',function(data) {
   	if ( data['partner'] == partner_id ) {
   		var message = '<div class="message">'+data['name']+' has been reconnected from the chat</div>';
-  		$("#conversations").prepend(message);
+  		$("#conversations .reconnecting").after(message);
   	} else if ( data['partner'] == my_id ) {
   		var message = '<div class="message">You have reconnected from the chat</div>';
-  		$("#conversations").prepend(message);
+  		$("#conversations .reconnecting").after(message);
   	}
   })
 
@@ -127,7 +137,7 @@ $(document).ready(function() {
 		  remaining_time = chat_time;
 		  chat_hash = "";
 		  onchat = false;
-		  $("#conversations").html("");
+		  $("#conversations .reconnecting").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
@@ -148,7 +158,7 @@ $(document).ready(function() {
     	remaining_time = chat_time;
 		  chat_hash = "";
 		  onchat = false;
-		  $("#conversations").html("");
+		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
@@ -160,8 +170,9 @@ $(document).ready(function() {
   })
 
   socket.on('start_chattime',function(data) {
-  	$("#conversations").html("");
+  	$("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
   	if ( data['chat_hash'] == chat_hash ) {
+  		$(".reconnecting").hide();
   		$(".btn-end-chat").show();
       onchat = true;
       timer = setInterval(function() {
@@ -245,6 +256,15 @@ $(document).ready(function() {
 			$(".user-"+data[x]+' .btn-call').attr('class','btn btn-primary btn-xs btn-call');
 			$(".user-"+data[x]+' .btn-call').html('Call');
 		}
+	});
+
+	socket.on('disconnect',function() {
+
+		$(".reconnecting").show();
+		$("#partner-webcam").attr('src',null);
+		$("#member_container")
+		peer._cleanup();
+		clearInterval(timer);
 	});
 
 })

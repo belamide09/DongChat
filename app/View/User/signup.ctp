@@ -10,6 +10,12 @@
     <?php echo $authSuccess; ?>
   </div>
 <?php endif; ?>
+<?php foreach($errors as $error): ?>
+  <div class="alert alert-danger">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <?php echo __($error[0]); ?>
+  </div>
+<?php endforeach; ?>
 <?php echo $this->Form->create('User',array('enctype'=>'multipart/form-data')); ?>
 <table class="table table-bordered teacher-details">
   <tr>
@@ -48,7 +54,7 @@
    <td>
     <div class="media">
       <div class="media-middle">
-        <img class="media-object custom-image" src="/dongdong/img/emptyprofile.jpg" alt="" style="" id="img-profile">
+        <img class="media-object custom-image" src="img/emptyprofile.jpg" alt="" style="" id="img-profile">
       </div>
     </div>
       <?php

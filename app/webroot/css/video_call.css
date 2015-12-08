@@ -95,6 +95,9 @@
 	overflow-y: auto;
 	font: 12px "Trebucher MS",sans-serif;
 }
+#conversations img {
+	width: 50px;
+}
 #conversations .message {
 	background: #fff;
 	border-radius: 2px;

@@ -10,23 +10,22 @@ var chat_hash = "";
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-peer = new Peer({
-  host: location.origin.split('//')[1],
-  port: '4500',
-  path: '/',
-  debug: 0
-});
-peer.on('open', function(peer_id){
-
-});
-peerEvts();
-getVideoStream();
+function init() {
+  peer = new Peer({
+    host: location.origin.split('//')[1],
+    port: '4500',
+    path: '/',
+    debug: 0
+  });
+  peerEvts();
+  getVideoStream();
+}
 
 function peerEvts() {
   peer.on('call', function(call) {
 
   	if ( chat_hash == '' ) {
-	  	var url = '/../VideoCall/getName';
+	  	var url = 'VideoCall/getName';
 	  	$.post(url,{peer:call.peer},function(data) {
 
 	  		var confirmation = confirm(data['name']+' want\'s to video chat with you');
@@ -57,8 +56,10 @@ function getVideoStream() {
   navigator.getUserMedia({audio: true, video: true}, function(stream){
     $('#my-webcam').prop('src', URL.createObjectURL(stream));
     window.localStream = stream;
-    socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer.id,video_chat:true});
     socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
+    setTimeout(function() {  
+      socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer.id,video_chat:true});
+    },1000);
   }, function(){ $('#step1-error').show(); });
 }
 
@@ -66,7 +67,7 @@ function Connect(c) {
   if (c.label == 'chat' ) {
     c.on('data',function(msg) {
       var message = '<div class="message">Chat Mate: '+msg+'</div>';
-      $("#conversations").prepend(message);
+      $("#conversations .reconnecting").after(message);
     })
   }
 }
@@ -77,7 +78,7 @@ function ReconnectToPeer(peer_id) {
 }
 
 function Call(user_id) {
-	var url = '/../VideoCall/getPeer';
+	var url = 'VideoCall/getPeer';
 	$.post(url,{user_id:user_id},function(data) {
 
 		partner_id = user_id;
