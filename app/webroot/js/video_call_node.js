@@ -121,6 +121,7 @@ $(document).ready(function() {
 	  	remaining_time = data['remaining_time'];
 	  	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 	  	onchat = true;
+	  	clearInterval(timer);
       timer = setInterval(function() {
         remaining_time--;
         $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));

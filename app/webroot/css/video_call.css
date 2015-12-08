@@ -98,6 +98,9 @@
 #conversations img {
 	width: 50px;
 }
+.reconnecting {
+	display: none;
+}
 #conversations .message {
 	background: #fff;
 	border-radius: 2px;
