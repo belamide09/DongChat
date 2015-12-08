@@ -259,12 +259,10 @@ $(document).ready(function() {
 	});
 
 	socket.on('disconnect',function() {
-
 		$(".reconnecting").show();
 		$("#partner-webcam").attr('src',null);
 		$("#member_container")
 		peer._cleanup();
-		clearInterval(timer);
 	});
 
 })
