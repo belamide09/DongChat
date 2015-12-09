@@ -18,6 +18,7 @@ $(document).ready(function() {
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
+  	location.reload();
   });
 
   $(".btn-video-chat").click(function() {
@@ -89,9 +90,7 @@ $(document).ready(function() {
 	});
 
 	socket.on('remove_room_member',function(data) {
-		if ( data['user_id'] == my_id ) {
-			location.reload();
-		} else {
+		if ( data['user_id'] != my_id ) {
 			$(".user-"+data['user_id']).remove();
 		}
 	});

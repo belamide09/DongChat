@@ -22,12 +22,14 @@ $(document).ready(function() {
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
-  	$(location).attr('href','../');
+  	$(location).attr('href','/dongdong');
+  	return false;
   });
 
   $(".btn-back").click(function() {
   	socket.emit('go_back_to_room',{user_id:my_id});
   	$(location).attr('href','ChatRoom');
+  	return false;
   })
 
   $(".btn-end-chat").click(function() {
@@ -238,7 +240,10 @@ $(document).ready(function() {
 	});
 
 	socket.on('remove_room_member',function(data) {
-		if ( data['user_id'] != my_id ) {
+		if ( data['user_id'] == my_id ) {
+			console.log( 'test' );
+			socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
+		} else if ( data['user_id'] != my_id ) {
 			$(".user-"+data['user_id']).remove();
 		}
 	});

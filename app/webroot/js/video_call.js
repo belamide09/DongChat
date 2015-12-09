@@ -11,6 +11,10 @@ var chat_hash = "";
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 function init() {
+  if ( typeof peer != 'undefined' ) {
+    peer.connections = {};
+    peer._cleanup();
+  }
   peer = new Peer({
     host: location.origin.split('//')[1],
     port: '4500',
@@ -85,6 +89,7 @@ function Call(user_id) {
 		partner_id = user_id;
 	  var call = peer.call(data['peer'], window.localStream);
 	  StartCall(call);
+    socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
 
 	},'JSON');
 }
