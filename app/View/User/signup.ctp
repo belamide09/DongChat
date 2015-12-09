@@ -10,12 +10,14 @@
     <?php echo $authSuccess; ?>
   </div>
 <?php endif; ?>
+<?php if ( isset($errors) ): ?>
 <?php foreach($errors as $error): ?>
   <div class="alert alert-danger">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
     <?php echo __($error[0]); ?>
   </div>
 <?php endforeach; ?>
+<?php endif; ?>
 <?php echo $this->Form->create('User',array('enctype'=>'multipart/form-data')); ?>
 <table class="table table-bordered teacher-details">
   <tr>

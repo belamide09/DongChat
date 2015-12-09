@@ -22,11 +22,12 @@ $(document).ready(function() {
 
   $(".btn-leave").click(function() {
   	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
+  	$(location).attr('href','../');
   });
 
   $(".btn-back").click(function() {
   	socket.emit('go_back_to_room',{user_id:my_id});
-  	return false;
+  	$(location).attr('href','ChatRoom');
   })
 
   $(".btn-end-chat").click(function() {
@@ -78,7 +79,6 @@ $(document).ready(function() {
   		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
   		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
   		$("#conversations .reconnecting").after(message);
-  		$("#partner-webcam").attr('src',null);
   		peer._cleanup();
   	}
   })
@@ -94,6 +94,7 @@ $(document).ready(function() {
   socket.on('reconnect_chat',function(data) {
   	if ( data['user_id'] == my_id ) {
   		$(".btn-end-chat").show();
+  		$("#conversations .reconnecting").after('<div class="message">Waiting for the camera...</div>');
   		if ( data['partner'] != null ) {
 	  		var peer = data['partner']['peer'];
 	  		partner_id = data['partner']['id'];
@@ -103,6 +104,8 @@ $(document).ready(function() {
 	  		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
 	  		$("#conversations .reconnecting").after(message);
 	  	}
+  	} else if ( data['user_id'] == partner_id ) {
+  		$("#conversations .reconnecting").after('<div class="message">Your Chate mate is trying to reconnect...</div>');
   	}
   })
 
@@ -138,7 +141,7 @@ $(document).ready(function() {
 		  remaining_time = chat_time;
 		  chat_hash = "";
 		  onchat = false;
-		  $("#conversations .reconnecting").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
+		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
@@ -163,7 +166,6 @@ $(document).ready(function() {
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
-
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
 		  partner_id = "";
@@ -194,7 +196,8 @@ $(document).ready(function() {
 			var members = data['members'];
 			var member_container = '<ul>';
 			for( var x in members) {
-				if ( members[x]['onair_user'] != null && members[x]['onair_user']['on_video_room'] == 1 ) {
+				if ( members[x]['onair_user'] != null && members[x]['onair_user']['on_video_room'] == 1 && 
+						 $(".user-"+data['members'][x]['user']['id']).length == 0 ) {
 					var member = members[x]['user'];
 					member_container += '<li class="user-'+member['id']+'">';
 					if ( members[x]['onair_user']['chat_hash'] == "" ) {
@@ -215,7 +218,8 @@ $(document).ready(function() {
 
 	socket.on('append_new_room_member',function(data) {
 		if ( data['room_id'] == room_id && data['member']['id'] != my_id) {
-			if ( data['member']['onair_user'] != null && data['member']['onair_user']['on_video_room'] == 1 ) {
+			if ( data['member']['onair_user'] != null && data['member']['onair_user']['on_video_room'] == 1 && 
+					 $(".user-"+data['member']['id']).length == 0) {
 				var member = data['member'];
 				var member_container = "";
 				member_container += '<li class="user-'+member['id']+'">';
@@ -234,9 +238,7 @@ $(document).ready(function() {
 	});
 
 	socket.on('remove_room_member',function(data) {
-		if ( data['user_id'] == my_id ) {
-			location.reload();
-		} else {
+		if ( data['user_id'] != my_id ) {
 			$(".user-"+data['user_id']).remove();
 		}
 	});
@@ -261,9 +263,16 @@ $(document).ready(function() {
 
 	socket.on('disconnect',function() {
 		$(".reconnecting").show();
-		$("#partner-webcam").attr('src',null);
-		$("#member_container")
+		$("#member-list").html("");
+		console.log( 'you have disconnected!' );
 		peer._cleanup();
 	});
+
+	socket.on('reconnect_server',function(data) {
+		if ( data['user_id'] == my_id ) {
+			init();
+			console.log( 'reconnect!' );
+		}
+	})
 
 })

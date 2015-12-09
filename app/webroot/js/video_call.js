@@ -50,6 +50,10 @@ function peerEvts() {
 	  }
 
   });
+  peer.on('open',function(id) {
+    console.log( id );
+    socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:id,video_chat:true});
+  }); 
 }
 
 function getVideoStream() {
@@ -57,9 +61,6 @@ function getVideoStream() {
     $('#my-webcam').prop('src', URL.createObjectURL(stream));
     window.localStream = stream;
     socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
-    setTimeout(function() {  
-      socket.emit('add_onair_user',{user_id:my_id,room_id:room_id,peer_id:peer.id,video_chat:true});
-    },1000);
   }, function(){ $('#step1-error').show(); });
 }
 

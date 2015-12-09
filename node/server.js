@@ -46,65 +46,75 @@ io.on('connection',function(socket) {
 
 	socket.on('add_onair_user',function(data) {
 		var user_id = data['user_id'];
-		OnairUser.count({
+		OnairUser.destroy({
 			where: {
 				id: user_id
 			}
 		}).done(function(count) {
-			if ( count == 0 ) {
-				OnairUser.create({
-					id 								: user_id,
-					on_video_room			: data['video_chat'],
-					peer							: data['peer_id'],
-					chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
-					created_datetime	: new Date(),
-					created_ip				: getIp(socket)
-				}).done(function() {
+			OnairUser.create({
+				id 								: user_id,
+				on_video_room			: data['video_chat'],
+				peer							: data['peer_id'],
+				chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
+				created_datetime	: new Date(),
+				created_ip				: getIp(socket)
+			}).done(function() {
 
-					User.belongsTo(OnairUser,{
-						foreignKey: 'id'
-					});
-					User.find({
-						where: {id: user_id},
-						include: [OnairUser]
-					}).done(function (member) {
-						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
-						if ( typeof chathash_arr[user_id] != 'undefined' ) {
-							var chat_hash = chathash_arr[user_id];
-							io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
-							OnairUser.find({
-								where: {
-									chat_hash: chat_hash,
-									id: { $ne: user_id }
-								}
-							}).done(function(user) {
-								io.emit('reconnect_chat',{user_id:user_id,partner:user});
-								io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
-							})
-							ChatHistory.find({
-								where: {
-									chat_hash: chat_hash
-								}
-							}).done(function(result) {
-								var now = new Date() / 1000;
-								var start = result['dataValues']['started'] / 1000;
-								var remaining_time = (300 - Math.round(now - start,2));
-								io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
-							})
-						}
-					})
-				}
+				User.belongsTo(OnairUser,{
+					foreignKey: 'id'
+				});
+				User.find({
+					where: {id: user_id},
+					include: [OnairUser]
+				}).done(function (member) {
+					io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
+					if ( typeof chathash_arr[user_id] != 'undefined' ) {
+						var chat_hash = chathash_arr[user_id];
+						io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
+						OnairUser.find({
+							where: {
+								chat_hash: chat_hash,
+								id: { $ne: user_id }
+							}
+						}).done(function(user) {
+							io.emit('reconnect_chat',{user_id:user_id,partner:user});
+							io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
+						})
+						ChatHistory.find({
+							where: {
+								chat_hash: chat_hash
+							}
+						}).done(function(result) {
+							var now = new Date() / 1000;
+							var start = result['dataValues']['started'] / 1000;
+							var remaining_time = (300 - Math.round(now - start,2));
+							io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
+						})
+					}
+				})
 			})
 
 		})
 
 	});
 
+	socket.on('get_remaining_time_arr',function() {
+		ChatHistory.findAll({
+			attributes: ['chat_hash','started'],
+			where: {
+				chat_hash: null
+			}
+		}).done(function(result) {
+			io.emit('return_remaining_time_arr',result);
+		});
+	})
+
 	socket.on('disconnect',function() {
-		if ( typeof socket.handshake.query['user_id'] != null ) {
+		if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
 			var user_id 	= socket.handshake.query['user_id'];
 			var chat_hash = chathash_arr[user_id];
 			io.emit('remove_room_member',{user_id:user_id});
+			io.emit('reconnect_server',{user_id:user_id});
 			OnairUser.destroy({
 				where: {
 					id: user_id
@@ -441,10 +451,6 @@ server.on('connection', function(id) {
 server.on('disconnect', function(id) {
 	console.log( id + ' has disconnected to the server' );
 });
-
-var ExpressPeerServer = require('peer').ExpressPeerServer;
-
-var ExpressPeerServer = require('peer').ExpressPeerServer;
 
 app.get('/', function(req, res, next) { res.send('Hello world!'); });
 

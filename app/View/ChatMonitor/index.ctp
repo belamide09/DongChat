@@ -67,6 +67,7 @@ th,td {
 <script>
 var socket = io.connect(location.origin+':4000');
 $(document).ready(function() {
+	socket.emit('get_remaining_time_arr');
 	$(".btn-kill").click(function() {
 		var confirmation = confirm('Are you sure you want to kill this chat?');
 		if ( confirmation == true ) {
@@ -83,6 +84,9 @@ $(document).ready(function() {
 	});
 	socket.on('remove_chat',function(data) {
 		$("."+data['chat_hash']).fadeOut();
+	})
+	socket.on('return_remaining_time_arr',function(data) {
+		console.log( data );
 	})
 })
 </script>
