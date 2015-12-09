@@ -89,7 +89,6 @@ function Call(user_id) {
 		partner_id = user_id;
 	  var call = peer.call(data['peer'], window.localStream);
 	  StartCall(call);
-    socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
 
 	},'JSON');
 }
