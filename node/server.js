@@ -454,7 +454,6 @@ server.on('disconnect', function(id) {
 
 app.get('/', function(req, res, next) { res.send('Hello world!'); });
 
-
 https.listen(4000,function() {
 	OnairUser.truncate();
 });

@@ -3,7 +3,8 @@ App::uses('AppController', 'Controller');
 App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
 class UserController extends AppController {
   public $uses = array(
-    'User'
+    'User',
+    'OnairUser'
   );
 	public function beforeFilter() {
 		parent::beforeFilter();
@@ -47,6 +48,7 @@ class UserController extends AppController {
 	}
 
   public function logout() {
+    $this->OnairUser->delete($this->Auth->user('id'));
     $this->Auth->logout();
     return $this->redirect('/login');
   }
