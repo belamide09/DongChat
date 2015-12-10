@@ -67,6 +67,7 @@ $(document).ready(function() {
   	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
   		var message = '<div class="message" style="color:blue;">'+data['name']+' has joined your room</div>';
   		$("#conversations .reconnecting").after(message);
+  		partner_id = data['user_id'];
   	}
   })
 
