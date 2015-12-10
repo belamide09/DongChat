@@ -27,7 +27,6 @@ app.engine('html', require('ejs').renderFile);
 var OnairUser 	= require('./app/Model/OnairUser.js');
 var User 				= require('./app/Model/User.js');
 var Room 				= require('./app/Model/Room.js');
-var RoomMember 	= require('./app/Model/RoomMember.js');
 var ChatHistory = require('./app/Model/ChatHistory.js');
 
 var room_lists 		= {};
@@ -46,54 +45,53 @@ io.on('connection',function(socket) {
 
 	socket.on('add_onair_user',function(data) {
 		var user_id = data['user_id'];
-		OnairUser.destroy({
+		OnairUser.count({
 			where: {
 				id: user_id
 			}
 		}).done(function(count) {
-			OnairUser.create({
-				id 								: user_id,
-				on_video_room			: data['video_chat'],
-				peer							: data['peer_id'],
-				chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
-				created_datetime	: new Date(),
-				created_ip				: getIp(socket)
-			}).done(function() {
+			if ( count == 0 ) {
+				OnairUser.create({
+					id 								: user_id,
+					peer							: data['peer_id'],
+					chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
+					created_datetime	: new Date(),
+					created_ip				: getIp(socket)
+				}).done(function() {
 
-				User.belongsTo(OnairUser,{
-					foreignKey: 'id'
-				});
-				User.find({
-					where: {id: user_id},
-					include: [OnairUser]
-				}).done(function (member) {
-					io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
-					if ( typeof chathash_arr[user_id] != 'undefined' ) {
-						var chat_hash = chathash_arr[user_id];
-						io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
-						OnairUser.find({
-							where: {
-								chat_hash: chat_hash,
-								id: { $ne: user_id }
-							}
-						}).done(function(user) {
-							io.emit('reconnect_chat',{user_id:user_id,partner:user});
-							io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
-						})
-						ChatHistory.find({
-							where: {
-								chat_hash: chat_hash
-							}
-						}).done(function(result) {
-							var now = new Date() / 1000;
-							var start = result['dataValues']['started'] / 1000;
-							var remaining_time = (300 - Math.round(now - start,2));
-							io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
-						})
-					}
+					User.belongsTo(OnairUser,{
+						foreignKey: 'id'
+					});
+					User.find({
+						where: {id: user_id},
+						include: [OnairUser]
+					}).done(function (member) {
+						if ( typeof chathash_arr[user_id] != 'undefined' ) {
+							var chat_hash = chathash_arr[user_id];
+							io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
+							OnairUser.find({
+								where: {
+									chat_hash: chat_hash,
+									id: { $ne: user_id }
+								}
+							}).done(function(user) {
+								io.emit('reconnect_chat',{user_id:user_id,partner:user});
+								io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
+							})
+							ChatHistory.find({
+								where: {
+									chat_hash: chat_hash
+								}
+							}).done(function(result) {
+								var now = new Date() / 1000;
+								var start = result['dataValues']['started'] / 1000;
+								var remaining_time = (300 - Math.round(now - start,2));
+								io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
+							})
+						}
+					})
 				})
-			})
-
+			}
 		})
 
 	});
@@ -113,7 +111,6 @@ io.on('connection',function(socket) {
 		if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
 			var user_id 	= socket.handshake.query['user_id'];
 			var chat_hash = chathash_arr[user_id];
-			io.emit('remove_room_member',{user_id:user_id});
 			io.emit('reconnect_server',{user_id:user_id});
 			OnairUser.destroy({
 				where: {
@@ -126,51 +123,28 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('get_all_rooms',function(data) {
-		Room.findAll().done(function(results) {
-			io.emit('return_rooms',{user_id:data['user_id'],results:results});
+		Room.belongsTo(User,{
+			'foreignKey': 'user_1'
+		});
+		Room.findAll({
+			where: {
+				user_2: null
+			},
+			include: [User]
+		}).done(function(results) {
+			io.emit('return_rooms',results);
 		});
 	});
 
 	socket.on('create_room',function(data) {
-		RoomMember.count({
-			where: {user_id: data['user_id']}
-		}).done(function(count) {
-			if ( count == 0 ) {
-				Room.create({
-					name 							: data['room_name'],
-					host							: data['user_id'],
-					members						: 1,
-					created_datetime	: new Date(),
-					created_ip				: getIp(socket)
-				}).done(function(result) {
-					RoomMember.create({
-						room_id : result['dataValues']['id'],
-						user_id : data['user_id'],
-						created_datetime	: new Date(),
-						created_ip				: getIp(socket)
-					});
-					io.emit('append_new_room',result);
-				})
-			}
+		Room.create({
+			user_1						: data['user_id'],
+			user_id						: null,
+			created_datetime	: new Date(),
+			created_ip				: getIp(socket)
+		}).done(function(result) {
+			io.emit('append_new_room',{id:result['dataValues']['id'],name:data['name']});
 		});
-	})
-
-	socket.on('get_messages',function(data) {
-		io.emit('return_messages',{messages:messages,user_id:data['user_id']})
-	});
-
-	socket.on('get_room_messages',function(data) {
-		var messages = GetRoomMessages(data['room_id']);
-		io.emit('return_room_messages',{messages:room_conversations,user_id:data['user_id']})
-	});
-
-
-	socket.on('send_message',function(data) {
-		messages.push(data);
-		if ( messages.length == 100 ) {
-			messages = messages.slice(1);
-		}
-		io.emit('append_message',data);
 	})
 
 	socket.on('send_room_message',function(data) {
@@ -180,82 +154,20 @@ io.on('connection',function(socket) {
 
 
 	socket.on('join_room',function(data) {
-		
-		RoomMember.count({
+		Room.update({user_2:data['user_id']},{
 			where: {
-				room_id: data['room_id'],
-				user_id: data['user_id']
+				id: data['room_id']
 			}
-		}).done(function(count) {
-			if ( count == 0 ) {
-				RoomMember.create({
-					room_id						: data['room_id'],
-					user_id						: data['user_id'],
-					created_datetime	: new Date(),
-					created_ip				: getIp(socket)
-				}).done(function() {
-					User.belongsTo(OnairUser,{
-						foreignKey: 'id'
-					});
-					User.find({
-						where: {id: data['user_id']},
-						include: [OnairUser]
-					}).done(function (member) {
-						io.emit('append_new_room_member',{room_id:data['room_id'],member:member});
-						io.emit('redirect_user_to_room',data);
-					})
-				});
-
-			}
-		})
-
-	})
-
-	socket.on('get_chatroom_members',function(data) {
-		RoomMember.belongsTo(User,{
-			foreignKey: 'user_id'
 		});
-		RoomMember.belongsTo(OnairUser,{
-			foreignKey: 'user_id'
-		});
-		RoomMember.findAll({
-			where: {
-				user_id: { 
-					$ne: data['user_id'],
-				},
-				room_id: data['room_id']
-			},
-			include: [User,OnairUser]
-		}).done(function(members) {
-			io.emit('return_chatroom_members',{user_id:data['user_id'],members:members});
-		});
-
+		io.emit('remove_room',{room_id:data['room_id']});
+		io.emit('append_new_member',{room_id:data['room_id'],user_id:data['user_id'],name:data['name']});
 	})
 
 	socket.on('leave_room',function(data) {
-		RoomMember.destroy({
-			where: {
-				user_id: data['user_id'],
-				room_id: data['room_id']
-			}
-		}).done(function() {
-			RoomMember.count({
-				where: {
-					room_id: data['room_id']
-				}
-			}).done(function(count) {
-				if ( count == 0 ) {
-					Room.destroy({where: {id:data['room_id']}});
-				}
-				io.emit('remove_room_member',{user_id:data['user_id']});
-				io.emit('remove_room',data);
-			})
-		})
-
+		console.log( 'leave room' );
 	})
 
 	socket.on('video_chat_room',function(data) {
-		console.log('data');
 		OnairUser.destroy({
 			where: {
 				id: data['user_id']
@@ -267,16 +179,6 @@ io.on('connection',function(socket) {
 	
 	socket.on('request_call',function(data) {
 		io.emit('request_call',data);
-	})
-
-	socket.on('go_back_to_room',function(data) {
-		OnairUser.destroy({
-			where: {
-				id: data['user_id']
-			}
-		}).done(function(result) {
-			io.emit('go_back_to_room',data);
-		})
 	})
 
 	socket.on('generate_chat_hash',function(data) {
@@ -431,16 +333,6 @@ io.on('connection',function(socket) {
 				io.emit('remove_chat',{chat_hash:chat_hash});
 	    })
 		}
-	}
-
-	function GetRoomMessages(room_id) {
-		var messages = [];
-		for(var x in room_conversations) {
-			if ( room_conversations[x]['room_id'] == room_id) {
-				messages.push(room_conversations[x]);
-			}
-		}
-		return messages;
 	}
 
 });

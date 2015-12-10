@@ -3,21 +3,39 @@ App::uses('AppController', 'Controller');
 class VideoCallController extends AppController {
 	public $uses = array(
 		'OnairUser',
-		'RoomMember'
+		'Room'
 	);
 	private function isOnAir() {
 		$onair = $this->OnairUser->findById($this->Auth->user('id'));
 		return isset($onair['OnairUser']) ? true : false;
 	}
+	private function getRoom() {
+		$conditions = array(
+			'OR' => array(
+				'Room.user_1' => $this->Auth->user('id'),
+				'Room.user_2' => $this->Auth->user('id')
+			)
+		);
+		$data = $this->Room->find('first',array(
+			'conditions' => $conditions
+			));
+		return $data;
+	}
 	public function index() {
-		$room = $this->RoomMember->findByUserId($this->Auth->user('id'));
-		$my_name = $this->Auth->user('name');
-		if ( !isset($room['RoomMember']) ) {
+		$my_id = $this->Auth->user('id');
+		$room  	= $this->getRoom();
+		if ( !isset($room['Room'])) {
+			$this->autoRender = false;
 			return $this->redirect('/');
+		} else {
+			$partner_id = $room['Room']['user_1'] == 	$my_id ? $room['Room']['user_2'] : $room['Room']['user_1'];
+			$this->set(compact('partner_id'));
 		}
-		$this->set('my_id',$this->Auth->user('id'));
+		$room_id = $room['Room']['id'];
+		$my_name = $this->Auth->user('name');
+		$this->set(compact('my_id'));
 		$this->set(compact('my_name'));
-		$this->set('room_id',$room['RoomMember']['room_id']);
+		$this->set(compact('room_id'));
 	}
 	public function getName() {
 		if ( $this->request->is('post') ) {

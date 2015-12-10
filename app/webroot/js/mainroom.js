@@ -21,16 +21,6 @@ $(document).ready(function() {
     }, function(){ $('#step1-error').show(); });
   }
 
-	$(".btn-new-room").click(function() {
-		var room_name = $(".txt-room-name").val().trim();
-		if ( room_name !== "" ) {
-			var c = confirm("Are you sure you want to create this room?");
-			if ( c == true ) {
-				CreateRoom(room_name);
-			}
-		}
-	});
-
 });
 
 // Make sure things clean up properly.

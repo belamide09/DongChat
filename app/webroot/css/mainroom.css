@@ -1,6 +1,6 @@
 #chatroom-container {
-	width: 1000px;
-	height: 850px;
+	width: 900px;
+	height: 540px;
 	background: green;
 	margin: 0px auto;
 	border: 1px solid #000;
@@ -8,7 +8,7 @@
 }
 #chatroom {
 	width: 98%;
-	height: 98%;
+	height: 520px;
 	background: #ddd;
 	margin: 1%;
 	border: 1px solid transparent;
@@ -26,15 +26,17 @@
 }
 #side {
 	width: 250px;
-	height: 96%;
+	height: 500px;
 	float: right;
-	margin-top: 20px;
-	margin-right: 10px;
+	margin-top: 10px;
+	margin-right: 5px;
 }
 #my-webcam-container {
-	width: 100%;
-	height: 200px;
+	float: left;
+	width: 600px;
+	height: 500px;
 	background: #000;
+	margin: 10px;
 }
 #my-webcam {
 	width: 100%;
@@ -42,9 +44,8 @@
 }
 #rooms {
 	width: 100%;
-	height: 580px;
+	height: 100%;
 	background: #fff;
-	margin-top: 2%;
 	padding: 5px;
 }
 #rooms ul {
@@ -68,7 +69,7 @@
 	float: right;
 }
 #rooms #room-list {
-	height: 480px;
+	height: 400px;
 }
 .txt-room-name {
 	width: 75%;
@@ -76,43 +77,4 @@
 .btn-new-room {
 	float: right;
 	margin: 5px;
-}
-#chatbox-contaner {
-	width: 700px;
-	height: 730px;
-	background: #fff;
-	margin: 2% 1%;
-	border: 1px solid transparent;
-}
-#conversations {
-	background: #000;
-	width: 99%;
-	height: 715px;
-	background: #ddd;
-	margin: 1% auto;
-	padding: 3px;
-	overflow-y: auto;
-}
-#conversations .message {
-	padding: 5px;
-	background: #fff;
-	border-radius: 3px;
-	font: 15px "Trebuchet MS",sans-serif;
-	margin: 3px 2px;
-}
-#chatbox-input {
-	width: 99%;
-	height: 60px;
-	background: #ddd;
-	margin: 1% auto;
-	border: 1px solid transparent;
-}
-#chatbox-input textarea {
-	margin: 2px;
-	width: 80%;
-	height: 100%; 
-}
-#chatbox-input #send {
-	float: right;
-	margin: 10px;
 }

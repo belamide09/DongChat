@@ -1,7 +1,8 @@
 <script>
+var room_id = "<?php echo $room_id?>";
+var partner_id = "<?php echo $partner_id?>";
 var my_id = "<?php echo $my_id?>";
 var my_name = "<?php echo $my_name?>";
-var room_id = "<?php echo $room_id?>";
 </script>
 <?php echo $this->Html->script('peer')?>
 <?php echo $this->Html->css('video_call')?>
@@ -18,12 +19,9 @@ var room_id = "<?php echo $room_id?>";
 				</span>
 				<a href="#" class="btn-end-chat btn btn-danger btn-xs pull-right">End chat</a>
 			</div>
-			<div id="members">
-				<div id="member-list"></div>
-				<div>
-					<a href="#" class="btn btn-success btn-sm pull-right btn-back">Go back to chatroom</a>
-					<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
-				</div>
+			<div id="buttons">
+				<a href="#" class="btn btn-success btn-sm pull-right btn-start-chat"<?php if (empty($partner_id)) ' disabled'?>>Start Chat</a>
+				<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
 			</div>
 		</div>
 		<div id="partner-webcam-container">

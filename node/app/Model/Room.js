@@ -7,12 +7,12 @@ exports.connection = con;
 
 var Room = con.define('rooms', {
 	id : {
-    type 				: seq.INTEGER,
-    autoIncrement: true,
-    primaryKey 	: true
+    type 					: seq.INTEGER,
+    autoIncrement	: true,
+    primaryKey 		: true
   },
-  name						: seq.INTEGER,
-  host 						: seq.STRING,
+  user_1					: seq.INTEGER,
+  user_2 					: seq.INTEGER,
   created_datetime: seq.DATE,
   created_ip			: seq.STRING
 },

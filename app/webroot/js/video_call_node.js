@@ -16,6 +16,9 @@ $(document).ready(function() {
 		$("#chatbox-container").css('height',chatbox_height+'px');
 		$("#conversations").css('height',conversation_height+'px');
 	})
+	$(".btn-start-chat").click(function() {
+		Call();
+	})
 	$("#txt-message").keypress(function(e) {
 		if ( e.keyCode == 13 ) {
 	 		validateMessage();
@@ -49,8 +52,7 @@ $(document).ready(function() {
   });
 
   $(".btn-back").click(function() {
-  	socket.emit('go_back_to_room',{user_id:my_id});
-  	$(location).attr('href','ChatRoom');
+  	$(location).attr('href','/dongdong');
   	return false;
   })
 
@@ -61,25 +63,10 @@ $(document).ready(function() {
 	  }
   })
 
-  socket.on('return_room_messages',function(data) {
-		if ( data['user_id'] == my_id ) {
-			var messages = data['messages'];
-			for(var x in messages) {
-				var message = messages[x]['name']+' - '+messages[x]['message'];
-				var message = '<div class="message">'+message+'</div>';
-				$("#conversations .reconnecting").after(message);
-			}
-		}
-	})
-
-
-  socket.on('refresh_rooms',function() {
-  	socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
-  });
-
-  socket.on('go_back_to_room',function(data) {
-  	if ( data['user_id'] == my_id ) {
-  		$(location).attr('href','ChatRoom');
+  socket.on('append_new_member',function(data) {
+  	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
+  		var message = '<div class="message" style="color:red;">'+data['name']+' has joined your room</div>';
+  		$("#conversations .reconnecting").after(message);
   	}
   })
 
@@ -214,71 +201,6 @@ $(document).ready(function() {
       },1000);
   	}
   });
-
-	socket.on('return_chatroom_members',function(data) {
-		if ( data['user_id'] == my_id ) {
-			var members = data['members'];
-			var member_container = '<ul>';
-			for( var x in members) {
-				if ( members[x]['onair_user'] != null && members[x]['onair_user']['on_video_room'] == 1 && 
-						 $(".user-"+data['members'][x]['user']['id']).length == 0 ) {
-					var member = members[x]['user'];
-					member_container += '<li class="user-'+member['id']+'">';
-					if ( members[x]['onair_user']['chat_hash'] == "" ) {
-						member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
-					} else {
-						member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
-					}
-					member_container += '<table class="member"><tr>';
-					member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
-					member_container += '<td><div class="member-name">'+member['name']+'</div></td>';
-					member_container += '</tr></table></li>';
-				}
-			}
-			member_container += '</ul>';
-			$("#member-list").html(member_container);
-		}
-	});
-
-	socket.on('append_new_room_member',function(data) {
-		if ( data['room_id'] == room_id && data['member']['id'] != my_id) {
-			if ( data['member']['onair_user'] != null && data['member']['onair_user']['on_video_room'] == 1 && 
-					 $(".user-"+data['member']['id']).length == 0) {
-				var member = data['member'];
-				var member_container = "";
-				member_container += '<li class="user-'+member['id']+'">';
-				if ( data['member']['onair_user']['chat_hash'] == '' ) {
-					member_container += '<span class="btn btn-primary btn-xs btn-call" onclick="Call('+member['id']+')">Call</span>';
-				} else {
-					member_container += '<span class="btn btn-danger btn-xs btn-call" disabled onclick="Call('+member['id']+')">On chat</span>';
-				}
-				member_container += '<table class="member"><tr>';
-				member_container += '<td><div class="member-image"><center><img src="/dongdong/user_image/'+member['photo']+'"></center></div></td>';
-				member_container += '<td><div class="member-name">'+member['name']+'</div></td>';
-				member_container += '</tr></table></li>';
-				$("#member-list ul").append(member_container);
-			}
-		}
-	});
-
-	socket.on('remove_room_member',function(data) {
-		if ( data['user_id'] == my_id ) {
-			console.log( 'test' );
-			socket.emit('get_chatroom_members',{user_id:my_id,room_id:room_id});
-		} else if ( data['user_id'] != my_id ) {
-			$(".user-"+data['user_id']).remove();
-		}
-	});
-
-	socket.on('disable_chat_user',function(data) {
-		$(".user-"+data['sender_id']+' .btn-call').attr('disabled','disabled');
-		$(".user-"+data['sender_id']+' .btn-call').attr('class','btn btn-danger btn-xs btn-call');
-		$(".user-"+data['sender_id']+' .btn-call').html('On chat');
-
-		$(".user-"+data['recipient_id']+' .btn-call').attr('disabled','disabled');
-		$(".user-"+data['recipient_id']+' .btn-call').attr('class','btn btn-danger btn-xs btn-call');
-		$(".user-"+data['recipient_id']+' .btn-call').html('On chat');
-	})
 
 	socket.on('update_users_status',function(data) {
 		for(var x in data) {
