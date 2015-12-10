@@ -36,6 +36,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 		echo $this->Html->css('bootstrap');
 		echo $this->Html->css('bootstrap.min');
+		echo $this->Html->css('font-awesome-4.4.0/css/font-awesome.css');
 		echo $this->Html->css('style');
 		echo $this->Html->css('jquery-ui');
 

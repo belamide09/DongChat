@@ -21,7 +21,7 @@
 	resize: both;
 }
 #partner-webcam {
-	width: 650px;
+	height: 200px;
 }
 #partner-webcam-container:before {
   font-family: 'fontAwesome';
