@@ -108,36 +108,18 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('disconnect',function() {
-		console.log( socket.handshake.query );
-		if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
-			var room_id = socket.handshake.query['room_id'];
-			var partner_type = socket.handshake.query['partner_type'];
-			var user_id 	= socket.handshake.query['user_id'];
-			var chat_hash = chathash_arr[user_id];
-			io.emit('reconnect_server',{user_id:user_id});
-			OnairUser.destroy({
-				where: {
-					id: user_id
-				}
-			}).done(function(result) {
-				if ( typeof chat_hash != 'undefined' ) {	
-					io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
-				}
-			})
-			if ( partner_type == 'user_1' ) {
-				Room.update({user_1:null},{
-					where: {
-						user_1: user_id
-					}
-				}).done(delete_empty_rooms);
-			} else {
-				Room.update({user_2:null},{
-					where: {
-						user_2: user_id
-					}
-				}).done(delete_empty_rooms);
+		var user_id 	= socket.handshake.query['user_id'];
+		var chat_hash = chathash_arr[user_id];
+		io.emit('reconnect_server',{user_id:user_id});
+		OnairUser.destroy({
+			where: {
+				id: user_id
 			}
-		}
+		}).done(function(result) {
+			if ( typeof chat_hash != 'undefined' ) {	
+				io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+			}
+		})
 	})
 
 	function delete_empty_rooms() {
@@ -197,19 +179,34 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('leave_room',function(data) {
-		// var partner_type = socket.handshake.query['partner_type'];
-		// OnairUser.destroy({
-		// 	where: {
-		// 		id: user_id
-		// 	}
-		// });
-		// Room.update({partner_type:null},{
-		// 	where: {
-		// 		partner_type: null
-		// 	}
-		// }).done(function() {
-
-		// })
+		if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
+			var partner_type = socket.handshake.query['partner_type'];
+			var user_id 	= socket.handshake.query['user_id'];
+			var chat_hash = chathash_arr[user_id];
+			io.emit('reconnect_server',{user_id:user_id});
+			OnairUser.destroy({
+				where: {
+					id: user_id
+				}
+			}).done(function(result) {
+				if ( typeof chat_hash != 'undefined' ) {	
+					io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+				}
+			})
+			if ( partner_type == 'user_1' ) {
+				Room.update({user_1:null},{
+					where: {
+						user_1: user_id
+					}
+				}).done(delete_empty_rooms);
+			} else {
+				Room.update({user_2:null},{
+					where: {
+						user_2: user_id
+					}
+				}).done(delete_empty_rooms);
+			}
+		}
 	})
 
 	socket.on('video_chat_room',function(data) {
