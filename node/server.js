@@ -120,6 +120,10 @@ io.on('connection',function(socket) {
 				io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
 			}
 		})
+		
+		if ( typeof user_id != 'undefined' ) {
+			io.emit('remove_room_mate',{partner:user_id});
+		}
 	})
 
 	function delete_empty_rooms() {

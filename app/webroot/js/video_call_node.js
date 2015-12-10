@@ -63,6 +63,12 @@ $(document).ready(function() {
 	  }
   })
 
+  socket.on('remove_room_mate',function(data) {
+  	if ( data['partner'] == partner_id ) {
+  		partner_id = "";
+  	}
+  });
+
   socket.on('append_new_member',function(data) {
   	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
   		var message = '<div class="message" style="color:blue;">'+data['name']+' has joined your room</div>';
