@@ -1,14 +1,18 @@
 var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name+"&video_chat="+true});
 $(document).ready(function() {
+	var webcam_height_orig = parseInt($("#partner-webcam-container").css('height'));
+	var chatbox_height_orig = parseInt($("#chatbox-container").css('height'));
+	var conversations_height_orig = parseInt($("#conversations").css('height'));
 	$( "#partner-webcam-container" ).resizable({
 		handles: 's',
 		minHeight: 200,
-    maxHeight: 400,
+    maxHeight: 400
 	});
 	$( "#partner-webcam-container" ).resize(function() {
 		$("#partner-webcam").css('height',$(this).css('height'));
-		var chatbox_height = (500 - $(this).height()) + 300;
-		var conversation_height = (500 - $(this).height()) + 200;
+		var diff = parseInt($(this).css('height')) - webcam_height_orig;
+		var chatbox_height =  chatbox_height_orig - diff;
+		var conversation_height = conversations_height_orig - diff;
 		$("#chatbox-container").css('height',chatbox_height+'px');
 		$("#conversations").css('height',conversation_height+'px');
 	})
