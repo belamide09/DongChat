@@ -15,7 +15,7 @@ $(document).ready(function () {
 			var row = data[x];
 			room_container += '<li class="room-'+row['id']+'"><div class="room">';
 			room_container += '<span class="btn btn-primary btn-xs btn-join" onclick="JoinRoom('+row['id']+')">Join</span>';
-			room_container += '<div class="room-description">'+row['user']['name']+'</div>';
+			room_container += '<div class="room-description">Room-'+row['id']+'</div>';
 			room_container += '</div></li>';
 		}
 		room_container += "</ul>";
@@ -26,7 +26,7 @@ $(document).ready(function () {
 		var room_container = "";
 		room_container = '<li class="room-'+data['id']+'"><div class="room">';
 		room_container += '<span class="btn btn-primary btn-xs btn-join" onclick="JoinRoom('+data['id']+')">Join</span>';
-		room_container += '<div class="room-description">'+data['name']+'</div>';
+		room_container += '<div class="room-description"> Room-'+data['id']+'</div>';
 		room_container += '</div></li>';
 		$("#room-list ul").append(room_container);
 	})
@@ -34,6 +34,12 @@ $(document).ready(function () {
 	socket.on('remove_room',function(data) {
 		$(".room-"+data['room_id']).remove();
 	});
+
+	socket.on('remove_rooms',function(data) {
+		for(var x in data) {
+			$(".room-"+data[x]['id']).remove();
+		}
+	})
 
 	socket.on('append_message',function(data) {
 

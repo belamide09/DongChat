@@ -28,8 +28,10 @@ class VideoCallController extends AppController {
 			$this->autoRender = false;
 			return $this->redirect('/');
 		} else {
-			$partner_id = $room['Room']['user_1'] == 	$my_id ? $room['Room']['user_2'] : $room['Room']['user_1'];
+			$partner_id 	= $room['Room']['user_1'] == 	$my_id ? $room['Room']['user_2'] : $room['Room']['user_1'];
+			$partner_type = $room['Room']['user_1'] == 	$my_id ? 'user_1' : 'user_2';
 			$this->set(compact('partner_id'));
+			$this->set(compact('partner_type'));
 		}
 		$room_id = $room['Room']['id'];
 		$my_name = $this->Auth->user('name');

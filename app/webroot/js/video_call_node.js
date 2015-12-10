@@ -1,4 +1,4 @@
-var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name+"&video_chat="+true});
+var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&room_id="+room_id+"&name="+my_name+"&partner_type="+partner_type});
 $(document).ready(function() {
 	var webcam_height_orig = parseInt($("#partner-webcam-container").css('height'));
 	var chatbox_height_orig = parseInt($("#chatbox-container").css('height'));
@@ -46,7 +46,7 @@ $(document).ready(function() {
 	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
   $(".btn-leave").click(function() {
-  	socket.emit('leave_room',{room_id:room_id,user_id:my_id});
+  	socket.emit('leave_room',{user_id:my_id});
   	$(location).attr('href','/dongdong');
   	return false;
   });
@@ -65,7 +65,7 @@ $(document).ready(function() {
 
   socket.on('append_new_member',function(data) {
   	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
-  		var message = '<div class="message" style="color:red;">'+data['name']+' has joined your room</div>';
+  		var message = '<div class="message" style="color:blue;">'+data['name']+' has joined your room</div>';
   		$("#conversations .reconnecting").after(message);
   	}
   })
