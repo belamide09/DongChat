@@ -3,12 +3,12 @@ $(document).ready(function() {
 	$( "#partner-webcam-container" ).resizable({
 		handles: 's',
 		minHeight: 200,
-    maxHeight: 490,
+    maxHeight: 400,
 	});
 	$( "#partner-webcam-container" ).resize(function() {
 		$("#partner-webcam").css('height',$(this).css('height'));
-		var chatbox_height = (490 - $(this).height()) + 300;
-		var conversation_height = (490 - $(this).height()) + 200;
+		var chatbox_height = (500 - $(this).height()) + 300;
+		var conversation_height = (500 - $(this).height()) + 200;
 		$("#chatbox-container").css('height',chatbox_height+'px');
 		$("#conversations").css('height',conversation_height+'px');
 	})
