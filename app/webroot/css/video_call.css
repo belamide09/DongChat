@@ -1,5 +1,5 @@
 #chatroom-container {
-	width: 1000px;
+	width: 960px;
 	height: 850px;
 	background: green;
 	margin: 0px auto;
@@ -14,13 +14,35 @@
 	border: 1px solid transparent;
 }
 #partner-webcam-container {
-	width: 700px;
-	height: 500px;
+	width: 650px;
+	height: 490px;
 	background: #000;
 	margin: 10px;
+	resize: both;
 }
 #partner-webcam {
-	margin-top: 10px;
+	width: 650px;
+}
+#partner-webcam-container:before {
+  font-family: 'fontAwesome';
+  content: '\f07d';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  display: block;
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: normal;
+  text-align: center;
+  line-height: 24px;
+  width: 24px;
+  height: 24px;
+  margin: auto;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  z-index: 1;
 }
 #side {
 	width: 250px;
@@ -80,10 +102,10 @@
 	margin: 10px;
 }
 #chatbox-container {
-	width: 700px;
-	height: 280px;
+	width: 650px;
+	height: 300px;
 	background: #fff;
-	margin: 2% 1%;
+	margin: 1%;
 	border: 1px solid transparent;
 }
 #conversations {

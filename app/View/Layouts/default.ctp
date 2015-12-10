@@ -37,6 +37,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		echo $this->Html->css('bootstrap');
 		echo $this->Html->css('bootstrap.min');
 		echo $this->Html->css('style');
+		echo $this->Html->css('jquery-ui');
 
 		echo $this->Html->script('jquery-1.10.2');
 		echo $this->Html->script('jquery-ui');

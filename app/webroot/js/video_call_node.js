@@ -1,10 +1,28 @@
 var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&name="+my_name+"&video_chat="+true});
 $(document).ready(function() {
-	$("#message-form").submit(function(e) {
-		e.preventDefault();
+	$( "#partner-webcam-container" ).resizable({
+		handles: 's',
+		minHeight: 200,
+    maxHeight: 490,
+	});
+	$( "#partner-webcam-container" ).resize(function() {
+		$("#partner-webcam").css('height',$(this).css('height'));
+		var chatbox_height = (490 - $(this).height()) + 300;
+		var conversation_height = (490 - $(this).height()) + 200;
+		$("#chatbox-container").css('height',chatbox_height+'px');
+		$("#conversations").css('height',conversation_height+'px');
+	})
+	$("#txt-message").keypress(function(e) {
+		if ( e.keyCode == 13 ) {
+	 		validateMessage();
+		}
+	});
+	$("#send").click(validateMessage);
+
+	function validateMessage() {
 		var msg = $("#txt-message").val();
 		$("#txt-message").val("");
-		if ( msg.trim() != '' && onchat ) {
+		if ( msg.trim() != '' && onchat && socket.connected == true ) {
 			for(var peer_id in peer.connections) {
 			  for(var x in peer.connections[peer_id]) {
 			    var conn = peer.connections[peer_id][x];
@@ -16,7 +34,7 @@ $(document).ready(function() {
       var message = '<div class="message">You: '+msg+'</div>';
 			$("#conversations .reconnecting").after(message);
 		}
-	});
+	}
 
 	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
@@ -81,7 +99,7 @@ $(document).ready(function() {
   		var message = '<div class="message" style="color:red;">Your chat partner has been disconnected... Please wait until the time finish</div>';
   		message += '<div class="message" style="color:blue;">Note: Your chat partner may also reconnect from this chat so please wait for a while</div>';
   		$("#conversations .reconnecting").after(message);
-  		peer._cleanup();
+  		peer.connections = {};
   	}
   })
 
@@ -130,7 +148,7 @@ $(document).ready(function() {
       timer = setInterval(function() {
         remaining_time--;
         $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
-        if ( remaining_time < 0 || !onchat ) {
+        if ( remaining_time <= 0 || !onchat ) {
         	endChat();
           clearInterval(timer);
         }
@@ -183,7 +201,7 @@ $(document).ready(function() {
       timer = setInterval(function() {
         remaining_time--;
         $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
-        if ( remaining_time < 0 || !onchat ) {
+        if ( remaining_time <= 0 || !onchat ) {
         	remaining_time = chat_time;
         	onchat = false;
         	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
@@ -270,7 +288,6 @@ $(document).ready(function() {
 		$(".reconnecting").show();
 		$("#member-list").html("");
 		console.log( 'you have disconnected!' );
-		peer._cleanup();
 	});
 
 	socket.on('reconnect_server',function(data) {
