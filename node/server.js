@@ -40,7 +40,7 @@ io.on('connection',function(socket) {
 
 	if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
 		// Reconnect
-		io.emit('connect_server',{user_id:socket.handshake.query['user_id']});
+		io.emit('connect_server',{user_id:socket.handshake.query['user_id'],room_id:socket.handshake.query['user_id']});
 	}
 
 	socket.on('add_onair_user',function(data) {
@@ -120,7 +120,7 @@ io.on('connection',function(socket) {
 				io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
 			}
 		})
-		
+
 		if ( typeof user_id != 'undefined' ) {
 			io.emit('remove_room_mate',{partner:user_id});
 		}

@@ -102,10 +102,13 @@ $(document).ready(function() {
   })
 
   socket.on('connect_server',function(data) {
+  	console.log( data );
   	if ( data['user_id'] == my_id ) {
 			$(".reconnecting").hide();
 			init();
   		console.log( 'You have just reconnect to server!' );
+  	} else if ( room_id == data['room_id'] ) {
+  		partner_id = data['user_id'];
   	}
   })
 
