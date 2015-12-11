@@ -3,7 +3,8 @@ App::uses('AppController', 'Controller');
 class VideoCallController extends AppController {
 	public $uses = array(
 		'OnairUser',
-		'Room'
+		'Room',
+		'User'
 	);
 	private function isOnAir() {
 		$onair = $this->OnairUser->findById($this->Auth->user('id'));
@@ -30,8 +31,14 @@ class VideoCallController extends AppController {
 		} else {
 			$partner_id 	= $room['Room']['user_1'] == 	$my_id ? $room['Room']['user_2'] : $room['Room']['user_1'];
 			$partner_type = $room['Room']['user_1'] == 	$my_id ? 'user_1' : 'user_2';
+			$partner_name = "";
+			if ( !empty($partner_id) ) {
+				$partner = $this->User->findById($partner_id);
+				$partner_name = $partner['User']['name'];
+			}
 			$this->set(compact('partner_id'));
 			$this->set(compact('partner_type'));
+			$this->set(compact('partner_name'));
 		}
 		$room_id = $room['Room']['id'];
 		$my_name = $this->Auth->user('name');

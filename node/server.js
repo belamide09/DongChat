@@ -40,7 +40,10 @@ io.on('connection',function(socket) {
 
 	if ( typeof socket.handshake.query['user_id'] != 'undefined' ) {
 		// Reconnect
-		io.emit('connect_server',{user_id:socket.handshake.query['user_id'],room_id:socket.handshake.query['user_id']});
+		var user_id = socket.handshake.query['user_id'];
+		var room_id = socket.handshake.query['room_id'];
+		var name 		= socket.handshake.query['name'];
+		io.emit('connect_server',{user_id:user_id,room_id:room_id,nam:name});
 	}
 
 	socket.on('add_onair_user',function(data) {
@@ -66,28 +69,12 @@ io.on('connection',function(socket) {
 						where: {id: user_id},
 						include: [OnairUser]
 					}).done(function (member) {
+						var name = socket.handshake.query['name'];
+						var sender_id = data['sender_id'];
+						var recipient_id = data['recipient_id'];
 						if ( typeof chathash_arr[user_id] != 'undefined' ) {
 							var chat_hash = chathash_arr[user_id];
-							io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
-							OnairUser.find({
-								where: {
-									chat_hash: chat_hash,
-									id: { $ne: user_id }
-								}
-							}).done(function(user) {
-								io.emit('reconnect_chat',{user_id:user_id,partner:user});
-								io.emit('notify_reconnect',{partner:user_id,name:socket.handshake.query['name']});
-							})
-							ChatHistory.find({
-								where: {
-									chat_hash: chat_hash
-								}
-							}).done(function(result) {
-								var now = new Date() / 1000;
-								var start = result['dataValues']['started'] / 1000;
-								var remaining_time = (300 - Math.round(now - start,2));
-								io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time});
-							})
+							reconnectToChat(user_id,sender_id,recipient_id,chat_hash,name);
 						}
 					})
 				})
@@ -95,6 +82,33 @@ io.on('connection',function(socket) {
 		})
 
 	});
+
+	function reconnectToChat(user_id,sender_id,recipient_id,chat_hash,name) {
+		var chat_hash = chathash_arr[user_id];
+		io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
+		OnairUser.find({
+			where: {
+				chat_hash: chat_hash,
+				id: { $ne: user_id }
+			}
+		}).done(function(user) {
+			io.emit('reconnect_chat',{user_id:user_id,partner:user,name:name});
+		})
+		console.log( chat_hash );
+		ChatHistory.find({
+			where: {
+				chat_hash: chat_hash
+			}
+		}).done(function(result) {
+			console.log( result );
+			if ( result != null ) {
+				var now = new Date() / 1000;
+				var start = result['dataValues']['started'] / 1000;
+				var remaining_time = (300 - Math.round(now - start,2));
+				io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time,name:name});
+			}
+		})
+	}
 
 	socket.on('get_remaining_time_arr',function() {
 		ChatHistory.findAll({

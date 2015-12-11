@@ -5,6 +5,7 @@ var chat_time  = 300;
 var remaining_time  = chat_time;
 var room_members    = {};
 var timer;	
+var partner_name = "";
 var partner_id;
 var chat_hash = "";
 
@@ -69,7 +70,7 @@ function getVideoStream() {
 function Connect(c) {
   if (c.label == 'chat' ) {
     c.on('data',function(msg) {
-      var message = '<div class="message">Chat Mate: '+msg+'</div>';
+      var message = '<div class="message">'+partner_name+': '+msg+'</div>';
       $("#conversations .reconnecting").after(message);
     })
   }
