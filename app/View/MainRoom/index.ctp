@@ -15,7 +15,7 @@
 				<div id="room-list">
 				</div>
 				<div class="create-room">
-					<button class="btn btn-primary btn-xs btn-new-room"> Create </button>
+					<a href="/dongdong/VideoCall" class="btn btn-primary btn-xs btn-new-room"> Create </a>
 				</div>
 			</div>
 		</div>

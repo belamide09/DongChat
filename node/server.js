@@ -148,7 +148,10 @@ io.on('connection',function(socket) {
 	socket.on('get_all_rooms',function(data) {
 		Room.findAll({
 			where: {
-				user_2: null
+				$or: [
+					{user_1: null},
+					{user_2: null}
+				]
 			},
 		}).done(function(results) {
 			io.emit('return_rooms',results);
@@ -166,20 +169,28 @@ io.on('connection',function(socket) {
 		});
 	})
 
-	socket.on('send_room_message',function(data) {
-		room_conversations.push(data);
-		io.emit('append_room_message',data);
-	})
-
-
 	socket.on('join_room',function(data) {
-		Room.update({user_2:data['user_id']},{
+		Room.find({
 			where: {
 				id: data['room_id']
 			}
+		}).done(function(result) {
+			if ( result['dataValues']['user_1'] == null ) {
+				Room.update({user_1:data['user_id']},{
+					where: {
+						id: data['room_id']
+					}
+				});
+			} else {
+				Room.update({user_2:data['user_id']},{
+					where: {
+						id: data['room_id']
+					}
+				});
+			}
+			io.emit('remove_room',{room_id:data['room_id']});
+			io.emit('append_new_member',{room_id:data['room_id'],user_id:data['user_id'],name:data['name']});
 		});
-		io.emit('remove_room',{room_id:data['room_id']});
-		io.emit('append_new_member',{room_id:data['room_id'],user_id:data['user_id'],name:data['name']});
 	})
 
 	socket.on('leave_room',function(data) {
@@ -212,16 +223,6 @@ io.on('connection',function(socket) {
 			}
 		}
 	})
-
-	socket.on('video_chat_room',function(data) {
-		OnairUser.destroy({
-			where: {
-				id: data['user_id']
-			}
-		}).done(function() {
-			io.emit('redirect_to_chat',data);
-		})
-	})
 	
 	socket.on('request_call',function(data) {
 		io.emit('request_call',data);
@@ -242,10 +243,7 @@ io.on('connection',function(socket) {
 	      where: {
 	       id: [recipient_id,sender_id]
 	      }
-	    }).done(function() {
-	    	io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
-	    	io.emit('redirect_to_chat',{chat_hash:chat_hash});
-	    })
+	    });
 		})
 	})
 

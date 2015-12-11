@@ -6,7 +6,6 @@ $(document).ready(function () {
 	socket.emit('get_all_rooms',{user_id:my_id});
 	$(".btn-new-room").click(function() {
 		socket.emit('create_room',{user_id:my_id,name:my_name});
-		$(location).attr('href','/dongdong/VideoCall');
 	})
 
 	socket.on('return_rooms',function(data) {
@@ -41,17 +40,10 @@ $(document).ready(function () {
 		}
 	})
 
-	socket.on('append_message',function(data) {
-
-		var message = data['name']+' - '+data['message'];
-		var message = '<div class="message">'+message+'</div>';
-		$("#conversations").prepend(message);
-
-	})
-
 });
 
 function JoinRoom(room_id) {
 	socket.emit('join_room',{room_id: room_id,user_id: my_id,name: my_name});
 	$(location).attr('href','/dongdong/VideoCall');
+	$('.room_id-'+room_id).remove();
 }

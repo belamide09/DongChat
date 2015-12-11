@@ -22,11 +22,3 @@ $(document).ready(function() {
   }
 
 });
-
-// Make sure things clean up properly.
-
-window.onunload = window.onbeforeunload = function(e) {
-  if (!!peer && !peer.destroyed) {
-    peer.destroy();
-  }
-};

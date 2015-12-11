@@ -124,3 +124,9 @@ function convertTime(time) {
   }
   return minutes+":"+seconds;
 }
+
+function leaveChatValidation() {
+  if ( onchat ) { 
+    return 'You are still chatting with someone. You can only leave after chatting';
+  }
+}

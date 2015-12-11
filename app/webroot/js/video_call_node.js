@@ -46,8 +46,18 @@ $(document).ready(function() {
 	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
   $(".btn-leave").click(function() {
-  	socket.emit('leave_room',{user_id:my_id});
-  	$(location).attr('href','/dongdong');
+  	if ( onchat ) {
+	  	var confirmation = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
+	  	if ( confirmation ) {
+		  	socket.emit('leave_room',{user_id:my_id});
+		  	socket.emit('disconnect_chat',{user_id:my_id});
+		  	$(location).attr('href','/dongdong');
+		  }
+	  } else {
+      socket.emit('leave_room',{user_id:my_id});
+      socket.emit('disconnect_chat',{user_id:my_id});
+      $(location).attr('href','/dongdong');
+    }
   	return false;
   });
 
@@ -66,6 +76,7 @@ $(document).ready(function() {
   socket.on('remove_room_mate',function(data) {
   	if ( data['partner'] == partner_id ) {
   		partner_id = "";
+      $(".btn-start-chat").attr('disabled','disabled');
   	}
   });
 
@@ -74,6 +85,7 @@ $(document).ready(function() {
   		var message = '<div class="message" style="color:blue;">'+data['name']+' has joined your room</div>';
   		$("#conversations .reconnecting").after(message);
   		partner_id = data['user_id'];
+      $(".btn-start-chat").removeAttr('disabled');
   	}
   })
 
@@ -142,6 +154,7 @@ $(document).ready(function() {
 
   socket.on('return_remaining_time',function(data) {
   	if ( data['user_id'] == my_id ) {
+  		window.onbeforeunload = leaveChatValidation;
 	  	remaining_time = data['remaining_time'];
 	  	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 	  	onchat = true;
@@ -168,7 +181,6 @@ $(document).ready(function() {
 		  ClosePeer();
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
-		  partner_id = "";
 		  if ( data['kill'] == 1 ) {
 		  	alert('The administrator kill this chat...');
 		  }
@@ -189,13 +201,13 @@ $(document).ready(function() {
 		  ClosePeer();
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
-		  partner_id = "";
   	}
   })
 
   socket.on('start_chattime',function(data) {
   	$("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
   	if ( data['chat_hash'] == chat_hash ) {
+  		window.onbeforeunload = leaveChatValidation;
   		$(".reconnecting").hide();
   		$(".btn-end-chat").show();
       onchat = true;
@@ -232,5 +244,6 @@ $(document).ready(function() {
 			console.log( 'reconnect!' );
 		}
 	})
+
 
 })

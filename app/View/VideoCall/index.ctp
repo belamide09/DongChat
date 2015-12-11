@@ -21,7 +21,7 @@ var my_name = "<?php echo $my_name?>";
 				<a href="#" class="btn-end-chat btn btn-danger btn-xs pull-right">End chat</a>
 			</div>
 			<div id="buttons">
-				<a href="#" class="btn btn-success btn-sm pull-right btn-start-chat"<?php if (empty($partner_id)) ' disabled'?>>Start Chat</a>
+				<a href="#" class="btn btn-success btn-sm pull-right btn-start-chat"<?php if (empty($partner_id)) echo ' disabled'?>>Start Chat</a>
 				<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
 			</div>
 		</div>
