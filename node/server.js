@@ -296,6 +296,43 @@ io.on('connection',function(socket) {
 		EndChat(user_id,true);
 	})
 
+	function EndChat(user_id,ended) {
+		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
+			var chat_hash = chathash_arr[user_id];
+    	delete chathash_arr[user_id];
+			io.emit('end_chat',{chat_hash:chat_hash});
+			ChatHistory.update({end: new Date()},{
+	      where: {
+	       chat_hash: chat_hash
+	      }
+	    });
+
+	    OnairUser.find({
+	    	attributes: ['id'],
+	    	where: {
+	    		chat_hash: chat_hash,
+	    		id: {
+	    			$ne: user_id
+	    		}
+	    	}
+	    }).done(function(user) {
+		    var users = [user_id];
+		    OnairUser.update({chat_hash: null},{
+		      where: {
+		       chat_hash: chat_hash
+		      }
+		    });
+		   	if ( user != null ) {
+		    	var partner_id = user['dataValues']['id'];
+		    	users.push(partner_id);
+		    	delete chathash_arr[partner_id];
+		    }
+				io.emit('notify_end_chat',{users:users,ended:ended});
+				io.emit('remove_chat',{chat_hash:chat_hash});
+	    })
+		}
+	}
+
 	socket.on('disconnect_chat',function(data) {
 		var user_id = data['user_id'];
 		var chat_hash = chathash_arr[user_id];
@@ -354,44 +391,6 @@ io.on('connection',function(socket) {
 		io.emit('update_users_status',users);
 		io.emit('remove_chat',{chat_hash:chat_hash});
 	})
-
-	function EndChat(user_id,ended) {
-		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
-			var chat_hash = chathash_arr[user_id];
-    	delete chathash_arr[user_id];
-			io.emit('end_chat',{chat_hash:chat_hash});
-			ChatHistory.update({end: new Date()},{
-	      where: {
-	       chat_hash: chat_hash
-	      }
-	    });
-
-	    OnairUser.find({
-	    	attributes: ['id'],
-	    	where: {
-	    		chat_hash: chat_hash,
-	    		id: {
-	    			$ne: user_id
-	    		}
-	    	}
-	    }).done(function(user) {
-		    var users = [user_id];
-		    OnairUser.update({chat_hash: null},{
-		      where: {
-		       chat_hash: chat_hash
-		      }
-		    });
-		   	if ( user != null ) {
-		    	var partner_id = user['dataValues']['id'];
-		    	users.push(partner_id);
-		    	delete chathash_arr[partner_id];
-		    }
-				io.emit('update_users_status',users);
-				io.emit('notify_end_chat',{users:users,ended:ended});
-				io.emit('remove_chat',{chat_hash:chat_hash});
-	    })
-		}
-	}
 
 });
 

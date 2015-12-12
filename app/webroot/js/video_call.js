@@ -137,6 +137,7 @@ function StartTime() {
       remaining_time = chat_time;
       onchat = false;
       $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+      socket.emit('end_chat',{user_id:my_id});
       clearInterval(timer);
     }
   },1000);
