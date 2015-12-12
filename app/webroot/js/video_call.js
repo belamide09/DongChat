@@ -4,8 +4,7 @@ var onchat     = false;
 var chat_time  = 300;
 var remaining_time  = chat_time;
 var room_members    = {};
-var timer;	
-var partner_name = "";
+var timer;
 var partner_id;
 var chat_hash = "";
 
@@ -35,7 +34,6 @@ function peerEvts() {
 
 	  		var confirmation = confirm(data['name']+' want\'s to video chat with you');
 	  		if ( confirmation == true ) {
-
 	  			partner_id = data['id'];
 		  		var end_chat = chat_time * 1000
 				  socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
@@ -45,11 +43,11 @@ function peerEvts() {
 				  setTimeout(function() {
 				    endChat(true);
 				  },end_chat);
-
 				}
 
 	  	},'JSON');
 	  } else {
+      $("#conversations .reconnecting").after('<div class="message">'+partner_name+' is now connected to the chat</div>');
 	  	call.answer(window.localStream);
 		  StartCall(call);
 	  }
@@ -124,6 +122,24 @@ function convertTime(time) {
     seconds = '0'+seconds;
   }
   return minutes+":"+seconds;
+}
+
+function StartTime() {
+  window.onbeforeunload = leaveChatValidation;
+  $(".reconnecting").hide();
+  $(".btn-end-chat").show();
+  onchat = true;
+  clearInterval(timer);
+  timer = setInterval(function() {
+    remaining_time--;
+    $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+    if ( remaining_time <= 0 || !onchat ) {
+      remaining_time = chat_time;
+      onchat = false;
+      $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+      clearInterval(timer);
+    }
+  },1000);
 }
 
 function leaveChatValidation() {

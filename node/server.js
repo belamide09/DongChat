@@ -91,22 +91,22 @@ io.on('connection',function(socket) {
 				chat_hash: chat_hash,
 				id: { $ne: user_id }
 			}
-		}).done(function(user) {
-			io.emit('reconnect_chat',{user_id:user_id,partner:user,name:name});
-		})
-		console.log( chat_hash );
-		ChatHistory.find({
-			where: {
-				chat_hash: chat_hash
-			}
-		}).done(function(result) {
-			console.log( result );
-			if ( result != null ) {
-				var now = new Date() / 1000;
-				var start = result['dataValues']['started'] / 1000;
-				var remaining_time = (300 - Math.round(now - start,2));
-				io.emit('return_remaining_time',{user_id:user_id,remaining_time:remaining_time,name:name});
-			}
+		}).done(function(partner) {
+			ChatHistory.find({
+				where: {
+					chat_hash: chat_hash
+				}
+			}).done(function(result) {
+				if ( result != null ) {
+					var now = new Date() / 1000;
+					var start = result['dataValues']['started'] / 1000;
+					var remaining_time = (300 - Math.round(now - start,2));
+				}
+				io.emit('start_chattime',{chat_hash:chat_hash,remaining_time:remaining_time});
+				if ( partner != null ) {
+					io.emit('reconnect_chat_partner',{user_id:user_id,partner:partner,name:name});
+				}
+			})
 		})
 	}
 

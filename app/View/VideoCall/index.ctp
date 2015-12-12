@@ -2,6 +2,7 @@
 var room_id = "<?php echo $room_id?>";
 var partner_type = "<?php echo $partner_type?>";
 var partner_id = "<?php echo $partner_id?>";
+var partner_name = "<?php echo $partner_name?>";
 var my_id = "<?php echo $my_id?>";
 var my_name = "<?php echo $my_name?>";
 </script>
