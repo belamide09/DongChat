@@ -6,7 +6,10 @@ var remaining_time  = chat_time;
 var room_members    = {};
 var timer;
 var partner_id;
+var partner_video_disabled = 0;
 var chat_hash = "";
+var partner_stream;
+
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -94,8 +97,11 @@ function StartCall(call) {
   if (window.existingCall) {
     window.existingCall.close();
   }
-  call.on('stream', function(stream){
-    $('#partner-webcam').prop('src', URL.createObjectURL(stream));
+  call.on('stream', function(stream) {
+    partner_stream = stream;
+    if ( !partner_video_disabled ) {
+      $('#partner-webcam').prop('src', URL.createObjectURL(stream));
+    }
   });
   window.existingCall = call;
 }

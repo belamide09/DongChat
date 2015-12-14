@@ -32,6 +32,8 @@ class VideoCallController extends AppController {
 			$partner_id 	= $room['Room']['user_1'] == 	$my_id ? $room['Room']['user_2'] : $room['Room']['user_1'];
 			$partner_type = $room['Room']['user_1'] == 	$my_id ? 'user_1' : 'user_2';
 			$partner_name = "";
+			$disabled_video = $this->Session->read('disabled_video');
+			$disabled_video = $disabled_video ? 1 : 0;
 			if ( !empty($partner_id) ) {
 				$partner = $this->User->findById($partner_id);
 				$partner_name = $partner['User']['name'];
@@ -45,6 +47,16 @@ class VideoCallController extends AppController {
 		$this->set(compact('my_id'));
 		$this->set(compact('my_name'));
 		$this->set(compact('room_id'));
+		$this->set(compact('disabled_video'));
+	}
+	public function disableVideo() {
+		if ( $this->request->is('post') ) {
+			$this->autoRender = false;
+			$disabled = $this->request->data['disabled'];
+			$this->Session->write('disabled_video', $disabled);
+		} else {
+			return $this->redirect('/');
+		}
 	}
 	public function getName() {
 		if ( $this->request->is('post') ) {

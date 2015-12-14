@@ -5,6 +5,7 @@ var partner_id = "<?php echo $partner_id?>";
 var partner_name = "<?php echo $partner_name?>";
 var my_id = "<?php echo $my_id?>";
 var my_name = "<?php echo $my_name?>";
+var disabled_video = <?php echo $disabled_video?>;
 </script>
 <?php echo $this->Html->script('peer')?>
 <?php echo $this->Html->css('video_call')?>
@@ -15,6 +16,16 @@ var my_name = "<?php echo $my_name?>";
 		<div id="side">
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
+				<div>
+					<?php 
+						$class_icon = $disabled_video ? 'fa fa-eye-slash' : 'fa fa-eye'; 
+						echo $this->Form->button('<i class="'.$class_icon.'"></i>',array(
+							'class' => 'btn btn-default btn-xs btn-disable-video',
+							'title' => 'Disable your video to chat partner',
+							'disable-video' => $disabled_video
+							)
+						)?>
+				</div>
 			</div>
 			<div id="remaining-time-container">
 				<span id="remaining-time">

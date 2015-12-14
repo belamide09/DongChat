@@ -361,10 +361,13 @@ io.on('connection',function(socket) {
 	    	users.push(partner_id);
 	    	delete chathash_arr[partner_id];
 	    }
-			io.emit('update_users_status',users);
 			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
 			io.emit('remove_chat',{chat_hash:chat_hash});
     })
+	})
+
+	socket.on('toggle_video_disabled',function(data) {
+		io.emit('toggle_video_disabled',data);
 	})
 
 	socket.on('kill_chat',function(data) {
