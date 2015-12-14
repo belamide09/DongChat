@@ -1,6 +1,6 @@
 #chatroom-container {
 	width: 900px;
-	height: 540px;
+	height: 480px;
 	background: green;
 	margin: 0px auto;
 	border: 1px solid #000;
@@ -8,7 +8,7 @@
 }
 #chatroom {
 	width: 98%;
-	height: 520px;
+	height: 460px;
 	background: #ddd;
 	margin: 1%;
 	border: 1px solid transparent;
@@ -26,7 +26,7 @@
 }
 #side {
 	width: 250px;
-	height: 500px;
+	height: 440px;
 	float: right;
 	margin-top: 10px;
 	margin-right: 5px;
@@ -34,9 +34,30 @@
 #my-webcam-container {
 	float: left;
 	width: 600px;
-	height: 500px;
+	height: 200px;
 	background: #000;
 	margin: 10px;
+}
+#my-webcam-container:before {
+  font-family: 'fontAwesome';
+  content: '\f07d';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  display: block;
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: normal;
+  text-align: center;
+  line-height: 24px;
+  width: 24px;
+  height: 24px;
+  margin: auto;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  z-index: 1;
 }
 #my-webcam {
 	width: 100%;
@@ -69,7 +90,7 @@
 	float: right;
 }
 #rooms #room-list {
-	height: 400px;
+	height: 350px;
 }
 .txt-room-name {
 	width: 75%;

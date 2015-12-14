@@ -16,21 +16,12 @@ var disabled_video = <?php echo $disabled_video?>;
 		<div id="side">
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
-				<div>
-					<?php 
-						$class_icon = $disabled_video ? 'fa fa-eye-slash' : 'fa fa-eye'; 
-						echo $this->Form->button('<i class="'.$class_icon.'"></i>',array(
-							'class' => 'btn btn-default btn-xs btn-disable-video',
-							'title' => 'Disable your video to chat partner',
-							'disable-video' => $disabled_video
-							)
-						)?>
-				</div>
 			</div>
-			<div id="remaining-time-container">
-				<span id="remaining-time">
-				</span>
-				<a href="#" class="btn-end-chat btn btn-danger btn-xs pull-right">End chat</a>
+			<div id="video-controls">
+				<a href="#" class="btn btn-default btn-xs btn-disable-video <?php echo $disabled_video ? 'off' : 'onn'?>" disable-video="<?php echo $disabled_video?>">
+					<div></div>
+				</a>
+				<span class="cnt_time" id="remaining-time">--:--</span>
 			</div>
 			<div id="buttons">
 				<a href="#" class="btn btn-success btn-sm pull-right btn-start-chat"<?php if (empty($partner_id)) echo ' disabled'?>>Start Chat</a>

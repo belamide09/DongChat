@@ -2,6 +2,12 @@
 var socket = io.connect(location.origin+':4000');
 $(document).ready(function () {
 
+	$( "#my-webcam-container" ).resizable({
+		handles: 's',
+		minHeight: 200,
+    maxHeight: 440
+	});
+
 	socket.emit('get_messages',{user_id:my_id});
 	socket.emit('get_all_rooms',{user_id:my_id});
 	$(".btn-new-room").click(function() {

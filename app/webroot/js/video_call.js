@@ -62,7 +62,9 @@ function peerEvts() {
 
 function getVideoStream() {
   navigator.getUserMedia({audio: true, video: true}, function(stream){
-    $('#my-webcam').prop('src', URL.createObjectURL(stream));
+    if ( !partner_video_disabled ) {
+      $('#my-webcam').prop('src', URL.createObjectURL(stream));
+    }
     window.localStream = stream;
   }, function(){ $('#step1-error').show(); });
 }
@@ -137,11 +139,11 @@ function StartTime() {
   clearInterval(timer);
   timer = setInterval(function() {
     remaining_time--;
-    $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+    $("#remaining-time").text(convertTime(remaining_time));
     if ( remaining_time <= 0 || !onchat ) {
       remaining_time = chat_time;
       onchat = false;
-      $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+      $("#remaining-time").text(convertTime(remaining_time));
       socket.emit('end_chat',{user_id:my_id});
       clearInterval(timer);
     }

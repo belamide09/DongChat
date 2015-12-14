@@ -13,10 +13,6 @@
 	margin: 1%;
 	border: 1px solid transparent;
 }
-.btn-disable-video {
-	margin-right: 5px;
-	float: right;
-}
 #partner-webcam-container {
 	width: 650px;
 	height: 200px;
@@ -53,11 +49,6 @@
 	height: 96%;
 	float: right;
 	margin: 10px;
-}
-#remaining-time-container {
-	background: #fff;
-	font-weight: bold;
-	padding: 5px;
 }
 .btn-end-chat {
 	display: none;
@@ -131,7 +122,6 @@
 	display: none;
 }
 #conversations .message {
-	background: #fff;
 	border-radius: 2px;
 	margin: 3px 1px;
 	padding: 3px;
@@ -152,10 +142,59 @@
 	float: right;
 	margin: 10px;
 }
+#video-controls {
+	width: 100%;
+	background: #fff;
+	padding: 5px;
+	border-radius: 3px;
+	border: 1px solid #ddd
+}
+#video-controls a {
+  width: 30px;
+  height: 30px;
+  transition: all 0.2s linear;
+  border-radius: 100%;
+}
+#video-controls a.onn {
+  background: #16a9b2;
+}
+#video-controls a.off {
+  background: #000;
+}
+#video-controls a.btn-disable-video.onn > div {
+	background: url('../img/enable_video.png') no-repeat center center;
+	width: 25px;
+	height: 25px;
+	margin-left: -3px;
+}
+#video-controls a.btn-disable-video.off > div {
+	background: url('../img/disable_video.png') no-repeat center center;
+	width: 25px;
+	height: 25px;
+	margin-left: -3px;
+}
+#remaining-time {
+	float: right;
+	margin: 3px;
+	font-weight: bold;
+}
+#remaining-time:before {
+  display: inline-block;
+  vertical-align: middle;
+  font-family: FontAwesome;
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: normal;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 3px;
+  content: '\f017';
+}
 #buttons {
 	width: 100%;
 	background: #fff;
 	margin-top: 10px;
 	padding: 5px;
 	border-radius: 3px;
+	border: 1px solid #ddd
 }

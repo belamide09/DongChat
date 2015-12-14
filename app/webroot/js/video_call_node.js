@@ -21,9 +21,13 @@ $(document).ready(function() {
     $(this).attr('disable-video',disabled_video);
     socket.emit('toggle_video_disabled',{user_id:my_id,disabled:disabled_video});
     if ( disabled_video ) {
+      $(this).attr('class','btn btn-default btn-xs btn-disable-video off');
       $(".btn-disable-video i").attr('class','fa fa-eye-slash');
+      $('#my-webcam').removeAttr('src');
     } else {
+      $(this).attr('class','btn btn-default btn-xs btn-disable-video onn');
       $(".btn-disable-video i").attr('class','fa fa-eye');
+      $('#my-webcam').prop('src', URL.createObjectURL(window.localStream));
     }
     $.post('VideoCall/disableVideo',{disabled:disabled_video});
   })
@@ -53,8 +57,6 @@ $(document).ready(function() {
 			$("#conversations .reconnecting").after(message);
 		}
 	}
-
-	$("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 
   $(".btn-leave").click(function() {
   	if ( onchat ) {
@@ -184,7 +186,7 @@ $(document).ready(function() {
 		  onchat = false;
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
-		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+		  $("#remaining-time").text(convertTime(remaining_time));
 		  ClosePeer();
       $(".btn-start-chat").removeAttr('disabled');
 		  $("#partner-webcam").attr('src',null);
@@ -212,7 +214,7 @@ $(document).ready(function() {
 		  onchat = false;
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
-		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
+		  $("#remaining-time").text(convertTime(remaining_time));
 		  ClosePeer();
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
