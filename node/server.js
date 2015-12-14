@@ -43,69 +43,68 @@ io.on('connection',function(socket) {
 		var user_id = socket.handshake.query['user_id'];
 		var room_id = socket.handshake.query['room_id'];
 		var name 		= socket.handshake.query['name'];
-		io.emit('connect_server',{user_id:user_id,room_id:room_id,nam:name});
+		ChatHistory.find({
+			where: {
+				$or: [
+					{sender_id: user_id},
+					{recipient_id: user_id}
+				],
+				end: null
+			}
+		}).done(function(result) {	
+			var chat_hash = result != null ? result['dataValues']['chat_hash'] : '';
+			if ( chat_hash != '' ) {
+				chathash_arr[user_id] = chat_hash;
+			}
+			io.emit('connect_server',{user_id:user_id,chat_hash:chat_hash,room_id:room_id,nam:name});
+		})
 	}
 
 	socket.on('add_onair_user',function(data) {
 		var user_id = data['user_id'];
-		OnairUser.count({
+		OnairUser.destroy({
 			where: {
 				id: user_id
 			}
-		}).done(function(count) {
-			if ( count == 0 ) {
-				OnairUser.create({
-					id 								: user_id,
-					peer							: data['peer_id'],
-					chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
-					created_datetime	: new Date(),
-					created_ip				: getIp(socket)
-				}).done(function() {
-
-					User.belongsTo(OnairUser,{
-						foreignKey: 'id'
-					});
-					User.find({
-						where: {id: user_id},
-						include: [OnairUser]
-					}).done(function (member) {
-						var name = socket.handshake.query['name'];
-						var sender_id = data['sender_id'];
-						var recipient_id = data['recipient_id'];
-						if ( typeof chathash_arr[user_id] != 'undefined' ) {
-							var chat_hash = chathash_arr[user_id];
-							reconnectToChat(user_id,sender_id,recipient_id,chat_hash,name);
-						}
-					})
-				})
-			}
+		}).done(function() {
+			OnairUser.create({
+				id 								: user_id,
+				peer							: data['peer_id'],
+				chat_hash 				: typeof chathash_arr[user_id] != 'undefined' ? chathash_arr[user_id] : '',
+				created_datetime	: new Date(),
+				created_ip				: getIp(socket)
+			}).done(function() {
+				var peer = data['peer_id'];
+				var chat_hash = chathash_arr[user_id];
+				if ( typeof chat_hash != 'undefined' ) {
+					reconnectToChat(user_id,peer,chat_hash);
+				}
+			})
 		})
 
 	});
 
-	function reconnectToChat(user_id,sender_id,recipient_id,chat_hash,name) {
+	function reconnectToChat(user_id,peer,chat_hash) {
 		var chat_hash = chathash_arr[user_id];
 		io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
-		OnairUser.find({
+		ChatHistory.find({
 			where: {
-				chat_hash: chat_hash,
-				id: { $ne: user_id }
+				chat_hash: chat_hash
 			}
-		}).done(function(partner) {
-			ChatHistory.find({
+		}).done(function(result) {
+			OnairUser.find({
 				where: {
-					chat_hash: chat_hash
+					chat_hash: chat_hash,
+					id: user_id
 				}
-			}).done(function(result) {
+			}).done(function(partner) {
 				if ( result != null ) {
 					var now = new Date() / 1000;
 					var start = result['dataValues']['started'] / 1000;
 					var remaining_time = (300 - Math.round(now - start,2));
 				}
 				io.emit('start_chattime',{chat_hash:chat_hash,remaining_time:remaining_time});
-				if ( partner != null ) {
-					io.emit('reconnect_chat_partner',{user_id:user_id,partner:partner,name:name});
-				}
+				io.emit('reconnect_chat_partner',{user_id:user_id,partner:partner,peer:peer});
 			})
 		})
 	}
@@ -124,7 +123,6 @@ io.on('connection',function(socket) {
 	socket.on('disconnect',function() {
 		var user_id 	= socket.handshake.query['user_id'];
 		var chat_hash = chathash_arr[user_id];
-		io.emit('reconnect_server',{user_id:user_id});
 		OnairUser.destroy({
 			where: {
 				id: user_id
@@ -299,6 +297,7 @@ io.on('connection',function(socket) {
 	function EndChat(user_id,ended) {
 		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
 			var chat_hash = chathash_arr[user_id];
+			var partner_id = "";
     	delete chathash_arr[user_id];
 			io.emit('end_chat',{chat_hash:chat_hash});
 			ChatHistory.update({end: new Date()},{
@@ -323,11 +322,11 @@ io.on('connection',function(socket) {
 		      }
 		    });
 		   	if ( user != null ) {
-		    	var partner_id = user['dataValues']['id'];
+		    	partner_id = user['dataValues']['id'];
 		    	users.push(partner_id);
 		    	delete chathash_arr[partner_id];
 		    }
-				io.emit('notify_end_chat',{users:users,ended:ended});
+				io.emit('enable_start_btn',{sender_id: user_id, recipient_id: partner_id});
 				io.emit('remove_chat',{chat_hash:chat_hash});
 	    })
 		}

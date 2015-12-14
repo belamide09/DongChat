@@ -101,6 +101,7 @@ $(document).ready(function() {
   socket.on('append_chathash',function(data) {
   	if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
   		chat_hash = data['chat_hash'];
+      $(".btn-start-chat").attr('disabled','disabled');
   	}
   });
 
@@ -114,27 +115,37 @@ $(document).ready(function() {
   })
 
   socket.on('connect_server',function(data) {
-  	if ( data['user_id'] == my_id ) {
+  	if ( data['user_id'] == my_id && data['chat_hash'] != '' ) {
+      chat_hash = data['chat_hash'];
+      $("#conversations .reconnecting").after('<div class="message"> Reconnecting to the chat</div>');
 			$(".reconnecting").hide();
-			init();
-  		console.log( 'You have just reconnect to server!' );
-  	} else if ( room_id == data['room_id'] ) {
-      partner_id = data['user_id'];
-  		$(".btn-start-chat").removeAttr('disabled');
-  	}
+      if ( data['partner'] == null ) {
+        var message = '<div class="message" style="color:blue;">Note:'+partner_name+' may also reconnect from this chat so please wait for a while</div>';
+        message += '<div class="message" style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</div>';
+        $("#conversations .reconnecting").after(message);
+      }
+      init();
+  	} else if ( data['user_id'] == partner_id && data['chat_hash'] != '' ) {
+      chat_hash = data['chat_hash'];
+      $("#conversations .reconnecting").after('<div class="message">'+partner_name+' is trying to reconnect the chat</div>');
+    } else if ( data['user_id'] == my_id ) {
+      $(".reconnecting").hide();
+      init();
+    } else if ( data['user_id'] == partner_id ) {
+      $(".btn-start-chat").removeAttr('disabled');
+    }
   })
 
   socket.on('reconnect_chat_partner',function(data) {
-    if ( data['user_id'] == my_id ) {
+    if ( data['user_id'] == partner_id ) {
       console.log( 'reconnect!' );
+      $("#conversations .reconnecting").after('<div class="message">'+partner_name+' is now connected to the chat</div>');
       onchat = true;
   		$(".btn-end-chat").show();
-  		$("#conversations .reconnecting").after('<div class="message">Waiting for the camera...</div>');
-			var peer = data['partner']['peer'];
-      partner_id = data['partner']['id'];
+			var peer = data['peer'];
   		ReconnectToPeer(peer);
-		} else if ( data['user_id'] == partner_id ) {
-  		$("#conversations .reconnecting").after('<div class="message">'+data['name']+' is trying to reconnect...</div>');
+		} else if ( data['user_id'] == my_id ) {
+      $("#conversations .reconnecting").after('<div class="message"> You are now reconnected to the chat...</div>');
   	}
   })
 
@@ -147,12 +158,19 @@ $(document).ready(function() {
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text('Remaining time : '+convertTime(remaining_time));
 		  ClosePeer();
+      $(".btn-start-chat").removeAttr('disabled');
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
 		  if ( data['kill'] == 1 ) {
 		  	alert('The administrator kill this chat...');
 		  }
   	}
+  });
+
+  socket.on('enable_start_btn',function(data) {
+    if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
+      $(".btn-start-chat").removeAttr('disabled');
+    }
   });
 
   socket.on('notify_disconnect_chat',function(data) {
@@ -194,13 +212,5 @@ $(document).ready(function() {
 		$("#member-list").html("");
 		console.log( 'you have disconnected!' );
 	});
-
-	socket.on('reconnect_server',function(data) {
-		if ( data['user_id'] == my_id ) {
-			init();
-			console.log( 'reconnect!' );
-		}
-	})
-
 
 })

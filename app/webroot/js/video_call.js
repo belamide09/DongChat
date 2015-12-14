@@ -47,7 +47,6 @@ function peerEvts() {
 
 	  	},'JSON');
 	  } else {
-      $("#conversations .reconnecting").after('<div class="message">'+partner_name+' is now connected to the chat</div>');
 	  	call.answer(window.localStream);
 		  StartCall(call);
 	  }
