@@ -110,7 +110,7 @@ $(document).ready(function() {
 
   socket.on('append_new_member',function(data) {
   	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
-  		var message = '<div class="message" style="color:blue;">Server: '+data['name']+' has joined your room</div>';
+  		var message = '<div class="message">Server: <span style="color:blue;">'+data['name']+' has joined your room</span></div>';
   		$("#conversations .reconnecting").after(message);
   		partner_id    = data['user_id'];
       partner_name  = data['name'];
@@ -138,8 +138,8 @@ $(document).ready(function() {
 
   socket.on('notify_disconnect_chat_partner',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
-  		var message = '<div class="message" style="color:blue;">Server: '+data['name']+' may also reconnect from this chat so please wait for a while</div>';
-  		message += '<div class="message" style="color:red;">Server: '+data['name']+' has been disconnected... Please wait until the time finish</div>';
+  		var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
+  		message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
   		$("#conversations .reconnecting").after(message);
   		peer.connections = {};
   	}
@@ -176,8 +176,8 @@ $(document).ready(function() {
       console.log( 'reconnect!' );
       $("#conversations .reconnecting").after('<div class="message">Server: '+partner_name+' is now connected to the chat</div>');
       if ( data['partner'] == null ) {
-        var message = '<div class="message" style="color:blue;">Server: '+partner_name+' may also reconnect from this chat so please wait for a while</div>';
-        message += '<div class="message" style="color:red;">Server: '+partner_name+' has been disconnected... Please wait until the time finish</div>';
+        var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
+        message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
         $("#conversations .reconnecting").after(message);
       }
       onchat = true;
