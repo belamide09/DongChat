@@ -217,7 +217,7 @@ io.on('connection',function(socket) {
 				}
 			}).done(function(result) {
 				if ( typeof chat_hash != 'undefined' ) {	
-					io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
+					io.emit('notify_disconnect_chat_partner',{chat_hash:chat_hash,user_id:user_id});
 				}
 			})
 			if ( partner_type == 'user_1' ) {
