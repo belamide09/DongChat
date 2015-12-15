@@ -190,10 +190,14 @@
   transition: all 0.2s linear;
   border-radius: 100%;
 }
+a.btn-default.disabled {
+	background: #555;
+}
 a.btn-default.onn {
   background: #16a9b2;
 }
-a.btn-default.off {  background: #000;
+a.btn-default.off {
+	background: #000;
 }
 a.btn-default.btn-disable-video.onn > div {
 	background: url('../img/enable_video.png') no-repeat center center;

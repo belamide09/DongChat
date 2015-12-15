@@ -30,7 +30,7 @@ var disabled_video = <?php echo $disabled_video?>;
 				<a href="#" class="btn btn-default btn-xs btn-sound-control off">
 					<div></div>
 				</a>
-				<a href="#" class="btn btn-default btn-xs btn-start-chat onn"<?php if (empty($partner_id)) echo ' disabled'?>>
+				<a href="#" class="btn btn-default btn-xs btn-start-chat <?php echo empty($partner_id) ? 'disabled' : 'onn'?>"<?php if (empty($partner_id)) echo ' disabled'?>>
 					<div></div>
 				</a>
 			</div>
