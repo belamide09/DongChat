@@ -6,7 +6,7 @@ $(document).ready(function() {
 	$( "#partner-webcam-container" ).resizable({
 		handles: 's',
 		minHeight: 200,
-    maxHeight: 400
+    maxHeight: 550
 	});
 	$( "#partner-webcam-container" ).resize(function() {
 		$("#partner-webcam").css('height',$(this).css('height'));
@@ -44,6 +44,7 @@ $(document).ready(function() {
 	function validateMessage() {
 		var msg = $("#txt-message").val();
 		$("#txt-message").val("");
+    $("#txt-message")[0].focus();
 		if ( msg.trim() != '' && onchat && socket.connected == true ) {
 			for(var peer_id in peer.connections) {
 			  for(var x in peer.connections[peer_id]) {

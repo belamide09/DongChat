@@ -11,21 +11,28 @@ var disabled_video = <?php echo $disabled_video?>;
 <?php echo $this->Html->css('video_call')?>
 <?php echo $this->Html->script('video_call')?>
 <?php echo $this->Html->script('video_call_node')?>
+<div id="header">
+	<a class="btn btn-sm btn-leave disable" rel="modal" href="#dialog_logout">LEAVE</a>
+	<div id="remaining-time-container">
+		<span class="cnt_time" id="remaining-time">--:--</span>
+	</div>
+</div>
 <div id="chatroom-container">
 	<div id="chatroom">
 		<div id="side">
 			<div id="my-webcam-container">
 				<video id="my-webcam" muted="true" autoplay></video>
 			</div>
-			<div id="video-controls">
+			<div id="buttons">
 				<a href="#" class="btn btn-default btn-xs btn-disable-video <?php echo $disabled_video ? 'off' : 'onn'?>" disable-video="<?php echo $disabled_video?>">
 					<div></div>
 				</a>
-				<span class="cnt_time" id="remaining-time">--:--</span>
-			</div>
-			<div id="buttons">
-				<a href="#" class="btn btn-success btn-sm pull-right btn-start-chat"<?php if (empty($partner_id)) echo ' disabled'?>>Start Chat</a>
-				<input type="submit" value="Leave" class="btn btn-danger btn-sm btn-leave">
+				<a href="#" class="btn btn-default btn-xs btn-sound-control off">
+					<div></div>
+				</a>
+				<a href="#" class="btn btn-default btn-xs btn-start-chat onn"<?php if (empty($partner_id)) echo ' disabled'?>>
+					<div></div>
+				</a>
 			</div>
 		</div>
 		<div id="partner-webcam-container">
@@ -37,7 +44,7 @@ var disabled_video = <?php echo $disabled_video?>;
 			</div>
 			<div id="chatbox-input">
 				<input type="submit" value="Send" class="btn btn-primary" id="send">
-				<textarea class="form-control" id="txt-message"> </textarea>
+				<input type="text" class="form-control" id="txt-message">
 			</div>
 		</div>
 	</div>

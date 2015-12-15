@@ -1,20 +1,27 @@
+#header {
+	width: 100%;
+	height: 40px;
+	background: #1ad2ff;
+	border: 1px solid transparent;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 9;
+}
 #chatroom-container {
-	width: 960px;
+	max-width: 1000px;
 	height: 850px;
-	background: green;
-	margin: 0px auto;
-	border: 1px solid #000;
-	border-radius: 10px;
+	margin: 60px auto;
 }
 #chatroom {
-	width: 98%;
-	height: 98%;
+	width: 100%;
+	height: 100%;
 	background: #ddd;
-	margin: 1%;
 	border: 1px solid transparent;
+	border-radius: 10px;
 }
 #partner-webcam-container {
-	width: 650px;
+	width: 700px;
 	height: 200px;
 	background: #000;
 	margin: 10px;
@@ -55,15 +62,12 @@
 }
 #my-webcam-container {
 	width: 100%;
-	height: 220px;
-	background: #000;
-}
-#my-webcam-container div {
-	width: 100%;
 	height: 200px;
+	background: #000;
 }
 #my-webcam {
 	width: 100%;
+	margin-top: 5px;
 }
 #members {
 	width: 100%;
@@ -100,7 +104,7 @@
 	margin: 10px;
 }
 #chatbox-container {
-	width: 650px;
+	width: 700px;
 	height: 590px;
 	background: #fff;
 	margin: 1%;
@@ -124,7 +128,6 @@
 #conversations .message {
 	border-radius: 2px;
 	margin: 3px 1px;
-	padding: 3px;
 }
 #chatbox-input {
 	width: 99%;
@@ -133,7 +136,7 @@
 	margin: 1% auto;
 	border: 1px solid transparent;
 }
-#chatbox-input textarea {
+#chatbox-input #txt-message {
 	margin: 2px;
 	width: 85%;
 	height: 50px; 
@@ -142,59 +145,104 @@
 	float: right;
 	margin: 10px;
 }
-#video-controls {
+.btn-leave {
+	display: inline-block;
+  width: 90px;
+  height: 28px;
+  line-height: 0;
+  border-radius: 2px;
+  font-size: 1.4rem;
+  transition: all 0.2s linear;
+  float: right;
+  background: #ccc !important;
+  margin: 3px;
+}
+.btn.disable {
+  border: #ccc solid 1px !important;
+  background: #ccc !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+.btn-leave::before {
+  display: inline-block;
+  vertical-align: middle;
+  content: '\f08b';
+  font-family: FontAwesome;
+  font-size: 18px;
+  font-size: 1.8rem;
+  color: #fff;
+  line-height: 1;
+  margin-right: 2px;
+}
+#buttons {
 	width: 100%;
 	background: #fff;
+	height: 45px;
+	width: 99%;
 	padding: 5px;
 	border-radius: 3px;
 	border: 1px solid #ddd
 }
-#video-controls a {
-  width: 30px;
-  height: 30px;
+#buttons a {
+  width: 35px;
+  height: 35px;
   transition: all 0.2s linear;
   border-radius: 100%;
 }
-#video-controls a.onn {
+a.btn-default.onn {
   background: #16a9b2;
 }
-#video-controls a.off {
-  background: #000;
+a.btn-default.off {  background: #000;
 }
-#video-controls a.btn-disable-video.onn > div {
+a.btn-default.btn-disable-video.onn > div {
 	background: url('../img/enable_video.png') no-repeat center center;
-	width: 25px;
-	height: 25px;
+	width: 30px;
+	height: 30px;
 	margin-left: -3px;
 }
-#video-controls a.btn-disable-video.off > div {
+a.btn-default.btn-disable-video.off > div {
 	background: url('../img/disable_video.png') no-repeat center center;
-	width: 25px;
-	height: 25px;
+	width: 30px;
+	height: 30px;
 	margin-left: -3px;
+}
+a.btn-default.btn-start-chat {
+	float: right;
+}
+a.btn-default.btn-sound-control:hover {
+	background: #555;
+}
+a.btn-default.btn-sound-control > div {
+	background: url('../img/ic_sound_small_on.png') no-repeat center center;
+	width: 30px;
+	height: 30px;
+	margin-left: -3px;
+}
+a.btn-default.btn-start-chat > div {
+	background: url('../img/start_chat.png') no-repeat center center;
+	background-size: 30px 30px;
+	width: 30px;
+	height: 30px;
+	margin-left: -3px;
+}
+#remaining-time-container {
+	width: 100px;
+	margin: 5px auto;
 }
 #remaining-time {
-	float: right;
-	margin: 3px;
 	font-weight: bold;
+	color: #fff;
 }
 #remaining-time:before {
   display: inline-block;
   vertical-align: middle;
   font-family: FontAwesome;
-  font-size: 18px;
+  font-size: 20px;
   font-size: 1.8rem;
   font-weight: normal;
   line-height: 1;
   vertical-align: middle;
   margin-right: 3px;
   content: '\f017';
-}
-#buttons {
-	width: 100%;
-	background: #fff;
-	margin-top: 10px;
-	padding: 5px;
-	border-radius: 3px;
-	border: 1px solid #ddd
 }
