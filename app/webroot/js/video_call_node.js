@@ -31,6 +31,7 @@ $(document).ready(function() {
     }
     $.post('VideoCall/disableVideo',{disabled:disabled_video});
   })
+  $(".btn").tooltip();
 	$(".btn-start-chat").click(function() {
 		Call();
 	})

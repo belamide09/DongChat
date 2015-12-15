@@ -1,7 +1,7 @@
 <script> var my_id = "<?php echo $my_id; ?>"; </script>
 <script> var my_name = "<?php echo $my_name; ?>"; </script>
 <?php echo $this->Html->css('mainroom')?>
-<?php echo $this->Html->script('peer')?>
+<?php echo $this->Html->script('peer.min')?>
 <?php echo $this->Html->script('mainroom')?>
 <?php echo $this->Html->script('mainroom_node')?>
 <div id="chatroom-container">
