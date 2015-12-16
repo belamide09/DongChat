@@ -184,6 +184,7 @@ $(document).ready(function() {
       chat_hash = data['chat_hash'];
       $("#conversations .reconnecting").after('<div class="message">Server: '+partner_name+' is trying to reconnect the chat</div>');
     } else if ( data['user_id'] == my_id ) {
+      setVideoSettings();
       $(".reconnecting").hide();
       init();
     } else if ( data['user_id'] == partner_id ) {

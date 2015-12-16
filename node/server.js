@@ -31,7 +31,7 @@ var ChatHistory = require('./app/Model/ChatHistory.js');
 
 var room_lists 		= {};
 var chathash_arr 	= {};
-var messages 			= [];
+var chat_messages = {};
 var room_conversations = [];
 
 // For node server
@@ -282,6 +282,7 @@ io.on('connection',function(socket) {
 	    });
 			chathash_arr[recipient_id] 	= chat_hash;
 			chathash_arr[sender_id] 		= chat_hash;
+			chat_messages[chat_hash] 		= {};
 	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
 	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash: chat_hash});
 	    io.emit('start_chattime',{chat_hash:chat_hash});
@@ -302,6 +303,7 @@ io.on('connection',function(socket) {
 		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
 			var chat_hash = chathash_arr[user_id];
 			var partner_id = "";
+			delete chat_messages[chat_hash];
     	delete chathash_arr[user_id];
 			io.emit('end_chat',{chat_hash:chat_hash});
 			ChatHistory.update({end: new Date()},{
@@ -383,6 +385,7 @@ io.on('connection',function(socket) {
 		var chat_hash = data['chat_hash'];
 		var sender_id = data['sender_id'];
 		var recipient_id = data['recipient_id'];
+		delete chat_messages[chat_hash];
   	delete chathash_arr[sender_id];
   	delete chathash_arr[recipient_id];
 		io.emit('end_chat',{chat_hash:chat_hash,kill:1});

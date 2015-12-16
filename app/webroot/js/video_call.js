@@ -11,27 +11,25 @@ var chat_hash = "";
 var partner_stream;
 
 navigator.getUserMedia = ( navigator.getUserMedia    || navigator.webkitGetUserMedia ||
-                           navigator.mozGetUserMedia ||navigator.msGetUserMedia);
-var video_constraints = {
+                           navigator.mozGetUserMedia || navigator.msGetUserMedia );
+var constraints = {
+ audio: true,
+ video: {
   mandatory: {
-    maxHeight: 100,
-    minHeight: 100,
-    maxWidth: 100,
-    minWidth: 100,
-    maxFrameRate: 30,
-    minFrameRate: 1
- },
- optional: []
+   minWidth: 100,
+   maxWidth: 100,
+   minHeight: 100,
+   maxHeight: 100,
+   minFrameRate: 1,
+   maxrameRate: 30
+  },
+  "optional": []
+ }
 };
 
-setVideoSettings();
-
 function setVideoSettings() {
-  console.warn('Conntecting to camera');
-  navigator.getUserMedia({
-     audio: false,
-     video: video_constraints
-  }, onsuccess,function(){});
+  console.warn('Connecting to camera');
+  navigator.getUserMedia(constraints,onsuccess,function(){});
 }
 
 function onsuccess(stream) {
