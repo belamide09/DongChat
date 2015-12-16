@@ -289,6 +289,10 @@ io.on('connection',function(socket) {
 		})
 	})
 
+	socket.on('send_message',function(data) {
+		io.emit('receive_message',data);
+	})
+
 	socket.on('end_chat',function(data) {
 		var user_id = data['user_id'];
 		EndChat(user_id,true);
@@ -368,6 +372,10 @@ io.on('connection',function(socket) {
 
 	socket.on('toggle_video_disabled',function(data) {
 		io.emit('toggle_video_disabled',data);
+	})
+
+	socket.on('change_partner_resolution',function(data) {
+		io.emit('change_partner_resolution',data);
 	})
 
 	socket.on('kill_chat',function(data) {

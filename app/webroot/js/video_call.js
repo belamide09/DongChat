@@ -10,8 +10,34 @@ var partner_video_disabled = 0;
 var chat_hash = "";
 var partner_stream;
 
+navigator.getUserMedia = ( navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                           navigator.mozGetUserMedia ||navigator.msGetUserMedia);
+var video_constraints = {
+  mandatory: {
+    maxHeight: 100,
+    minHeight: 100,
+    maxWidth: 100,
+    minWidth: 100,
+    maxFrameRate: 30,
+    minFrameRate: 1
+ },
+ optional: []
+};
 
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+setVideoSettings();
+
+function setVideoSettings() {
+  console.warn('Conntecting to camera');
+  navigator.getUserMedia({
+     audio: false,
+     video: video_constraints
+  }, onsuccess,function(){});
+}
+
+function onsuccess(stream) {
+  console.warn('Connected to camera');
+}
+
 
 function init() {
   if ( typeof peer != 'undefined' ) {
@@ -22,7 +48,7 @@ function init() {
     host: location.origin.split('//')[1],
     port: '4500',
     path: '/',
-    debug: 0
+    debug: 2
   });
   peerEvts();
   getVideoStream();
@@ -62,20 +88,9 @@ function peerEvts() {
 
 function getVideoStream() {
   navigator.getUserMedia({audio: true, video: true}, function(stream){
-    if ( !partner_video_disabled ) {
-      $('#my-webcam').prop('src', URL.createObjectURL(stream));
-    }
+    $('#my-webcam').prop('src', URL.createObjectURL(stream));
     window.localStream = stream;
   }, function(){ $('#step1-error').show(); });
-}
-
-function Connect(c) {
-  if (c.label == 'chat' ) {
-    c.on('data',function(msg) {
-      var message = '<div class="message">'+partner_name+': '+msg+'</div>';
-      $("#conversations .reconnecting").after(message);
-    })
-  }
 }
 
 function ReconnectToPeer(peer_id) {
@@ -92,10 +107,6 @@ function Call() {
 }
 
 function StartCall(call) {
-  var conn = peer.connect(call.peer, {
-    label: 'chat'
-  });
-  Connect(conn);
   if (window.existingCall) {
     window.existingCall.close();
   }
@@ -110,13 +121,6 @@ function StartCall(call) {
 
 function endChat() {
   socket.emit('end_chat',{user_id:my_id,ended:true});
-}
-
-function ClosePeer() {
-  peer.connections = {};
-  for(var peer_id in peer.connections) {
-    peer._cleanupPeer(peer_id)
-  }
 }
 
 function convertTime(time) {
@@ -143,7 +147,7 @@ function StartTime() {
     if ( remaining_time <= 0 || !onchat ) {
       remaining_time = chat_time;
       onchat = false;
-      $("#remaining-time").text(convertTime(remaining_time));
+      $("#remaining-time").text('--:--');
       socket.emit('end_chat',{user_id:my_id});
       clearInterval(timer);
     }

@@ -33,6 +33,15 @@ var disabled_video = <?php echo $disabled_video?>;
 				<a href="#" class="btn btn-default btn-xs btn-sound-control off">
 					<div></div>
 				</a>
+				<a href="#" class="btn btn-default btn-xs btn-resolution-control onn" title="Video resolution">
+					<div></div>
+				</a>
+				<ul id="resolution-list" style="display:none;">
+					<li data-value="144">144</li>
+					<li data-value="240">240</li>
+					<li data-value="360" class="selected">360</li>
+					<li data-value="640">640</li>
+				</ul>
 			</div>
 		</div>
 		<div id="partner-webcam-container">

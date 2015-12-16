@@ -23,42 +23,50 @@ $(document).ready(function() {
     if ( disabled_video ) {
       $(this).attr('class','btn btn-default btn-xs btn-disable-video off');
       $(".btn-disable-video i").attr('class','fa fa-eye-slash');
-      $('#my-webcam').removeAttr('src');
     } else {
       $(this).attr('class','btn btn-default btn-xs btn-disable-video onn');
       $(".btn-disable-video i").attr('class','fa fa-eye');
-      $('#my-webcam').prop('src', URL.createObjectURL(window.localStream));
     }
     $.post('VideoCall/disableVideo',{disabled:disabled_video});
+  })
+  $(".btn-resolution-control").click(function() {
+    if ( $("#resolution-list").css('display') == 'none' ) 
+      $("#resolution-list").show();
+    else 
+      $("#resolution-list").hide();
+  })
+  $("#resolution-list li").click(function() {
+    $('#resolution-list li').removeAttr('style');
+    $("#resolution-list li").removeClass('selected');
+    $(this).addClass('selected');
+    $("#resolution-list").hide();
+    var size = $(this).attr('data-value');
+    video_constraints['mandatory']['maxHeight'] = size;
+    video_constraints['mandatory']['minHeight'] = size;
+    video_constraints['mandatory']['maxWidth'] = size;
+    video_constraints['mandatory']['minWidth'] = size;
+    setVideoSettings();
+    if ( onchat ) {
+      socket.emit('change_partner_resolution',{partner_id:partner_id,peer:peer.id});
+    }
   })
   $(".btn").tooltip();
 	$(".btn-start-chat").click(function() {
 		Call();
 	})
 	$("#txt-message").keypress(function(e) {
-		if ( e.keyCode == 13 ) {
-	 		validateMessage();
-		}
+		if ( e.keyCode == 13 ) SendMessage();
 	});
-	$("#send").click(validateMessage);
+	$("#send").click(SendMessage);
 
-	function validateMessage() {
-		var msg = $("#txt-message").val();
-		$("#txt-message").val("");
+  function SendMessage() {
+    var msg = $("#txt-message").val();
+    $("#txt-message").val("");
     $("#txt-message")[0].focus();
-		if ( msg.trim() != '' && onchat && socket.connected == true ) {
-			for(var peer_id in peer.connections) {
-			  for(var x in peer.connections[peer_id]) {
-			    var conn = peer.connections[peer_id][x];
-			    if ( conn.label == 'chat' ) {
-			    	conn.send(msg);
-			    }
-			  }
-			}
-      var message = '<div class="message">'+my_name+': '+msg+'</div>';
-			$("#conversations .reconnecting").after(message);
-		}
-	}
+    if ( msg.trim() != '' && onchat && socket.connected == true ) {
+      socket.emit('send_message',{user_id:my_id,name:my_name,chat_hash:chat_hash,message:msg});
+    }
+  }
 
   $(".btn-leave").click(function() {
   	if ( onchat ) {
@@ -88,6 +96,13 @@ $(document).ready(function() {
 	  }
   })
 
+  socket.on('receive_message',function(data) {
+    if ( data['chat_hash'] == chat_hash ) {
+      var message = '<div class="message">'+data['name']+' : '+data['message']+'</div>';
+      $("#conversations .reconnecting").after(message);
+    }
+  })
+
   socket.on('toggle_video_disabled',function(data) {
     if ( data['user_id'] == partner_id ) {
       partner_video_disabled = data['disabled'];
@@ -98,6 +113,12 @@ $(document).ready(function() {
       } else {
         $('#partner-webcam').prop('src', URL.createObjectURL(partner_stream));
       }
+    }
+  })
+
+  socket.on('change_partner_resolution',function(data) {
+    if ( data['partner_id'] == my_id ) {
+      peer.call(data['peer'], window.localStream);
     }
   })
 
@@ -137,7 +158,7 @@ $(document).ready(function() {
   });
 
   socket.on('notify_disconnect_chat_partner',function(data) {
-  	if ( data['chat_hash'] == chat_hash ) {
+    if ( data['chat_hash'] == chat_hash && data['user_id'] == partner_id) {
   		var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
   		message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
   		$("#conversations .reconnecting").after(message);
@@ -196,8 +217,7 @@ $(document).ready(function() {
 		  onchat = false;
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
-		  $("#remaining-time").text(convertTime(remaining_time));
-		  ClosePeer();
+		  $("#remaining-time").text('--:--');
       $(".btn-start-chat").removeAttr('disabled');
       $(".btn-start-chat").removeClass('disable');
 		  $("#partner-webcam").attr('src',null);
@@ -228,7 +248,6 @@ $(document).ready(function() {
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
 		  $("#remaining-time").text(convertTime(remaining_time));
-		  ClosePeer();
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
   	}
