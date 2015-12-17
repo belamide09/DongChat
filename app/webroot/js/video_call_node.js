@@ -119,7 +119,6 @@ $(document).ready(function() {
   socket.on('change_partner_resolution',function(data) {
     if ( data['partner_id'] == my_id ) {
       ChangeResolution(data['resolution']);
-      console.log(constraints.video.mandatory);
       initializeCamera(data['peer']);
     }
   })

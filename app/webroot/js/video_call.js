@@ -83,7 +83,9 @@ function initializeCamera(call_peer) {
       $('#my-webcam').prop('src', URL.createObjectURL(stream));
     }
     if ( call_peer ) {
-      peer.call(call_peer, window.localStream);
+      setTimeout(function() {
+        peer.call(call_peer, window.localStream);
+      },1000);
     }
     window.localStream = stream;
   }, function(error) {
