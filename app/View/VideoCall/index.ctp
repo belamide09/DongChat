@@ -24,7 +24,7 @@ var disabled_video = <?php echo $disabled_video?>;
 	<div id="chatroom">
 		<div id="side">
 			<div id="my-webcam-container">
-				<video id="my-webcam" muted="true" autoplay></video>
+				<center> <video id="my-webcam" muted="true" autoplay></video> </center>
 			</div>
 			<div id="buttons">
 				<a href="#" class="btn btn-default btn-xs btn-disable-video <?php echo $disabled_video ? 'off' : 'onn'?>" disable-video="<?php echo $disabled_video?>">
@@ -37,10 +37,10 @@ var disabled_video = <?php echo $disabled_video?>;
 					<div></div>
 				</a>
 				<ul id="resolution-list" style="display:none;">
-					<li data-value="144">144</li>
+					<li data-value="140">140</li>
 					<li data-value="240">240</li>
 					<li data-value="360" class="selected">360</li>
-					<li data-value="640">640</li>
+					<li data-value="720">720</li>
 				</ul>
 			</div>
 		</div>

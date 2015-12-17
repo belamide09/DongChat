@@ -40,14 +40,14 @@ $(document).ready(function() {
     $("#resolution-list li").removeClass('selected');
     $(this).addClass('selected');
     $("#resolution-list").hide();
-    var size = $(this).attr('data-value');
-    video_constraints['mandatory']['maxHeight'] = size;
-    video_constraints['mandatory']['minHeight'] = size;
-    video_constraints['mandatory']['maxWidth'] = size;
-    video_constraints['mandatory']['minWidth'] = size;
-    setVideoSettings();
     if ( onchat ) {
-      socket.emit('change_partner_resolution',{partner_id:partner_id,peer:peer.id});
+      var value = $(this).attr('data-value');
+      var data = {
+        partner_id: partner_id,
+        peer: peer.id,
+        resolution: value
+      }
+      socket.emit('change_partner_resolution',data);
     }
   })
   $(".btn").tooltip();
@@ -118,7 +118,9 @@ $(document).ready(function() {
 
   socket.on('change_partner_resolution',function(data) {
     if ( data['partner_id'] == my_id ) {
-      peer.call(data['peer'], window.localStream);
+      ChangeResolution(data['resolution']);
+      console.log(constraints.video.mandatory);
+      initializeCamera(data['peer']);
     }
   })
 
@@ -167,6 +169,7 @@ $(document).ready(function() {
   })
 
   socket.on('connect_server',function(data) {
+
     if ( chat_hash != "" && data['chat_hash'] == chat_hash ) {
       $(".btn-start-chat").attr('disabled','disabled');
       $(".btn-start-chat").addClass('disable');
@@ -184,7 +187,6 @@ $(document).ready(function() {
       chat_hash = data['chat_hash'];
       $("#conversations .reconnecting").after('<div class="message">Server: '+partner_name+' is trying to reconnect the chat</div>');
     } else if ( data['user_id'] == my_id ) {
-      setVideoSettings();
       $(".reconnecting").hide();
       init();
     } else if ( data['user_id'] == partner_id ) {
@@ -197,17 +199,17 @@ $(document).ready(function() {
     if ( data['user_id'] == partner_id ) {
       console.log( 'reconnect!' );
       $("#conversations .reconnecting").after('<div class="message">Server: '+partner_name+' is now connected to the chat</div>');
-      if ( data['partner'] == null ) {
-        var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
-        message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
-        $("#conversations .reconnecting").after(message);
-      }
       onchat = true;
   		$(".btn-end-chat").show();
 			var peer = data['peer'];
   		ReconnectToPeer(peer);
 		} else if ( data['user_id'] == my_id ) {
       $("#conversations .reconnecting").after('<div class="message">Server: You are now reconnected to the chat...</div>');
+      if ( data['partner'] == null ) {
+        var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
+        message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
+        $("#conversations .reconnecting").after(message);
+      }
   	}
   })
 

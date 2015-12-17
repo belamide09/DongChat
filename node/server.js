@@ -95,7 +95,9 @@ io.on('connection',function(socket) {
 			OnairUser.find({
 				where: {
 					chat_hash: chat_hash,
-					id: user_id
+					id: {
+						$ne: user_id
+					}
 				}
 			}).done(function(partner) {
 				if ( result != null ) {

@@ -10,30 +10,20 @@ var partner_video_disabled = 0;
 var chat_hash = "";
 var partner_stream;
 
-navigator.getUserMedia = ( navigator.getUserMedia    || navigator.webkitGetUserMedia ||
-                           navigator.mozGetUserMedia || navigator.msGetUserMedia );
 var constraints = {
- audio: true,
- video: {
+  audio: true,
+  video: {
   mandatory: {
-   minWidth: 100,
-   maxWidth: 100,
-   minHeight: 100,
-   maxHeight: 100,
-   minFrameRate: 1,
-   maxrameRate: 30
-  },
-  "optional": []
- }
-};
-
-function setVideoSettings() {
-  console.warn('Connecting to camera');
-  navigator.getUserMedia(constraints,onsuccess,function(){});
-}
+    minWidth: 360,
+    minHeight: 360,
+    maxWidth: 360,
+    maxHeight: 360,
+    minFrameRate: 1,
+    maxFrameRate: 30
+  }
+}};
 
 function onsuccess(stream) {
-  console.warn('Connected to camera');
 }
 
 
@@ -49,7 +39,7 @@ function init() {
     debug: 2
   });
   peerEvts();
-  getVideoStream();
+  initializeCamera('');
 }
 
 function peerEvts() {
@@ -84,11 +74,28 @@ function peerEvts() {
   }); 
 }
 
-function getVideoStream() {
-  navigator.getUserMedia({audio: true, video: true}, function(stream){
-    $('#my-webcam').prop('src', URL.createObjectURL(stream));
+function initializeCamera(call_peer) {
+  navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia || navigator.msGetUserMedia );
+  navigator.getUserMedia(constraints, function(stream){
+    console.warn('Connected to camera'); 
+    if ( typeof $("#my-webcam").attr('src') == 'undefined' ) {
+      $('#my-webcam').prop('src', URL.createObjectURL(stream));
+    }
+    if ( call_peer ) {
+      peer.call(call_peer, window.localStream);
+    }
     window.localStream = stream;
-  }, function(){ $('#step1-error').show(); });
+  }, function(error) {
+    console.log( error );
+  });
+}
+
+function ChangeResolution(value) {  
+  constraints['video']['mandatory']['minWidth']   = value;
+  constraints['video']['mandatory']['minHeight']  = value;
+  constraints['video']['mandatory']['maxWidth']   = value;
+  constraints['video']['mandatory']['maxHeight']  = value;
 }
 
 function ReconnectToPeer(peer_id) {
@@ -142,7 +149,7 @@ function StartTime() {
   timer = setInterval(function() {
     remaining_time--;
     $("#remaining-time").text(convertTime(remaining_time));
-    if ( remaining_time <= 0 || !onchat ) {
+    if ( remaining_time <= 0 ) {
       remaining_time = chat_time;
       onchat = false;
       $("#remaining-time").text('--:--');

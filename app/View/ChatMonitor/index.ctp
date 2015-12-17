@@ -29,7 +29,6 @@ th,td {
 			<th> Started </td>
 			<th> Sender </th>
 			<th> Recipient </th>
-			<th> Remaining time </th>
 			<th> Action </th>
 		</tr>
 	</thead>
@@ -46,12 +45,11 @@ th,td {
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
 			<td> <?php echo $row['Sender']['name']?> </td>
 			<td> <?php echo $row['Recipient']['name']?> </td>
-			<td> </td>
 			<td>
 				<a href="#" class="btn btn-danger btn-xs btn-kill" chat-id="<?php echo $chat_id?>" 
 					 sender-id="<?php echo $sender_id?>" recipient-id="<?php echo $recipient_id?>" 
 					 chat-hash="<?php echo $chat_hash?>">
-					Kill<i class="fa fa-stop"></i>
+					Kill
 				</a>
 			</td>
 		</tr>

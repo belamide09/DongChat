@@ -3,34 +3,31 @@ var peer;
 var c;
 $(document).ready(function() {
 
-  navigator.getUserMedia = ( navigator.getUserMedia    || navigator.webkitGetUserMedia ||
-                           navigator.mozGetUserMedia ||navigator.msGetUserMedia);
-  var video_constraints = {
+  navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia || navigator.msGetUserMedia );
+  var constraints = {
+    audio: true,
+    video: {
     mandatory: {
-      maxHeight: 360,
+      minWidth: 360,
       minHeight: 360,
       maxWidth: 360,
-      minWidth: 360,
-      maxFrameRate: 30,
-      minFrameRate: 1
-   },
-   optional: []
-  };
-
-  setVideoSettings();
+      maxHeight: 360,
+      minFrameRate: 1,
+      maxFrameRate: 30
+    }
+  }};
 
   function setVideoSettings() {
-    console.warn('Conntecting to camera');
-    navigator.getUserMedia({
-       audio: false,
-       video: video_constraints
-    }, onsuccess,function(){});
+    console.warn('Connecting to camera');
+    navigator.getUserMedia(constraints,onsuccess,function(){});
   }
 
   function onsuccess(stream) {
     console.warn('Connected to camera');
   }
 
+  setVideoSettings();
 
   peer = new Peer({
     host: location.origin.split('//')[1],
@@ -42,7 +39,7 @@ $(document).ready(function() {
   getVideoStream();
   
   function getVideoStream() {
-    navigator.getUserMedia({audio: true, video: true}, function(stream){
+    navigator.getUserMedia(constraints,function(stream){
       $('#my-webcam').prop('src', URL.createObjectURL(stream));
       window.localStream = stream;
     }, function(){ $('#step1-error').show(); });
