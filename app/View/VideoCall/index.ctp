@@ -40,7 +40,7 @@ var disabled_video = <?php echo $disabled_video?>;
 					<li data-value="140">140</li>
 					<li data-value="240">240</li>
 					<li data-value="360" class="selected">360</li>
-					<li data-value="720">720</li>
+					<li data-value="640">640</li>
 				</ul>
 			</div>
 		</div>

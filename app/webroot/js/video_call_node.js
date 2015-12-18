@@ -3,11 +3,14 @@ $(document).ready(function() {
 	var webcam_height_orig = parseInt($("#partner-webcam-container").css('height'));
 	var chatbox_height_orig = parseInt($("#chatbox-container").css('height'));
 	var conversations_height_orig = parseInt($("#conversations").css('height'));
+
 	$( "#partner-webcam-container" ).resizable({
 		handles: 's',
 		minHeight: 200,
     maxHeight: 550
 	});
+
+  // Resizable video
 	$( "#partner-webcam-container" ).resize(function() {
 		$("#partner-webcam").css('height',$(this).css('height'));
 		var diff = parseInt($(this).css('height')) - webcam_height_orig;
@@ -16,6 +19,8 @@ $(document).ready(function() {
 		$("#chatbox-container").css('height',chatbox_height+'px');
 		$("#conversations").css('height',conversation_height+'px');
 	})
+
+  // Disable/Enable video to your chat partner
   $(".btn-disable-video").click(function() {
     disabled_video = parseInt($(this).attr('disable-video')) ? 0 : 1;
     $(this).attr('disable-video',disabled_video);
@@ -29,37 +34,51 @@ $(document).ready(function() {
     }
     $.post('VideoCall/disableVideo',{disabled:disabled_video});
   })
+
+  // Show resolution control
   $(".btn-resolution-control").click(function() {
     if ( $("#resolution-list").css('display') == 'none' ) 
       $("#resolution-list").show();
     else 
       $("#resolution-list").hide();
   })
+
+  // Select resolution
   $("#resolution-list li").click(function() {
-    $('#resolution-list li').removeAttr('style');
-    $("#resolution-list li").removeClass('selected');
-    $(this).addClass('selected');
+    var class_name = $(this).attr('class');
+    var selected = typeof class_name != 'undefined' && class_name == 'selected' ? true : false;
     $("#resolution-list").hide();
-    var value = $(this).attr('data-value');
-    var data = {
-      partner_id: partner_id,
-      peer: peer.id,
-      resolution: value
+    if ( !selected ) {
+      $('#resolution-list li').removeAttr('style');
+      $("#resolution-list li").removeClass('selected');
+      $(this).addClass('selected');
+      var value = $(this).attr('data-value');
+      var data = {
+        partner_id: partner_id,
+        peer: peer.id,
+        resolution: value
+      }
+      socket.emit('change_partner_resolution',data);
     }
-    socket.emit('change_partner_resolution',data);
   })
+
   $(".btn").tooltip();
+
+  // Start chat
 	$(".btn-start-chat").click(function() {
     socket.emit('save_chat',{sender_peer:peer.id ,sender_id:my_id,recipient_id:partner_id});
     $(".btn-start-chat").attr('disabled','disabled');
     $(".btn-start-chat").addClass('disable');
 		Call();
 	})
+
 	$("#txt-message").keypress(function(e) {
 		if ( e.keyCode == 13 ) SendMessage();
 	});
+
 	$("#send").click(SendMessage);
 
+  // Send chat message
   function SendMessage() {
     var msg = $("#txt-message").val();
     $("#txt-message").val("");
@@ -69,6 +88,7 @@ $(document).ready(function() {
     }
   }
 
+  // Leave room
   $(".btn-leave").click(function() {
   	if ( onchat ) {
 	  	var confirmation = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
@@ -85,18 +105,7 @@ $(document).ready(function() {
   	return false;
   });
 
-  $(".btn-back").click(function() {
-  	$(location).attr('href','/dongdong');
-  	return false;
-  })
-
-  $(".btn-end-chat").click(function() {
-  	var confirmation = confirm('Are you sure you want to end this chat?');
-  	if ( confirmation == true ) {
-	  	socket.emit('disconnect_chat',{user_id:my_id});
-	  }
-  })
-
+  // Receive chat message from node
   socket.on('receive_message',function(data) {
     if ( data['chat_hash'] == chat_hash ) {
       var message = '<div class="message">'+data['name']+' : '+data['message']+'</div>';
@@ -104,6 +113,8 @@ $(document).ready(function() {
     }
   })
 
+
+  // Disable/Enable partner webcam
   socket.on('toggle_video_disabled',function(data) {
     if ( data['user_id'] == partner_id ) {
       partner_video_disabled = data['disabled'];
@@ -117,6 +128,7 @@ $(document).ready(function() {
     }
   })
 
+  // Change partner resolution
   socket.on('change_partner_resolution',function(data) {
     if ( data['partner_id'] == my_id ) {
       ChangeResolution(data['resolution']);
@@ -131,6 +143,7 @@ $(document).ready(function() {
   	}
   });
 
+  // Nofify user join
   socket.on('append_new_member',function(data) {
   	if ( data['room_id'] == room_id && data['user_id'] != my_id ) {
   		var message = '<div class="message">Server: <span style="color:blue;">'+data['name']+' has joined your room</span></div>';
@@ -142,6 +155,8 @@ $(document).ready(function() {
   	}
   })
 
+
+  // Update chat hash
   socket.on('append_chathash',function(data) {
   	if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
   		chat_hash = data['chat_hash'];
@@ -150,6 +165,7 @@ $(document).ready(function() {
   	}
   });
 
+  // Notify user that chat partner is disconnected
   socket.on('notify_disconnect_chat_partner',function(data) {
     if ( data['chat_hash'] == chat_hash && data['user_id'] == partner_id) {
   		var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
@@ -158,6 +174,7 @@ $(document).ready(function() {
   		peer.connections = {};
   	}
   })
+
 
   socket.on('connect_server',function(data) {
 
@@ -185,7 +202,7 @@ $(document).ready(function() {
       $(".btn-start-chat").removeClass('disable');
     }
   })
-
+  // Reconnect to chat
   socket.on('reconnect_chat_partner',function(data) {
     if ( data['user_id'] == partner_id ) {
       console.log( 'reconnect!' );
@@ -204,6 +221,7 @@ $(document).ready(function() {
   	}
   })
 
+  // End chat
   socket.on('end_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
 		  remaining_time = chat_time;
@@ -222,13 +240,16 @@ $(document).ready(function() {
   	}
   });
 
+
+  // Enable start button
   socket.on('enable_start_btn',function(data) {
-    if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {
+    if ( data['sender_id'] == my_id || data['recipient_id'] == my_id && chat_hash == '' ) {
       $(".btn-start-chat").removeAttr('disabled');
       $(".btn-start-chat").removeClass('disable');
     }
   });
 
+  // Notify user about chat disconnection
   socket.on('notify_disconnect_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
       $(".btn-start-chat").removeAttr('disabled');
@@ -247,6 +268,7 @@ $(document).ready(function() {
   	}
   })
 
+  // Start chat time
   socket.on('start_chattime',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
       if ( typeof data['remaining_time'] != 'undefined' ) {
@@ -256,12 +278,14 @@ $(document).ready(function() {
   	}
   });
 
+  // Enable caht start button
 	socket.on('enable_start_chat',function(data) {
 		for(var x in data) {
       $(".btn-start-chat").removeAttr('disabled');
 		}
 	});
 
+  // Notify user about disconnection
 	socket.on('disconnect',function() {
 		$(".reconnecting").show();
 		$("#member-list").html("");
