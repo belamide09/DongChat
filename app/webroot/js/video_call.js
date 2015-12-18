@@ -1,9 +1,7 @@
 var peer;
-var c;
 var onchat     = false;
 var chat_time  = 300;
 var remaining_time  = chat_time;
-var room_members    = {};
 var timer;
 var partner_id;
 var partner_video_disabled = 0;
@@ -23,10 +21,6 @@ var constraints = {
   }
 }};
 
-function onsuccess(stream) {
-}
-
-
 function init() {
   if ( typeof peer != 'undefined' ) {
     peer.connections = {};
@@ -45,6 +39,7 @@ function init() {
 function peerEvts() {
   peer.on('call', function(call) {
 
+    console.log( call );
   	if ( chat_hash == '' ) {
 	  	var url = 'VideoCall/getName';
 	  	$.post(url,{peer:call.peer},function(data) {
@@ -77,15 +72,16 @@ function peerEvts() {
 function initializeCamera(call_peer) {
   navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                               navigator.mozGetUserMedia || navigator.msGetUserMedia );
-  navigator.getUserMedia(constraints, function(stream){
+  navigator.getUserMedia(constraints, function(stream) {
     console.warn('Connected to camera'); 
     if ( typeof $("#my-webcam").attr('src') == 'undefined' ) {
       $('#my-webcam').prop('src', URL.createObjectURL(stream));
     }
-    if ( call_peer ) {
+    if ( call_peer && onchat ) {
+      console.log( 'test' );
       setTimeout(function() {
         peer.call(call_peer, window.localStream);
-      },1000);
+      },500);
     }
     window.localStream = stream;
   }, function(error) {

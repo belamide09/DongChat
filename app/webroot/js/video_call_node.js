@@ -40,15 +40,13 @@ $(document).ready(function() {
     $("#resolution-list li").removeClass('selected');
     $(this).addClass('selected');
     $("#resolution-list").hide();
-    if ( onchat ) {
-      var value = $(this).attr('data-value');
-      var data = {
-        partner_id: partner_id,
-        peer: peer.id,
-        resolution: value
-      }
-      socket.emit('change_partner_resolution',data);
+    var value = $(this).attr('data-value');
+    var data = {
+      partner_id: partner_id,
+      peer: peer.id,
+      resolution: value
     }
+    socket.emit('change_partner_resolution',data);
   })
   $(".btn").tooltip();
 	$(".btn-start-chat").click(function() {
