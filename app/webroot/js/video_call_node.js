@@ -50,6 +50,9 @@ $(document).ready(function() {
   })
   $(".btn").tooltip();
 	$(".btn-start-chat").click(function() {
+    socket.emit('save_chat',{sender_peer:peer.id ,sender_id:my_id,recipient_id:partner_id});
+    $(".btn-start-chat").attr('disabled','disabled');
+    $(".btn-start-chat").addClass('disable');
 		Call();
 	})
 	$("#txt-message").keypress(function(e) {
@@ -105,7 +108,7 @@ $(document).ready(function() {
     if ( data['user_id'] == partner_id ) {
       partner_video_disabled = data['disabled'];
     }
-    if ( data['user_id'] == partner_id && onchat) {
+    if ( data['user_id'] == partner_id && onchat ) {
       if ( partner_video_disabled ) {
         $("#partner-webcam").removeAttr('src');
       } else {
@@ -138,15 +141,6 @@ $(document).ready(function() {
       $(".btn-start-chat").removeClass('disable');
   	}
   })
-
-  socket.on('request_call',function(data) {
-  	if ( data['user_id'] == my_id ) {
-	  	var confirmation = confirm(data['name']+' want\'s to video chat with you');
-	  	if ( confirmation == true ) {
-	  		socket.emit('generate_chat_hash',{recipient_id:my_id,sender_id:data['sender_id']});
-	  	}
-	  }
-  });
 
   socket.on('append_chathash',function(data) {
   	if ( data['sender_id'] == my_id || data['recipient_id'] == my_id ) {

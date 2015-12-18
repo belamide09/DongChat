@@ -38,34 +38,12 @@ function init() {
 
 function peerEvts() {
   peer.on('call', function(call) {
-
-    if ( chat_hash == '' ) {
-	  	var url = 'VideoCall/getName';
-	  	$.post(url,{peer:call.peer},function(data) {
-
-	  		var confirmation = confirm(data['name']+' want\'s to video chat with you');
-	  		if ( confirmation == true ) {
-	  			partner_id = data['id'];
-		  		var end_chat = chat_time * 1000
-				  socket.emit('save_chat',{sender_peer:call.peer,recipient_id:my_id});
-				  call.answer(window.localStream);
-				  StartCall(call);
-
-				  setTimeout(function() {
-				    endChat(true);
-				  },end_chat);
-				}
-
-	  	},'JSON');
-	  } else {
-	  	call.answer(window.localStream);
-		  StartCall(call);
-	  }
-
+	  call.answer(window.localStream);
+		StartCall(call);
   });
   peer.on('open',function(id) {
     socket.emit('add_onair_user',{user_id:my_id,peer_id:id});
-  }); 
+  });
 }
 
 function initializeCamera(call_peer) {
@@ -108,6 +86,9 @@ function Call() {
 }
 
 function StartCall(call) {
+  if ( typeof window.existingCall != 'undefined' && window.existingCall ) {
+    window.existingCall.close();
+  }
   call.on('stream', function(stream) {
     partner_stream = stream;
     if ( !partner_video_disabled ) {
