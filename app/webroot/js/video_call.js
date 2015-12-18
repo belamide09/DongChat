@@ -39,8 +39,7 @@ function init() {
 function peerEvts() {
   peer.on('call', function(call) {
 
-    console.log( call );
-  	if ( chat_hash == '' ) {
+    if ( chat_hash == '' ) {
 	  	var url = 'VideoCall/getName';
 	  	$.post(url,{peer:call.peer},function(data) {
 
@@ -78,7 +77,6 @@ function initializeCamera(call_peer) {
       $('#my-webcam').prop('src', URL.createObjectURL(stream));
     }
     if ( call_peer && onchat ) {
-      console.log( 'test' );
       setTimeout(function() {
         peer.call(call_peer, window.localStream);
       },500);
@@ -110,9 +108,6 @@ function Call() {
 }
 
 function StartCall(call) {
-  if (window.existingCall) {
-    window.existingCall.close();
-  }
   call.on('stream', function(stream) {
     partner_stream = stream;
     if ( !partner_video_disabled ) {
