@@ -217,6 +217,9 @@ a.btn-default.btn-start-chat {
 	margin-left: 5px;
 	background: #fff;
 }
+a.btn-default.btn-bitrate-control {
+	display: inline-block;
+}
 a.btn-default.btn-sound-control:hover {
 	background: #555;
 }
@@ -234,7 +237,15 @@ a.btn-default.btn-start-chat > div {
 	margin-left: -5px;
 }
 a.btn-default.btn-resolution-control > div {
-	background: url('../img/settings.png') no-repeat center center;
+	background: url('../img/resolution.png') no-repeat center center;
+	background-size: 30px 30px;
+	width: 20px;
+	height: 20px;
+	margin-left: 1px;
+	margin-top: 6px;
+}
+a.btn-default.btn-bitrate-control > div {
+	background: url('../img/film.png') no-repeat center center;
 	background-size: 30px 30px;
 	width: 20px;
 	height: 20px;
@@ -242,10 +253,8 @@ a.btn-default.btn-resolution-control > div {
 	margin-top: 6px;
 }
 #resolution-list {
+	margin-left: 25px;
 	width: 80px;
-}
-#resolution-list {
-	margin: 0;
 }
 #resolution-list li {
 	list-style-type: none;

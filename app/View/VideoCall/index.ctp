@@ -43,6 +43,9 @@ var disabled_video = <?php echo $disabled_video?>;
 					<li data-value="640">640</li>
 				</ul>
 			</div>
+			<a href="#" class="btn btn-default btn-xs btn-bitrate-control onn" title="Bit rate">
+				<div></div>
+			</a>
 		</div>
 		<div id="partner-webcam-container">
 			<center> <video id="partner-webcam" height="100%" width="100%" autoplay></video> </center>
