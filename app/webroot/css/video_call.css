@@ -271,6 +271,11 @@ a.btn-default.btn-bitrate-control > div {
 #resolution-list li.selected {
 	background: #fff;
 }
+#bit-rate-range {
+	height: 100px;
+	width: 5px;
+	margin: 5px 130px;
+}
 #remaining-time-container {
 	width: 100px;
 	margin: 5px auto;

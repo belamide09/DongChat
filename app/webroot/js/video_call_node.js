@@ -36,12 +36,29 @@ $(document).ready(function() {
   })
 
   // Show resolution control
-  $(".btn-resolution-control").click(function() {
+  $(".btn-resolution").click(function() {
     if ( $("#resolution-list").css('display') == 'none' ) 
       $("#resolution-list").show();
     else 
       $("#resolution-list").hide();
   })
+
+  // Show resolution control
+  $(".btn-bitrate").click(function() {
+    if ( $("#bit-rate-range").css('display') == 'none' ) 
+      $("#bit-rate-range").show();
+    else 
+      $("#bit-rate-range").hide();
+  })
+
+  $(document).click(function(evt) {
+    if ( !evt.target.className.match('btn-resolution')) {
+      $("#resolution-list").hide();
+    }
+    if ( !evt.target.className.match('btn-bitrate') ) {
+      $("#bit-rate-range").hide();
+    }
+  });  
 
   // Select resolution
   $("#resolution-list li").click(function() {
@@ -52,15 +69,41 @@ $(document).ready(function() {
       $('#resolution-list li').removeAttr('style');
       $("#resolution-list li").removeClass('selected');
       $(this).addClass('selected');
-      var value = $(this).attr('data-value');
+      resolution = $(this).attr('data-value');
       var data = {
         partner_id: partner_id,
         peer: peer.id,
-        resolution: value
+        resolution: resolution,
+        bit_rate: bit_rate
       }
-      socket.emit('change_partner_resolution',data);
+      socket.emit('change_video_quality',data);
     }
   })
+
+  $( "#bit-rate-range" ).slider({
+    orientation: "vertical",
+    range: "min",
+    min: 1,
+    max: 30,
+    value: 30,
+    slide: function( event, ui ) {
+      bit_rate = ui.value;
+    }
+  });
+
+  $( "#bit-rate-range" ).mouseup(setBitRate);
+  $( "#bit-rate-range" ).click(setBitRate);
+
+  function setBitRate() {
+    $("#bit-rate-range").hide();
+    var data = {
+      partner_id: partner_id,
+      peer: peer.id,
+      resolution: resolution,
+      bit_rate: bit_rate
+    }
+    socket.emit('change_video_quality',data);
+  }
 
   $(".btn").tooltip();
 
@@ -92,15 +135,18 @@ $(document).ready(function() {
   $(".btn-leave").click(function() {
   	if ( onchat ) {
 	  	var confirmation = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
-	  	if ( confirmation ) {
+	  	if ( confirmation == true ) {
 		  	socket.emit('leave_room',{user_id:my_id});
 		  	socket.emit('disconnect_chat',{user_id:my_id});
 		  	$(location).attr('href','/dongdong');
 		  }
 	  } else {
-      socket.emit('leave_room',{user_id:my_id});
-      socket.emit('disconnect_chat',{user_id:my_id});
-      $(location).attr('href','/dongdong');
+      var confirmation = confirm('Are you sure you want to leave this room?');
+      if ( confirmation == true ) {
+        socket.emit('leave_room',{user_id:my_id});
+        socket.emit('disconnect_chat',{user_id:my_id});
+        $(location).attr('href','/dongdong');
+      }
     }
   	return false;
   });
@@ -129,10 +175,25 @@ $(document).ready(function() {
   })
 
   // Change partner resolution
-  socket.on('change_partner_resolution',function(data) {
+  socket.on('change_video_quality',function(data) {
     if ( data['partner_id'] == my_id ) {
       ChangeResolution(data['resolution']);
+      constraints['video']['mandatory']['minFrameRate'] = data['bit_rate'];
+      constraints['video']['mandatory']['maxFrameRate'] = data['bit_rate'];
       initializeCamera(data['peer']);
+
+      for(var peer_id in peer.connections) {
+        for(var x = 0 ; x < peer.connections[peer_id].length ; x++) {
+          var conn = peer.connections[peer_id][x];
+          console.log( conn.id );
+          if ( conn.id != window.existingCall.id ) {
+            conn.close();
+            // delete peer.connections[peer_id][x];
+          }
+        }
+      }
+
+
     }
   })
 

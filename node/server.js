@@ -378,8 +378,8 @@ io.on('connection',function(socket) {
 		io.emit('toggle_video_disabled',data);
 	})
 
-	socket.on('change_partner_resolution',function(data) {
-		io.emit('change_partner_resolution',data);
+	socket.on('change_video_quality',function(data) {
+		io.emit('change_video_quality',data);
 	})
 
 	socket.on('kill_chat',function(data) {

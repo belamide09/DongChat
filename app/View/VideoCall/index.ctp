@@ -33,19 +33,20 @@ var disabled_video = <?php echo $disabled_video?>;
 				<a href="#" class="btn btn-default btn-xs btn-sound-control off">
 					<div></div>
 				</a>
-				<a href="#" class="btn btn-default btn-xs btn-resolution-control onn" title="Video resolution">
-					<div></div>
+				<a href="#" class="btn btn-default btn-xs btn-resolution-control onn">
+					<div class="btn-resolution"></div>
+				</a>
+				<a href="#" class="btn btn-default btn-xs btn-bitrate-control onn">
+					<div class="btn-bitrate"></div>
 				</a>
 				<ul id="resolution-list" style="display:none;">
 					<li data-value="140">140</li>
 					<li data-value="240">240</li>
 					<li data-value="360" class="selected">360</li>
-					<li data-value="640">640</li>
+					<li data-value="480">640</li>
 				</ul>
+				<div id="bit-rate-range" style="display:none;"></div>
 			</div>
-			<a href="#" class="btn btn-default btn-xs btn-bitrate-control onn" title="Bit rate">
-				<div></div>
-			</a>
 		</div>
 		<div id="partner-webcam-container">
 			<center> <video id="partner-webcam" height="100%" width="100%" autoplay></video> </center>

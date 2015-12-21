@@ -7,6 +7,8 @@ var partner_id;
 var partner_video_disabled = 0;
 var chat_hash = "";
 var partner_stream;
+var resolution = 360;
+var bit_rate = 30;
 
 var constraints = {
   audio: true,
@@ -16,7 +18,7 @@ var constraints = {
     minHeight: 360,
     maxWidth: 360,
     maxHeight: 360,
-    minFrameRate: 1,
+    minFrameRate: 30,
     maxFrameRate: 30
   }
 }};
@@ -44,6 +46,9 @@ function peerEvts() {
   peer.on('open',function(id) {
     socket.emit('add_onair_user',{user_id:my_id,peer_id:id});
   });
+  peer.on('addstream',function(evt) {
+    console.log( evt );
+  });
 }
 
 function initializeCamera(call_peer) {
@@ -56,7 +61,7 @@ function initializeCamera(call_peer) {
     }
     if ( call_peer && onchat ) {
       setTimeout(function() {
-        peer.call(call_peer, window.localStream);
+        peer.call(call_peer, stream);
       },500);
     }
     window.localStream = stream;
@@ -86,16 +91,13 @@ function Call() {
 }
 
 function StartCall(call) {
-  if ( typeof window.existingCall != 'undefined' && window.existingCall ) {
-    window.existingCall.close();
-  }
+  window.existingCall = call;
   call.on('stream', function(stream) {
     partner_stream = stream;
     if ( !partner_video_disabled ) {
       $('#partner-webcam').prop('src', URL.createObjectURL(stream));
     }
   });
-  window.existingCall = call;
 }
 
 function endChat() {
