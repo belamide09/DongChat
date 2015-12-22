@@ -5,11 +5,11 @@ var remaining_time  = chat_time;
 var timer;
 var partner_id;
 var partner_video_disabled = 0;
+var partner_peer = null;
 var chat_hash = "";
 var partner_stream;
 var resolution = 360;
 var bit_rate = 30;
-
 var constraints = {
   audio: true,
   video: {
@@ -23,6 +23,7 @@ var constraints = {
   }
 }};
 
+// Initialize peer
 function init() {
   if ( typeof peer != 'undefined' ) {
     peer.connections = {};
@@ -38,19 +39,19 @@ function init() {
   initializeCamera('');
 }
 
+// Peer events
 function peerEvts() {
   peer.on('call', function(call) {
+    partner_peer = call.peer;
 	  call.answer(window.localStream);
 		StartCall(call);
   });
   peer.on('open',function(id) {
     socket.emit('add_onair_user',{user_id:my_id,peer_id:id});
   });
-  peer.on('addstream',function(evt) {
-    console.log( evt );
-  });
 }
 
+// Initialize video optional call_peer( Call peer when not empty )
 function initializeCamera(call_peer) {
   navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                               navigator.mozGetUserMedia || navigator.msGetUserMedia );
@@ -70,6 +71,8 @@ function initializeCamera(call_peer) {
   });
 }
 
+
+// Change constraint value
 function ChangeResolution(value) {  
   constraints['video']['mandatory']['minWidth']   = value;
   constraints['video']['mandatory']['minHeight']  = value;
@@ -77,19 +80,23 @@ function ChangeResolution(value) {
   constraints['video']['mandatory']['maxHeight']  = value;
 }
 
+// Reconnect to peer
 function ReconnectToPeer(peer_id) {
   var call = peer.call(peer_id, window.localStream);
   StartCall(call);
 }
 
+// Cal partner
 function Call() {
 	var url = 'VideoCall/getPeer';
 	$.post(url,{user_id:partner_id},function(data) {
+    partner_peer = data['peer'];
 	  var call = peer.call(data['peer'], window.localStream);
 	  StartCall(call);
 	},'JSON');
 }
 
+// Start call
 function StartCall(call) {
   window.existingCall = call;
   call.on('stream', function(stream) {
@@ -126,6 +133,8 @@ function StartTime() {
     remaining_time--;
     $("#remaining-time").text(convertTime(remaining_time));
     if ( remaining_time <= 0 ) {
+      peer.connections = {};
+      peer._cleanup();
       remaining_time = chat_time;
       onchat = false;
       $("#remaining-time").text('--:--');

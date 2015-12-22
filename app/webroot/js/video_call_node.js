@@ -4,13 +4,15 @@ $(document).ready(function() {
 	var chatbox_height_orig = parseInt($("#chatbox-container").css('height'));
 	var conversations_height_orig = parseInt($("#conversations").css('height'));
 
+  // Resizable video
 	$( "#partner-webcam-container" ).resizable({
 		handles: 's',
 		minHeight: 200,
     maxHeight: 550
 	});
 
-  // Resizable video
+
+  // Adjust video size and chatbox when partner webcam container resize
 	$( "#partner-webcam-container" ).resize(function() {
 		$("#partner-webcam").css('height',$(this).css('height'));
 		var diff = parseInt($(this).css('height')) - webcam_height_orig;
@@ -58,7 +60,7 @@ $(document).ready(function() {
     if ( !evt.target.className.match('btn-bitrate') ) {
       $("#bit-rate-range").hide();
     }
-  });  
+  });
 
   // Select resolution
   $("#resolution-list li").click(function() {
@@ -80,6 +82,7 @@ $(document).ready(function() {
     }
   })
 
+  // Change bit rate
   $( "#bit-rate-range" ).slider({
     orientation: "vertical",
     range: "min",
@@ -94,6 +97,7 @@ $(document).ready(function() {
   $( "#bit-rate-range" ).mouseup(setBitRate);
   $( "#bit-rate-range" ).click(setBitRate);
 
+  // Change partner video bit rate
   function setBitRate() {
     $("#bit-rate-range").hide();
     var data = {
@@ -182,21 +186,18 @@ $(document).ready(function() {
       constraints['video']['mandatory']['maxFrameRate'] = data['bit_rate'];
       initializeCamera(data['peer']);
 
-      for(var peer_id in peer.connections) {
-        for(var x = 0 ; x < peer.connections[peer_id].length ; x++) {
-          var conn = peer.connections[peer_id][x];
-          console.log( conn.id );
-          if ( conn.id != window.existingCall.id ) {
-            conn.close();
-            // delete peer.connections[peer_id][x];
-          }
+      // Close other stream except use stream
+      for(var x  in peer.connections[partner_peer]) {
+        var conn = peer.connections[partner_peer][x];
+        if ( conn.id != window.existingCall.id ) {
+          conn.close();
         }
       }
-
 
     }
   })
 
+  // Disable start chat when room mate leave
   socket.on('remove_room_mate',function(data) {
   	if ( data['partner'] == partner_id ) {
       $(".btn-start-chat").attr('disabled','disabled');
@@ -237,6 +238,7 @@ $(document).ready(function() {
   })
 
 
+  // Notify connect to the server
   socket.on('connect_server',function(data) {
 
     if ( chat_hash != "" && data['chat_hash'] == chat_hash ) {
@@ -271,6 +273,7 @@ $(document).ready(function() {
       onchat = true;
   		$(".btn-end-chat").show();
 			var peer = data['peer'];
+      partner_peer = peer;
   		ReconnectToPeer(peer);
 		} else if ( data['user_id'] == my_id ) {
       $("#conversations .reconnecting").after('<div class="message">Server: You are now reconnected to the chat...</div>');
