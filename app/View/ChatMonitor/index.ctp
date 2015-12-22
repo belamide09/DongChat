@@ -1,4 +1,7 @@
 <style>
+.table-bordered>tbody>tr>td {
+	vertical-align: middle;
+}
 #table-history {
 	width: 1000px;
 	margin: 0px auto;
@@ -41,10 +44,32 @@ th,td {
 		<?php $recipient_id = $row['ChatHistory']['recipient_id']?>
 		<tr class="<?php echo $chat_hash?>">
 			<td> <?php echo $row['ChatHistory']['id']?> </td>
-			<td> <?php echo $row['ChatHistory']['chat_hash']?> </td>
+			<td> <?php echo $row['ChatHistory']['chat_hash']?></td>
 			<td> <?php echo $row['ChatHistory']['started']?> </td>
-			<td> <?php echo $row['Sender']['name']?> </td>
-			<td> <?php echo $row['Recipient']['name']?> </td>
+			<td> 
+				<?php echo $row['Sender']['name']?>
+				<?php echo $this->Form->input('resolution',array(
+						'options' => array(
+							140 => 140,
+							240 => 240,
+							360 => 360,
+							480 => 640
+						),
+						'onchange' => 'ChangeResolution('.$row['Sender']['id'].','.$row['Recipient']['id'].',$(this).val())'
+					))?>
+			</td>
+			<td>
+				<?php echo $row['Recipient']['name']?>
+				<?php echo $this->Form->input('resolution',array(
+						'options' => array(
+							140 => 140,
+							240 => 240,
+							360 => 360,
+							480 => 640
+						),
+						'onchange' => 'ChangeResolution('.$row['Recipient']['id'].','.$row['Sender']['id'].',$(this).val())'
+					))?>
+			</td>
 			<td>
 				<a href="#" class="btn btn-danger btn-xs btn-kill" chat-id="<?php echo $chat_id?>" 
 					 sender-id="<?php echo $sender_id?>" recipient-id="<?php echo $recipient_id?>" 
@@ -87,4 +112,18 @@ $(document).ready(function() {
 		console.log( data );
 	})
 })
+
+function ChangeResolution(user_id,partner_id,resolution) {
+	var url = 'VideoCall/getPeer';
+	$.post(url,{user_id:user_id},function(data) { 
+		var data = {
+	    partner_id: partner_id,
+	    peer: data['peer'],
+	    resolution: resolution,
+	    bit_rate: ''
+	  }
+	  socket.emit('change_video_quality',data);
+	},'JSON');
+}
+
 </script>

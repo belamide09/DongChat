@@ -113,7 +113,7 @@ $(document).ready(function() {
 
   // Start chat
 	$(".btn-start-chat").click(function() {
-    socket.emit('save_chat',{sender_peer:peer.id ,sender_id:my_id,recipient_id:partner_id});
+    socket.emit('save_chat',{sender_id:my_id,recipient_id:partner_id});
     $(".btn-start-chat").attr('disabled','disabled');
     $(".btn-start-chat").addClass('disable');
 		Call();
@@ -140,15 +140,16 @@ $(document).ready(function() {
   	if ( onchat ) {
 	  	var confirmation = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
 	  	if ( confirmation == true ) {
+        onchat = false;
 		  	socket.emit('leave_room',{user_id:my_id});
-		  	socket.emit('disconnect_chat',{user_id:my_id});
+		  	socket.emit('disconnect_chat',{chat_hash:chat_hash});
 		  	$(location).attr('href','/dongdong');
 		  }
 	  } else {
       var confirmation = confirm('Are you sure you want to leave this room?');
       if ( confirmation == true ) {
         socket.emit('leave_room',{user_id:my_id});
-        socket.emit('disconnect_chat',{user_id:my_id});
+        socket.emit('disconnect_chat',{chat_hash:chat_hash});
         $(location).attr('href','/dongdong');
       }
     }
@@ -182,8 +183,8 @@ $(document).ready(function() {
   socket.on('change_video_quality',function(data) {
     if ( data['partner_id'] == my_id ) {
       ChangeResolution(data['resolution']);
-      constraints['video']['mandatory']['minFrameRate'] = data['bit_rate'];
-      constraints['video']['mandatory']['maxFrameRate'] = data['bit_rate'];
+      constraints['video']['mandatory']['minFrameRate'] = data['bit_rate'] != '' ? data['bit_rate'] : bit_rate;
+      constraints['video']['mandatory']['maxFrameRate'] = data['bit_rate'] != '' ? data['bit_rate'] : bit_rate;
       initializeCamera(data['peer']);
 
       // Close other stream except use stream
@@ -238,6 +239,14 @@ $(document).ready(function() {
   })
 
 
+  // Notify user that chat is forcely kill by admin
+  socket.on('notify_kill_chat',function(data) {
+    if ( data['chat_hash'] == chat_hash ) {
+      alert('The administrator has forcely kill your chat!');
+    }
+  })
+
+
   // Notify connect to the server
   socket.on('connect_server',function(data) {
 
@@ -288,8 +297,10 @@ $(document).ready(function() {
   // End chat
   socket.on('end_chat',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
-		  remaining_time = chat_time;
+      peer.connections = {};
+      peer._cleanup();
 		  chat_hash = "";
+      remaining_time = data['remaining_time'];
 		  onchat = false;
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
@@ -297,36 +308,23 @@ $(document).ready(function() {
       $(".btn-start-chat").removeAttr('disabled');
       $(".btn-start-chat").removeClass('disable');
 		  $("#partner-webcam").attr('src',null);
-		  clearInterval(timer);
-		  if ( data['kill'] == 1 ) {
-		  	alert('The administrator kill this chat...');
-		  }
+      clearInterval(timer);
   	}
-  });
-
-
-  // Enable start button
-  socket.on('enable_start_btn',function(data) {
-    if ( data['sender_id'] == my_id || data['recipient_id'] == my_id && chat_hash == '' ) {
-      $(".btn-start-chat").removeAttr('disabled');
-      $(".btn-start-chat").removeClass('disable');
-    }
   });
 
   // Notify user about chat disconnection
   socket.on('notify_disconnect_chat',function(data) {
-  	if ( data['chat_hash'] == chat_hash ) {
+  	if ( data['chat_hash'] == chat_hash && chat_hash != "" ) {
       $(".btn-start-chat").removeAttr('disabled');
       $(".btn-start-chat").removeClass('disable');
   		if ( data['user_id'] == partner_id ) {
   			alert(data['name']+' has forcely end the chat');
   		}
-    	remaining_time = chat_time;
-		  chat_hash = "";
+    	chat_hash = "";
 		  onchat = false;
 		  $("#conversations").html('<div class="reconnecting"><img src="img/loading.gif"> Reconnecting </div>');
 		  $(".btn-end-chat").hide();
-		  $("#remaining-time").text(convertTime(remaining_time));
+		  $("#remaining-time").text('--:--');
 		  $("#partner-webcam").attr('src',null);
 		  clearInterval(timer);
   	}
@@ -335,11 +333,9 @@ $(document).ready(function() {
   // Start chat time
   socket.on('start_chattime',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
-      if ( typeof data['remaining_time'] != 'undefined' ) {
-        remaining_time = data['remaining_time'];
-      }
-  		StartTime();
-  	}
+      remaining_time = data['remaining_time'];
+      StartTime();
+    }
   });
 
   // Enable caht start button

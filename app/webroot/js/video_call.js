@@ -1,7 +1,6 @@
 var peer;
 var onchat     = false;
-var chat_time  = 300;
-var remaining_time  = chat_time;
+var remaining_time;
 var timer;
 var partner_id;
 var partner_video_disabled = 0;
@@ -107,10 +106,6 @@ function StartCall(call) {
   });
 }
 
-function endChat() {
-  socket.emit('end_chat',{user_id:my_id,ended:true});
-}
-
 function convertTime(time) {
   var minutes = Math.floor(time / 60);
   var seconds = time % 60;
@@ -131,15 +126,10 @@ function StartTime() {
   clearInterval(timer);
   timer = setInterval(function() {
     remaining_time--;
-    $("#remaining-time").text(convertTime(remaining_time));
     if ( remaining_time <= 0 ) {
-      peer.connections = {};
-      peer._cleanup();
-      remaining_time = chat_time;
-      onchat = false;
       $("#remaining-time").text('--:--');
-      socket.emit('end_chat',{user_id:my_id});
-      clearInterval(timer);
+    } else {
+      $("#remaining-time").text(convertTime(remaining_time));
     }
   },1000);
 }

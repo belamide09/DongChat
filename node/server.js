@@ -31,8 +31,9 @@ var ChatHistory = require('./app/Model/ChatHistory.js');
 
 var room_lists 		= {};
 var chathash_arr 	= {};
-var chat_messages = {};
-var room_conversations = [];
+var chat_time_arr = {};
+
+var chat_duration = 300;
 
 // For node server
 
@@ -54,7 +55,28 @@ io.on('connection',function(socket) {
 		}).done(function(result) {	
 			var chat_hash = result != null ? result['dataValues']['chat_hash'] : '';
 			if ( chat_hash != '' ) {
-				chathash_arr[user_id] = chat_hash;
+				var started 							= result['dataValues']['started'];
+				var recipient_id 					= result['dataValues']['recipient_id'];
+				var sender_id 						= result['dataValues']['sender_id'];
+				var partner_id 						= user_id == recipient_id ? sender_id : recipient_id;
+
+				// Get remaining chat time 
+				var now 						= new Date() / 1000;
+				var start 					= started / 1000;
+				var remaining_time 	= (chat_duration - Math.round(now - start,2)) - 1;
+
+				// If still have remaining time reconnect to chat
+				if ( remaining_time > 0 ) {
+					chathash_arr[user_id] 		= chat_hash;
+					chathash_arr[partner_id] 	= chat_hash;
+					if ( typeof chat_time_arr[chat_hash] == 'undefined' ) {
+						chat_time_arr[chat_hash] 	= remaining_time;
+						ChatInterval(chat_hash);
+					}
+					io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash:chat_hash});
+					io.emit('start_chattime',{chat_hash:chat_hash,remaining_time:remaining_time});
+				}
+
 			}
 			io.emit('connect_server',{user_id:user_id,chat_hash:chat_hash,room_id:room_id,nam:name});
 		})
@@ -66,6 +88,7 @@ io.on('connection',function(socket) {
 			where: {
 				id: user_id
 			}
+
 		}).done(function() {
 			OnairUser.create({
 				id 								: user_id,
@@ -86,7 +109,6 @@ io.on('connection',function(socket) {
 
 	function reconnectToChat(user_id,peer,chat_hash) {
 		var chat_hash = chathash_arr[user_id];
-		io.emit('append_chathash',{sender_id: user_id, recipient_id: user_id,chat_hash:chat_hash});
 		ChatHistory.find({
 			where: {
 				chat_hash: chat_hash
@@ -100,12 +122,6 @@ io.on('connection',function(socket) {
 					}
 				}
 			}).done(function(partner) {
-				if ( result != null ) {
-					var now = new Date() / 1000;
-					var start = result['dataValues']['started'] / 1000;
-					var remaining_time = (300 - Math.round(now - start,2));
-				}
-				io.emit('start_chattime',{chat_hash:chat_hash,remaining_time:remaining_time});
 				io.emit('reconnect_chat_partner',{user_id:user_id,partner:partner,peer:peer});
 			})
 		})
@@ -262,116 +278,71 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('save_chat',function(data) {
-		OnairUser.find({
-			where: {
-				peer: data['sender_peer']
-			}
-		}).done(function(result) {
-			var chat_hash = md5(new Date());
-			var sender_id = result['dataValues']['id'];
-			var recipient_id = data['recipient_id'];
-			ChatHistory.create({
-				chat_hash			: chat_hash,
-				sender_id			: sender_id,
-				recipient_id	: recipient_id,
-				started 			: new Date(),
-				end						: null
-			});
-			OnairUser.update({chat_hash: chat_hash},{
-	      where: {
-	       id: [recipient_id,sender_id]
-	      }
-	    });
-			chathash_arr[recipient_id] 	= chat_hash;
-			chathash_arr[sender_id] 		= chat_hash;
-			chat_messages[chat_hash] 		= {};
-	    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
-	    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash: chat_hash});
-	    io.emit('start_chattime',{chat_hash:chat_hash});
-	    io.emit('notify_new_chat');
-		})
+		var chat_hash = md5(new Date());
+		var sender_id = data['sender_id'];
+		var recipient_id = data['recipient_id'];
+		ChatHistory.create({
+			chat_hash			: chat_hash,
+			sender_id			: sender_id,
+			recipient_id	: recipient_id,
+			started 			: new Date(),
+			end						: null
+		});
+		OnairUser.update({chat_hash: chat_hash},{
+      where: {
+       id: [recipient_id,sender_id]
+      }
+    });
+		chathash_arr[recipient_id] 	= chat_hash;
+		chathash_arr[sender_id] 		= chat_hash;
+		chat_time_arr[chat_hash] 		= chat_duration -1;
+		ChatInterval(chat_hash);
+    io.emit('disable_chat_user',{sender_id: sender_id, recipient_id: recipient_id});
+    io.emit('append_chathash',{sender_id: sender_id, recipient_id: recipient_id,chat_hash: chat_hash});
+    io.emit('start_chattime',{chat_hash:chat_hash,remaining_time:chat_duration});
+    io.emit('notify_new_chat');
 	})
 
 	socket.on('send_message',function(data) {
 		io.emit('receive_message',data);
 	})
 
-	socket.on('end_chat',function(data) {
-		var user_id = data['user_id'];
-		EndChat(user_id,true);
-	})
+	function ChatInterval(chat_hash) {
+		var interval = setInterval(function() {
+			if ( typeof chat_time_arr[chat_hash] == 'undefined' ) {
+				clearInterval(interval);
+			} else if ( chat_time_arr[chat_hash] > 0 ) {
+				chat_time_arr[chat_hash] = chat_time_arr[chat_hash] - 1;
+			} else {
+				EndChat(chat_hash);
+				clearInterval(interval);
+			}
+		},1000);
+	}
 
-	function EndChat(user_id,ended) {
-		if ( typeof chathash_arr[user_id] !== 'undefined' ) {
-			var chat_hash = chathash_arr[user_id];
-			var partner_id = "";
-			delete chat_messages[chat_hash];
-    	delete chathash_arr[user_id];
-			io.emit('end_chat',{chat_hash:chat_hash});
-			ChatHistory.update({end: new Date()},{
-	      where: {
-	       chat_hash: chat_hash
-	      }
-	    });
-
-	    OnairUser.find({
-	    	attributes: ['id'],
-	    	where: {
-	    		chat_hash: chat_hash,
-	    		id: {
-	    			$ne: user_id
-	    		}
-	    	}
-	    }).done(function(user) {
-		    var users = [user_id];
-		    OnairUser.update({chat_hash: null},{
-		      where: {
-		       chat_hash: chat_hash
-		      }
-		    });
-		   	if ( user != null ) {
-		    	partner_id = user['dataValues']['id'];
-		    	users.push(partner_id);
-		    	delete chathash_arr[partner_id];
-		    }
-				io.emit('enable_start_btn',{sender_id: user_id, recipient_id: partner_id});
-				io.emit('remove_chat',{chat_hash:chat_hash});
-	    })
-		}
+	function EndChat(chat_hash) {
+		delete chat_time_arr[chat_hash];
+		io.emit('end_chat',{chat_hash:chat_hash,remaining_time:chat_duration});
+		ChatHistory.update({end: new Date()},{
+      where: { chat_hash: chat_hash }
+    });
+    OnairUser.update({chat_hash: null},{
+      where: { chat_hash: chat_hash }
+    });
+    for(var user_id in chathash_arr) {
+    	if ( chathash_arr[user_id] == chat_hash ) {
+    		delete chathash_arr[user_id];
+    	}
+    }
+		io.emit('remove_chat',{chat_hash:chat_hash});
+    io.emit('end_chat',{chat_hash:chat_hash});
 	}
 
 	socket.on('disconnect_chat',function(data) {
-		var user_id = data['user_id'];
-		var chat_hash = chathash_arr[user_id];
-		delete chathash_arr[user_id];
-		ChatHistory.update({end: new Date()},{
-      where: {
-       chat_hash: chat_hash
-      }
-    });
-    OnairUser.find({
-    	attributes: ['id'],
-    	where: {
-    		chat_hash: chat_hash,
-    		id: {
-    			$ne: user_id
-    		}
-    	}
-    }).done(function(user) {
-	    var users = [user_id];
-	    OnairUser.update({chat_hash: null},{
-	      where: {
-	       chat_hash: chat_hash
-	      }
-	    });
-	   	if ( user != null ) {
-	    	var partner_id = user['dataValues']['id'];
-	    	users.push(partner_id);
-	    	delete chathash_arr[partner_id];
-	    }
-			io.emit('notify_disconnect_chat',{chat_hash:chat_hash,user_id:user_id,name:socket.handshake.query['name']});
-			io.emit('remove_chat',{chat_hash:chat_hash});
-    })
+		var user_id = socket.handshake.query['user_id'];
+		var name 		= socket.handshake.query['name'];
+		io.emit('notify_disconnect_chat',{chat_hash:data['chat_hash'],user_id:user_id,name:name});
+		EndChat(data['chat_hash']);
 	})
 
 	socket.on('toggle_video_disabled',function(data) {
@@ -383,28 +354,9 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('kill_chat',function(data) {
-		var chat_id 	= data['chat_id'];
-		var chat_hash = data['chat_hash'];
-		var sender_id = data['sender_id'];
-		var recipient_id = data['recipient_id'];
-		delete chat_messages[chat_hash];
-  	delete chathash_arr[sender_id];
-  	delete chathash_arr[recipient_id];
-		io.emit('end_chat',{chat_hash:chat_hash,kill:1});
-		ChatHistory.update({end: new Date()},{
-      where: {
-       chat_hash: chat_hash,
-       end : null
-      }
-    });
-    OnairUser.update({chat_hash: null},{
-      where: {
-       chat_hash: chat_hash
-      }
-    });
-    var users = [sender_id,recipient_id];
-		io.emit('update_users_status',users);
-		io.emit('remove_chat',{chat_hash:chat_hash});
+		io.emit('notify_kill_chat',{chat_hash:data['chat_hash']});
+		io.emit('remove_chat',{chat_hash:data['chat_hash']});
+		EndChat(data['chat_hash']);
 	})
 
 });
