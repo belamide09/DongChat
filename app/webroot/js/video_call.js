@@ -1,7 +1,5 @@
 var peer;
 var onchat     = false;
-var remaining_time;
-var timer;
 var partner_id;
 var partner_video_disabled = 0;
 var partner_peer = null;
@@ -116,22 +114,6 @@ function convertTime(time) {
     seconds = '0'+seconds;
   }
   return minutes+":"+seconds;
-}
-
-function StartTime() {
-  window.onbeforeunload = leaveChatValidation;
-  $(".reconnecting").hide();
-  $(".btn-end-chat").show();
-  onchat = true;
-  clearInterval(timer);
-  timer = setInterval(function() {
-    remaining_time--;
-    if ( remaining_time <= 0 ) {
-      $("#remaining-time").text('--:--');
-    } else {
-      $("#remaining-time").text(convertTime(remaining_time));
-    }
-  },1000);
 }
 
 function leaveChatValidation() {

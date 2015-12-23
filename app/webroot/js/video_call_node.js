@@ -1,5 +1,7 @@
 var socket = io.connect(location.origin+':4000',{query:"user_id="+my_id+"&room_id="+room_id+"&name="+my_name+"&partner_type="+partner_type});
 $(document).ready(function() {
+  var remaining_time;
+  var timer;
 	var webcam_height_orig = parseInt($("#partner-webcam-container").css('height'));
 	var chatbox_height_orig = parseInt($("#chatbox-container").css('height'));
 	var conversations_height_orig = parseInt($("#conversations").css('height'));
@@ -341,7 +343,21 @@ $(document).ready(function() {
   socket.on('start_chattime',function(data) {
   	if ( data['chat_hash'] == chat_hash ) {
       remaining_time = data['remaining_time'];
-      StartTime();
+
+      window.onbeforeunload = leaveChatValidation;
+      $(".reconnecting").hide();
+      $(".btn-end-chat").show();
+      onchat = true;
+      clearInterval(timer);
+      timer = setInterval(function() {
+        remaining_time--;
+        if ( remaining_time <= 0 ) {
+          $("#remaining-time").text('--:--');
+        } else {
+          $("#remaining-time").text(convertTime(remaining_time));
+        }
+      },1000);
+      
     }
   });
 
