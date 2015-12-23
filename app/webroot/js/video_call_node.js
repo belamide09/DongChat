@@ -357,16 +357,9 @@ $(document).ready(function() {
           $("#remaining-time").text(convertTime(remaining_time));
         }
       },1000);
-      
+
     }
   });
-
-  // Enable caht start button
-	socket.on('enable_start_chat',function(data) {
-		for(var x in data) {
-      $(".btn-start-chat").removeAttr('disabled');
-		}
-	});
 
   // Notify user about disconnection
 	socket.on('disconnect',function() {
