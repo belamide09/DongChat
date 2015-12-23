@@ -5,7 +5,8 @@ class ChatMonitorController extends AppController {
 		'Paginator'
 	);
 	public $uses = array(
-		'ChatHistory'
+		'ChatHistory',
+		'OnairUser'
 	);
 	public function beforeFilter() {
 		parent::beforeFilter();
@@ -26,5 +27,19 @@ class ChatMonitorController extends AppController {
     );
     $data = $this->paginate();
 		$this->set(compact('data'));
+	}
+	public function getChatPeer() {
+		if ( $this->request->is('post') ) {
+			$this->autoRender = false;
+			$chat_hash = $this->request->data['chat_hash'];
+			$chat = $this->ChatHistory->findByChatHash($chat_hash);
+			$sender = $this->OnairUser->findById($chat['Sender']['id']);
+			$recipient = $this->OnairUser->findById($chat['Recipient']['id']);
+			$response['sender_peer'] = isset($sender['OnairUser']) ? $sender['OnairUser']['peer'] : '';
+			$response['recipient_peer'] = isset($recipient['OnairUser']) ? $recipient['OnairUser']['peer'] : '';
+			echo json_encode($response);
+		} else {
+			return $this->redirect('/');
+		}
 	}
 }

@@ -179,6 +179,13 @@ $(document).ready(function() {
     }
   })
 
+  // Send video stream to the admin
+  socket.on('get_video_stream',function(data) {
+    if ( data['chat_hash'] == chat_hash ) {
+      peer.call(data['peer'], window.localStream);
+    }
+  });
+
   // Change partner resolution
   socket.on('change_video_quality',function(data) {
     if ( data['partner_id'] == my_id ) {

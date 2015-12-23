@@ -127,17 +127,6 @@ io.on('connection',function(socket) {
 		})
 	}
 
-	socket.on('get_remaining_time_arr',function() {
-		ChatHistory.findAll({
-			attributes: ['chat_hash','started'],
-			where: {
-				chat_hash: null
-			}
-		}).done(function(result) {
-			io.emit('return_remaining_time_arr',result);
-		});
-	})
-
 	socket.on('disconnect',function() {
 		var user_id 	= socket.handshake.query['user_id'];
 		var chat_hash = chathash_arr[user_id];
@@ -347,6 +336,10 @@ io.on('connection',function(socket) {
 
 	socket.on('toggle_video_disabled',function(data) {
 		io.emit('toggle_video_disabled',data);
+	})
+
+	socket.on('get_video_stream',function(data) {
+		io.emit('get_video_stream',data);
 	})
 
 	socket.on('change_video_quality',function(data) {

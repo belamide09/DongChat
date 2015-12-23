@@ -42,6 +42,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 		echo $this->Html->script('jquery-1.10.2');
 		echo $this->Html->script('jquery-ui');
+		echo $this->Html->script('peer.min');
 		echo $this->Html->script('https://'.$_SERVER['HTTP_HOST'].':4000/socket.io/socket.io.js');
 	?>
 </head>
