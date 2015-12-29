@@ -60,12 +60,23 @@ function initializeCamera(call_peer) {
     if ( call_peer && onchat ) {
       setTimeout(function() {
         peer.call(call_peer, stream);
+        ReceiveMessage(call_peer);
       },500);
     }
     window.localStream = stream;
   }, function(error) {
     console.warn(error);
   });
+}
+
+function ReceiveMessage(peer_id) {
+  var conn = peer.connect(peer_id);
+  conn.on('open', function() {
+    conn.on('data',function(data) {
+      var message = '<div class="message">'+partner_name+' : '+data+'</div>';
+      $("#conversations .reconnecting").after(message);
+    })
+  })
 }
 
 
@@ -102,6 +113,7 @@ function StartCall(call) {
       $('#partner-webcam').prop('src', URL.createObjectURL(stream));
     }
   });
+  ReceiveMessage(call.peer);
 }
 
 function convertTime(time) {

@@ -292,10 +292,6 @@ io.on('connection',function(socket) {
     io.emit('notify_new_chat');
 	})
 
-	socket.on('send_message',function(data) {
-		io.emit('receive_message',data);
-	})
-
 	function ChatInterval(chat_hash) {
 		var interval = setInterval(function() {
 			if ( typeof chat_time_arr[chat_hash] == 'undefined' ) {

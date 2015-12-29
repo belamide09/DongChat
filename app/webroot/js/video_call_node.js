@@ -132,8 +132,13 @@ $(document).ready(function() {
     var msg = $("#txt-message").val();
     $("#txt-message").val("");
     $("#txt-message")[0].focus();
-    if ( msg.trim() != '' && onchat && socket.connected == true ) {
-      socket.emit('send_message',{user_id:my_id,name:my_name,chat_hash:chat_hash,message:msg});
+    if ( msg.trim() && onchat && socket.connected && jQuery.isEmptyObject(peer.connections) ) {
+      alert('Your chat partner is not yet reconnected from the chat!');
+    } else if ( msg.trim() != '' && onchat && socket.connected ) {
+      var last_index = peer.connections[partner_peer].length - 1;
+      peer.connections[partner_peer][last_index].send(msg);
+      var message = '<div class="message">'+my_name+' : '+msg+'</div>';
+      $("#conversations .reconnecting").after(message);
     }
   }
 
@@ -157,14 +162,6 @@ $(document).ready(function() {
     }
   	return false;
   });
-
-  // Receive chat message from node
-  socket.on('receive_message',function(data) {
-    if ( data['chat_hash'] == chat_hash ) {
-      var message = '<div class="message">'+data['name']+' : '+data['message']+'</div>';
-      $("#conversations .reconnecting").after(message);
-    }
-  })
 
 
   // Disable/Enable partner webcam
@@ -198,9 +195,9 @@ $(document).ready(function() {
 
       // Close other stream except use stream
       for(var x  in peer.connections[partner_peer]) {
-        var conn = peer.connections[partner_peer][x];
-        if ( conn.id != window.existingCall.id ) {
-          conn.close();
+        var con = peer.connections[partner_peer][x];
+        if ( con.id != window.existingCall.id ) {
+          con.close();
         }
       }
 
@@ -244,7 +241,9 @@ $(document).ready(function() {
   		message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
   		$("#conversations .reconnecting").after(message);
   		peer.connections = {};
-  	}
+  	} else if ( data['chat_hash'] == chat_hash && data['user_id'] == my_id ) {
+      init();
+    }
   })
 
 
