@@ -150,14 +150,14 @@ $(document).ready(function() {
         onchat = false;
 		  	socket.emit('leave_room',{user_id:my_id});
 		  	socket.emit('disconnect_chat',{chat_hash:chat_hash});
-		  	$(location).attr('href','/dongdong');
+		  	$(location).attr('href','../');
 		  }
 	  } else {
       var confirmation = confirm('Are you sure you want to leave this room?');
       if ( confirmation == true ) {
         socket.emit('leave_room',{user_id:my_id});
         socket.emit('disconnect_chat',{chat_hash:chat_hash});
-        $(location).attr('href','/dongdong');
+        $(location).attr('href','../');
       }
     }
   	return false;

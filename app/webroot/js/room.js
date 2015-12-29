@@ -1,9 +1,10 @@
 var Room = function() {
-	var R = {}; // Room
-	var E = {}; // Emit
-	var peer;
+	var room = room_id;
+	var chat_time = 300;
+	var peer = null;
 	var conn = null;
-	var receiver = {};
+	var timer = null;
+	var sec = 0;
 	var config = {
     host: location.origin.split('//')[1],
     port: '4500',
@@ -24,64 +25,86 @@ var Room = function() {
 	  }
 	}};
 
-
-	// function for Room
-	R.init = function() {
-		if ( typeof peer.connections != 'undefined' ) {
-			peer.connections = {};
-			peer._cleanup();
-		}
+	this.init = function() {
+		if(peer != null){
+	    peer.connections = {};
+	    peer._cleanup();
+	  }
 		peer = new Peer(config);
 		setPeerListener();
 		initializeCamera();
 	};
-	R.initializeCamera = function() {
+	var initializeCamera = function() {
 		navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                               	navigator.mozGetUserMedia || navigator.msGetUserMedia );
 		navigator.getUserMedia(constraints,setMyStream,errorMedia);
 	};
-	R.setMyStream = function() {
-		function(stream) {
-			window.localStream = stream;
-			setMyVideo();
-		}
+	var setVideoControls = function() {
+		localStorage.setItem('enable_video',true);
+	}
+	var setMyStream = function(stream) {
+		window.localStream = stream;
+		setMyVideo();
 	};
-	R.errorMedia = function(error) {
+	var errorMedia = function(error) {
 		displayErrorMedia(error);
 	};
-	R.setPeerListener = function() {
+	var setPeerListener = function() {
 		peer.on('call', function(call) {
-	    partner_peer = call.peer;
-		  var call.answer(window.localStream);
+			window.existingCall = call;
+		  call.answer(window.localStream);
+			call.on('stream',function(stream){setPartnerVideo();})
 			receiveMessage(call.peer);
 	  });
 	  peer.on('open',function(peer_id) {
-	  	E.addOnAir(peer_id);
+	  	myEmit.addOnAir(peer_id);
 	  })
 	};
-	R.call = function(to_call) {
-		var call = peer.call(to_call,localStream);
-	};
-	R.startCall = function(call) {
+	this.call = function(peer_id) {
+		var call = peer.call(peer_id,localStream);
 		window.existingCall = call;
-		call.on('stream',function(stream) {
-			setPartnerVideo();
-		})
+		call.on('stream',function(stream){setPartnerVideo();})
+		receiveMessage(call.peer);
 	};
-	R.sendMessage = function(msg) {
-		var last_index = peer.connections[partner_peer].length - 1;
-    var dist = peer.connections[partner_peer][last_index];
-    dist.send(msg);
+	this.save_chat = function() {
+		myEmit.save_chat();
+	}
+	this.sendMessage = function(msg) {
+		if(!jQuery.isEmptyObject(peer.connections))myEmit.sendMessage(msg);
 	};
-	R.receiveMessage = function(peer_id) {
+	var receiveMessage = function(peer_id) {
 		// Close existing connection
-		if (conn != null) conn.close();
+		if (conn != null)conn.close();
 		conn = peer.connect(peer_id);
 		conn.on('open',function() {
 			//Receive message
-			conn.on('data',function(data) {
-				ReceiveMessage(data);
+			conn.on('data',function(msg) {
+				ReceiveMessage({sender:partner_name,msg:msg});
 			});
 		})
-	}
-}
+	};
+	this.startTime = function(s) {
+		sec = s;
+		if(timer != null)clearInterval(timer);		
+		timer = setInterval(function() {
+			sec--;
+			setRemainingTime(sec);
+		},1000);
+	};
+	this.endChat = function() {
+		peer.connections = {};
+    peer._cleanup();
+    sec = chat_time;
+    endChat();
+    clearInterval(timer);
+	};
+	this.leaveRoom = function() {
+		myEmit.leaveRoom();
+	};
+	this.getPeer = function() {
+		return peer;
+	};
+
+	setVideoControls();
+
+};
