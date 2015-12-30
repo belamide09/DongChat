@@ -5,7 +5,7 @@ var partner_id = "<?php echo $partner_id?>";
 var partner_name = "<?php echo $partner_name?>";
 var my_id = "<?php echo $my_id?>";
 var my_name = "<?php echo $my_name?>";
-var disabled_video = <?php echo $disabled_video?>;
+localStorage.setItem('my_camera',<?php echo $enable_camera ? 'true' : 'false'?>);
 </script>
 <?php echo $this->Html->script('peer.min')?>
 <?php echo $this->Html->css('video_call')?>
@@ -29,7 +29,7 @@ var disabled_video = <?php echo $disabled_video?>;
 				<center> <video id="my-webcam" muted="true" autoplay></video> </center>
 			</div>
 			<div id="buttons">
-				<a href="#" class="btn btn-default btn-xs btn-disable-video <?php echo $disabled_video ? 'off' : 'onn'?>" disable-video="<?php echo $disabled_video?>">
+				<a href="#" class="btn btn-default btn-xs btn-enable-camera <?php echo $enable_camera ? 'onn' : 'off'?>" enable-camera="<?php echo $enable_camera?>">
 					<div></div>
 				</a>
 				<a href="#" class="btn btn-default btn-xs btn-sound-control off">
@@ -94,8 +94,9 @@ var myEmit = new RoomEmit();
 var myRoom = new Room();
 function setMyVideo() {
 	var has_displayed = typeof $("#my-webcam").attr('src') != 'undefined' ? true : false;
+	var enable = localStorage.my_camera == 'true' ? true : false;
 	var stream = window.localStream;
-	if(!has_displayed) {
+	if(!has_displayed && enable) {
     $('#my-webcam').prop('src', URL.createObjectURL(stream));
     console.warn('connected to video');
   }
@@ -110,21 +111,22 @@ function displayErrorMedia(error) {
 	console.warn(error);
 }
 function setPartnerVideo() {
-	var enable = localStorage.enable_video;
+	var enable = localStorage.partner_camera == 'true' ? true : false;
 	var stream = window.existingCall.remoteStream;
 	if(enable){
 		$('#partner-webcam').prop('src', URL.createObjectURL(stream));
-		$('#my-webcam').prop('src', URL.createObjectURL(localStream));
 	}else{
 		$('#partner-webcam').removeAttr('src');
-		$('#my-webcam').removeAttr('src');
 	}
+}
+function removePartnerVideo() {
+	$("#partner-webcam").removeAttr('src');
 }
 function SendMessage() {
   var msg = $("#txt-message").val();
   $("#txt-message").val("");
   $("#txt-message")[0].focus();
-  if (msg.trim()){
+  if (msg.trim() && myEmit.onchat()){
     var message = '<div class="message">'+my_name+' : '+msg+'</div>';
     $("#conversations .reconnecting").after(message);
     myRoom.sendMessage(msg);
@@ -180,11 +182,62 @@ function endChat() {
   $(".btn-start-chat").removeClass('disable');
   $("#partner-webcam").attr('src',null);
 }
+function enableMyCamera() {
+	var enable = localStorage.my_camera == 'true' ? true : false;
+	var target = $(".btn-enable-camera");
+	$.post('VideoCall/enableCamera',{enable:enable});
+	target.attr('enable-camera',enable ? 1 : 0);
+	if(enable){
+		target.attr('class','btn btn-default btn-xs btn-enable-camera onn');
+    target.find("i").attr('class','fa fa-eye');
+		$('#my-webcam').prop('src', URL.createObjectURL(localStream));
+	}else{
+		target.attr('class','btn btn-default btn-xs btn-enable-camera off');
+    target.find("i").attr('class','fa fa-eye-slash');
+		$('#my-webcam').removeAttr('src');
+	}
+}
+function setBitRate() {
+  $("#bit-rate-range").hide();
+  myRoom.changeBitRate();
+}
 $(function() {
-	$(".btn-disable-video").on('click',function() {
-		var enable = $(this).attr('disable-video') == 0 ? true : false;
-		Room.enable_video(enable);
+  $(".btn-enable-camera").click(function() {
+    var t = parseInt($(this).attr('enable-camera')) ? false : true;
+    myRoom.toggle_video(t);
 	});
+	$(".btn-resolution").click(function() {
+		var showed = $("#resolution-list").css('display') == 'none' ? false : true;
+    showed ? $("#resolution-list").hide() : $("#resolution-list").show();
+  })
+  $("#resolution-list li").click(function() {
+    var class_name = $(this).attr('class');
+    var selected = typeof class_name != 'undefined' && class_name == 'selected' ? true : false;
+    $("#resolution-list").hide();
+    if(!selected){
+    	$('#resolution-list li').removeAttr('style');
+      $("#resolution-list li").removeClass('selected');
+      $(this).addClass('selected');
+      var resolution = $(this).attr('data-value');
+      myRoom.changeResolution(resolution);
+    }
+  })
+  $(".btn-bitrate").click(function() {
+    var showed = $("#bit-rate-range").css('display') == 'none' ? false : true;
+    showed ? $("#bit-rate-range").hide() : $("#bit-rate-range").show();
+  })
+  $("#bit-rate-range").slider({
+    orientation: "vertical",
+    range: "min",
+    min: 1,
+    max: 30,
+    value: 30,
+    slide:function(event,ui) {
+      myRoom.changeBitRateValue(ui.value);
+    }
+  });
+  $("#bit-rate-range").mouseup(setBitRate);
+  $("#bit-rate-range").click(setBitRate);
 	$(".btn-start-chat").on('click',function() {
 		var url = 'VideoCall/getPartnerPeer';
 		$.post(url,{user_id:partner_id,room_id:room_id},function(data) {

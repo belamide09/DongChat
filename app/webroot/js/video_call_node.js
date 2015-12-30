@@ -27,7 +27,7 @@ $(document).ready(function() {
   // Disable/Enable video to your chat partner
   $(".btn-disable-video").click(function() {
     disabled_video = parseInt($(this).attr('disable-video')) ? 0 : 1;
-    $(this).attr('disable-video',disabled_video);
+    localStorage.my_camera
     socket.emit('toggle_video_disabled',{user_id:my_id,disabled:disabled_video});
     if ( disabled_video ) {
       $(this).attr('class','btn btn-default btn-xs btn-disable-video off');

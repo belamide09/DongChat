@@ -330,8 +330,8 @@ io.on('connection',function(socket) {
 		EndChat(data['chat_hash']);
 	})
 
-	socket.on('toggle_video_disabled',function(data) {
-		io.emit('toggle_video_disabled',data);
+	socket.on('toggle_video',function(data) {
+		io.emit('toggle_video',data);
 	})
 
 	socket.on('get_video_stream',function(data) {

@@ -5,13 +5,16 @@ var Room = function() {
 	var conn = null;
 	var timer = null;
 	var sec = 0;
+	var resolution = 360;
+	var bit_rate = 30;
+	var partner_peer = '';
 	var config = {
     host: location.origin.split('//')[1],
     port: '4500',
     path: '/',
     debug: 2
   };
-  // Video controls
+
   var constraints = {
 	  audio: true,
 	  video: {
@@ -52,6 +55,7 @@ var Room = function() {
 	var setPeerListener = function() {
 		peer.on('call', function(call) {
 			window.existingCall = call;
+			partner_peer = call.peer;
 		  call.answer(window.localStream);
 			call.on('stream',function(stream){setPartnerVideo();})
 			receiveMessage(call.peer);
@@ -60,24 +64,82 @@ var Room = function() {
 	  	myEmit.addOnAir(peer_id);
 	  })
 	};
+	this.toggle_video = function(t) {
+		myEmit.toggle_video(t);
+	};
+	this.changeResolution = function(r) {
+		resolution = r;
+		var data = {
+      partner_id: partner_id,
+      peer 			: peer.id,
+      resolution: resolution,
+      bit_rate: bit_rate
+    }
+		myEmit.changeVideoQuality(data);
+	};
+	this.changeBitRate = function() {
+		var data = {
+      partner_id: partner_id,
+      peer 			: peer.id,
+      resolution: resolution,
+      bit_rate: bit_rate
+    }
+		myEmit.changeVideoQuality(data);
+	};
+	this.changeVideoQuality = function(data) {
+		changeMyResolution(data.resolution);
+		changeMyBitRate(data.bit_rate);
+		partner_peer = data.peer;
+		navigator.getUserMedia = (  navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                            		navigator.mozGetUserMedia || navigator.msGetUserMedia );
+		navigator.getUserMedia(constraints,applyVideoQuality,errorMedia);
+	};
+	var applyVideoQuality = function(stream) {
+		localStream = stream;
+		closePreviousConnection();
+		peer.call(partner_peer,stream);
+		receiveMessage(partner_peer);
+	};
+	var changeMyResolution = function(r) {
+		constraints.video.mandatory.minWidth   = r;
+	  constraints.video.mandatory.minHeight  = r;
+	  constraints.video.mandatory.maxWidth   = r;
+	  constraints.video.mandatory.maxHeight  = r;
+	};
+	this.changeBitRateValue = function(br) {
+		bit_rate = br;
+	};
+	var changeMyBitRate = function(br) {
+		constraints.video.mandatory.minFrameRate = br != '' ? br : bit_rate;
+    constraints.video.mandatory.maxFrameRate = br != '' ? br : bit_rate;
+	};
 	this.call = function(peer_id) {
 		var call = peer.call(peer_id,localStream);
+		partner_peer = peer_id;
 		window.existingCall = call;
 		call.on('stream',function(stream){setPartnerVideo();})
 		receiveMessage(call.peer);
 	};
 	this.save_chat = function() {
 		myEmit.save_chat();
-	}
+	};
+	var closePreviousConnection = function() {
+		var conns = peer.connections;
+		var peer_id = Object.keys(conns)[0];
+    for(var x  in peer.connections[peer_id]) {
+      var con = peer.connections[peer_id][x];
+      if(con.type == 'media' && con.id != window.existingCall.id){
+        con.close();
+      }
+    }
+	};
 	this.sendMessage = function(msg) {
 		if(!jQuery.isEmptyObject(peer.connections))myEmit.sendMessage(msg);
 	};
 	var receiveMessage = function(peer_id) {
-		// Close existing connection
-		if (conn != null)conn.close();
+		if(conn != null)conn.close();
 		conn = peer.connect(peer_id);
 		conn.on('open',function() {
-			//Receive message
 			conn.on('data',function(msg) {
 				ReceiveMessage({sender:partner_name,msg:msg});
 			});
@@ -104,7 +166,6 @@ var Room = function() {
 	this.getPeer = function() {
 		return peer;
 	};
-
 	setVideoControls();
 
 };

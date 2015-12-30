@@ -9,15 +9,24 @@ var RoomEmit = function() {
 	this.addOnAir = function(peer_id) {
 		socket.emit('add_onair_user',{user_id:user_id,peer_id:peer_id});
 	};
-	this.enable_camera = function(t) {
-		socket.emit('enable_camera',{enable:t});
+	this.toggle_video = function(t) {
+		socket.emit('toggle_video',{user_id:user_id,enable:t});
 	};
+	this.changeVideoQuality = function(data) {
+    socket.emit('change_video_quality',data);
+	};
+	this.changeBitRate = function(data) {
+		socket.emit('change_video_quality',data);
+	}
 	this.save_chat = function() {
 		var params = {
 			sender_id: user_id,
 			recipient_id: partner_id
 		}
 		socket.emit('save_chat',params);
+	};
+	this.onchat = function() {
+		return onchat;
 	};
 	this.sendMessage = function(msg) {
 		var peer = myRoom.getPeer();
@@ -69,7 +78,8 @@ var RoomEmit = function() {
     	myRoom.call(data['peer']);
 			reconnectPartner();
 		}else if(data['user_id'] == my_id){
-			$("#conversations .reconnecting").after('<div class="message">Server: You are now reconnected to the chat...</div>');
+			var message = '<div class="message">Server: You are now reconnected to the chat...</div>';
+			$("#conversations .reconnecting").after(message);
       if(data['partner'] == null)NotifyDisconnectPartner();
 		}
   })
@@ -83,5 +93,22 @@ var RoomEmit = function() {
 		  onchat = false;
 		  myRoom.endChat();
   	}
-  })
+  });
+  socket.on('toggle_video',function(data) {
+    if(data['user_id'] == partner_id && onchat){
+    	localStorage.setItem('partner_camera',data['enable']);
+    	setPartnerVideo();
+    } else if(data['user_id'] == partner_id && !onchat){
+    	localStorage.setItem('partner_camera',data['enable']);
+    }
+    if(data['user_id'] == user_id){
+    	localStorage.setItem('my_camera',data['enable']);
+    	enableMyCamera();
+    }
+  });
+  socket.on('change_video_quality',function(data) {
+    if(data['partner_id'] == my_id){
+    	myRoom.changeVideoQuality({resolution:data['resolution'],bit_rate:data['bit_rate'],peer:data['peer']});
+    }
+  });
 };

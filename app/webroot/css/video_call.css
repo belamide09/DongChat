@@ -199,13 +199,13 @@ a.btn-default.onn {
 a.btn-default.off {
 	background: #000;
 }
-a.btn-default.btn-disable-video.onn > div {
+a.btn-default.btn-enable-camera.onn > div {
 	background: url('../img/enable_video.png') no-repeat center center;
 	width: 30px;
 	height: 30px;
 	margin-left: -3px;
 }
-a.btn-default.btn-disable-video.off > div {
+a.btn-default.btn-enable-camera.off > div {
 	background: url('../img/disable_video.png') no-repeat center center;
 	width: 30px;
 	height: 30px;
