@@ -57,7 +57,7 @@ var Room = function() {
 			window.existingCall = call;
 			partner_peer = call.peer;
 		  call.answer(window.localStream);
-			call.on('stream',function(stream){setPartnerVideo();})
+			call.on('stream',function(stream){setPartnerVideo(stream);})
 			receiveMessage(call.peer);
 	  });
 	  peer.on('open',function(peer_id) {
@@ -117,7 +117,7 @@ var Room = function() {
 		var call = peer.call(peer_id,localStream);
 		partner_peer = peer_id;
 		window.existingCall = call;
-		call.on('stream',function(stream){setPartnerVideo();})
+		call.on('stream',function(stream){setPartnerVideo(stream);})
 		receiveMessage(call.peer);
 	};
 	this.save_chat = function() {

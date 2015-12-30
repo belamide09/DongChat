@@ -110,9 +110,8 @@ function StartCall(peer_id) {
 function displayErrorMedia(error) {
 	console.warn(error);
 }
-function setPartnerVideo() {
+function setPartnerVideo(stream) {
 	var enable = localStorage.partner_camera == 'true' ? true : false;
-	var stream = window.existingCall.remoteStream;
 	if(enable){
 		$('#partner-webcam').prop('src', URL.createObjectURL(stream));
 	}else{
@@ -137,7 +136,7 @@ function ReceiveMessage(data) {
   $("#conversations .reconnecting").after(message);
 }
 function reconnectPartner() {
-	console.warn( 'reconnect!' );
+	console.warn('reconnected to the chat');
   $("#conversations .reconnecting").after('<div class="message">Server: '+partner_name+' is now connected to the chat</div>');
 	$(".btn-end-chat").show();
 }
@@ -238,7 +237,14 @@ $(function() {
   });
   $("#bit-rate-range").mouseup(setBitRate);
   $("#bit-rate-range").click(setBitRate);
+  $(document).click(function(evt) {
+    var not_resolution = !evt.target.className.match('btn-resolution') ? true : false;
+    if(not_resolution)$("#resolution-list").hide();
+    var not_bitrate = !evt.target.className.match('btn-bitrate') ? true : false;
+    if(not_bitrate)$("#bit-rate-range").hide();
+  });
 	$(".btn-start-chat").on('click',function() {
+		enableStart(false);
 		var url = 'VideoCall/getPartnerPeer';
 		$.post(url,{user_id:partner_id,room_id:room_id},function(data) {
 			if(data['peer']){
