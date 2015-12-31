@@ -71,7 +71,7 @@ class VideoCallController extends AppController {
 			return $this->redirect('/');
 		}
 	}
-	public function getPartnerPeer() {
+	public function getPeer() {
 		if ( $this->request->is('post') ) {
 			$this->autoRender = false;
 			$user = $this->OnairUser->findById($this->request->data['user_id']);

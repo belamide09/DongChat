@@ -201,7 +201,7 @@ $(document).ready(function() {
 })
 
 function ChangeResolution(user_id,partner_id,resolution) {
-	var url = 'VideoCall/getPeer';
+	var url = 'ChatMonitor/getPeer';
 	$.post(url,{user_id:user_id},function(data) { 
 		var data = {
 	    partner_id: partner_id,

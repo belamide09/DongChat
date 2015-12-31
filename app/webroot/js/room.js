@@ -134,7 +134,9 @@ var Room = function() {
     }
 	};
 	this.sendMessage = function(msg) {
-		if(!jQuery.isEmptyObject(peer.connections))myEmit.sendMessage(msg);
+		if(!jQuery.isEmptyObject(peer.connections)){
+			myEmit.sendMessage(partner_peer,msg);
+		}
 	};
 	var receiveMessage = function(peer_id) {
 		if(conn != null)conn.close();
@@ -166,6 +168,7 @@ var Room = function() {
 	this.getPeer = function() {
 		return peer;
 	};
+	this.receiveMessage = receiveMessage;
 	setVideoControls();
 
 };

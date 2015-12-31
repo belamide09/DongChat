@@ -28,10 +28,9 @@ var RoomEmit = function() {
 	this.onchat = function() {
 		return onchat;
 	};
-	this.sendMessage = function(msg) {
+	this.sendMessage = function(peer_id,msg) {
 		var peer = myRoom.getPeer();
 		var conns = peer.connections;
-		var peer_id = Object.keys(conns)[0];
 		conns = conns[peer_id];
 		var last_index = conns.length - 1;
     var dist = conns[last_index];
@@ -52,7 +51,24 @@ var RoomEmit = function() {
     $(location).attr('href','../');
 	}
 	socket.on('connect_server',function(data) {
-		myRoom.init();
+    if(chat_hash && data['chat_hash'] == chat_hash){
+      enableStart(false);
+    }
+    if(data['user_id'] == user_id || data['user_id'] != partner_id){
+      var t = localStorage.enable_video == 'true' ? true : false;
+      var p = {user_id:user_id,enable:t};
+      socket.emit('toggle_video',p);
+    }
+    if(data['user_id'] == user_id && data['chat_hash'] != ''){
+      ReconnectMeServer();
+      myRoom.init();
+    }else if(data['user_id'] == user_id){
+      hideReconnectLoader();
+      myRoom.init();
+    }else if(data['user_id'] == partner_id){
+      enableStart(true);
+    }
+    
 	})
   socket.on('append_chathash',function(data) {
   	var condition = data['sender_id'] == user_id || data['recipient_id'] == user_id;
@@ -65,11 +81,13 @@ var RoomEmit = function() {
   	if(data['chat_hash'] == chat_hash){
   		onchat = true;
   		myRoom.startTime(data['remaining_time']);
+      window.onbeforeunload = leaveChatValidation;
     }
   });
   socket.on('end_chat',function(data) {
   	if(data['chat_hash'] == chat_hash){
   		chat_hash = null;
+      onchat = false;
   		myRoom.endChat();
   	}
   });
@@ -95,10 +113,13 @@ var RoomEmit = function() {
   	}
   });
   socket.on('toggle_video',function(data) {
-    if(data['user_id'] == partner_id && onchat){
+    if(data['user_id'] == partner_id && onchat && window.existingCall != null){
     	localStorage.setItem('partner_camera',data['enable']);
-    	setPartnerVideo();
-    } else if(data['user_id'] == partner_id && !onchat){
+      var stream = window.existingCall.remoteStream;
+    	setPartnerVideo(stream);
+    }else if(data['user_id'] == partner_id && onchat && window.existingCall == null){
+      localStorage.setItem('partner_camera',data['enable']);
+    }else if(data['user_id'] == partner_id && !onchat){
     	localStorage.setItem('partner_camera',data['enable']);
     }
     if(data['user_id'] == user_id){

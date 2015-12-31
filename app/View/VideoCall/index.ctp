@@ -90,6 +90,7 @@ $(function() {
 <script>
 var timer;
 var end;
+window.existingCall = null;
 var myEmit = new RoomEmit();
 var myRoom = new Room();
 function setMyVideo() {
@@ -144,6 +145,13 @@ function NotifyDisconnectPartner() {
   var message = '<div class="message">Server: <span style="color:blue;">'+partner_name+' may also reconnect from this chat so please wait for a while</span></div>';
   message += '<div class="message">Server: <span style="color:red;">'+partner_name+' has been disconnected... Please wait until the time finish</span></div>';
   $("#conversations .reconnecting").after(message);
+}
+function ReconnectMeServer() {
+	$("#conversations .reconnecting").after('<div class="message">Server: Reconnecting to the chat</div>');
+  $(".reconnecting").hide();
+}
+function hideReconnectLoader() {
+	$(".reconnecting").hide();
 }
 function enableStart(t) {
 	if(t){
@@ -200,6 +208,10 @@ function setBitRate() {
   $("#bit-rate-range").hide();
   myRoom.changeBitRate();
 }
+function leaveChatValidation() {
+	var msg = 'You are still chatting with someone. You can only leave this page after chatting';
+  if(myEmit.onchat())return msg;
+}
 $(function() {
   $(".btn-enable-camera").click(function() {
     var t = parseInt($(this).attr('enable-camera')) ? false : true;
@@ -245,7 +257,7 @@ $(function() {
   });
 	$(".btn-start-chat").on('click',function() {
 		enableStart(false);
-		var url = 'VideoCall/getPartnerPeer';
+		var url = 'VideoCall/getPeer';
 		$.post(url,{user_id:partner_id,room_id:room_id},function(data) {
 			if(data['peer']){
 				StartCall(data['peer']);

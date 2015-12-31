@@ -10,7 +10,7 @@ class ChatMonitorController extends AppController {
 	);
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('index');
+		$this->Auth->allow();
 	}
 	public function index() {
 		$conditions = array(
@@ -27,6 +27,16 @@ class ChatMonitorController extends AppController {
     );
     $data = $this->paginate();
 		$this->set(compact('data'));
+	}
+	public function getPeer() {
+		if ( $this->request->is('post') ) {
+			$this->autoRender = false;
+			$user = $this->OnairUser->findById($this->request->data['user_id']);
+			$response['peer'] = $user['OnairUser']['peer'];
+			echo json_encode($response);
+		} else {
+			return $this->redirect('/');
+		}
 	}
 	public function getChatPeer() {
 		if ( $this->request->is('post') ) {
