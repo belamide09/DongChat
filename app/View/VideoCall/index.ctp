@@ -11,8 +11,6 @@ localStorage.setItem('my_camera',<?php echo $enable_camera ? 'true' : 'false'?>)
 <?php echo $this->Html->css('video_call')?>
 <?php echo $this->Html->script('room')?>
 <?php echo $this->Html->script('room_emit')?>
-<?php //echo $this->Html->script('video_call')?>
-<?php //echo $this->Html->script('video_call_node')?>
 <div id="header">
 	<a class="btn btn-sm btn-leave disable" rel="modal" href="#dialog_logout">LEAVE</a>
 	<div id="remaining-time-container">
@@ -126,7 +124,7 @@ function SendMessage() {
   var msg = $("#txt-message").val();
   $("#txt-message").val("");
   $("#txt-message")[0].focus();
-  if (msg.trim() && myEmit.onchat()){
+  if(msg.trim() && myEmit.onchat()){
     var message = '<div class="message">'+my_name+' : '+msg+'</div>';
     $("#conversations .reconnecting").after(message);
     myRoom.sendMessage(msg);
@@ -164,19 +162,19 @@ function enableStart(t) {
 }
 function setRemainingTime(sec) {
 	var time = convertTime(sec);
-	if ( sec <= 0 ) {
+	if(sec <= 0){
     $("#remaining-time").text('--:--');
-  } else {
+  }else{
     $("#remaining-time").text(time);
   }
 }
 function convertTime(time) {
   var minutes = Math.floor(time / 60);
   var seconds = time % 60;
-  if ( minutes < 10 ) {
+  if(minutes < 10){
     minutes = '0'+minutes;
   }
-  if ( seconds < 10 ) {
+  if(seconds < 10){
     seconds = '0'+seconds;
   }
   return minutes+":"+seconds;
