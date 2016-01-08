@@ -1,4 +1,5 @@
-var Room = function() {
+var Room = (function() {
+	var Public = {}; //Public or Accesible outside
 	var room = room_id;
 	var chat_time = 300;
 	var peer = null;
@@ -28,7 +29,7 @@ var Room = function() {
 	  }
 	}};
 
-	this.init = function() {
+	Public.init = function() {
 		if(peer != null){
 	    peer.connections = {};
 	    peer._cleanup();
@@ -61,13 +62,13 @@ var Room = function() {
 			receiveMessage(call.peer);
 	  });
 	  peer.on('open',function(peer_id) {
-	  	myEmit.addOnAir(peer_id);
+	  	RoomEmit.addOnAir(peer_id);
 	  })
 	};
-	this.toggle_video = function(t) {
-		myEmit.toggle_video(t);
+	Public.toggle_video = function(t) {
+		RoomEmit.toggle_video(t);
 	};
-	this.changeResolution = function(r) {
+	Public.changeResolution = function(r) {
 		resolution = r;
 		var data = {
       partner_id: partner_id,
@@ -75,18 +76,18 @@ var Room = function() {
       resolution: resolution,
       bit_rate: bit_rate
     }
-		myEmit.changeVideoQuality(data);
+		RoomEmit.changeVideoQuality(data);
 	};
-	this.changeBitRate = function() {
+	Public.changeBitRate = function() {
 		var data = {
       partner_id: partner_id,
       peer 			: peer.id,
       resolution: resolution,
       bit_rate: bit_rate
     }
-		myEmit.changeVideoQuality(data);
+		RoomEmit.changeVideoQuality(data);
 	};
-	this.changeVideoQuality = function(data) {
+	Public.changeVideoQuality = function(data) {
 		changeMyResolution(data.resolution);
 		changeMyBitRate(data.bit_rate);
 		partner_peer = data.peer;
@@ -106,22 +107,22 @@ var Room = function() {
 	  constraints.video.mandatory.maxWidth   = r;
 	  constraints.video.mandatory.maxHeight  = r;
 	};
-	this.changeBitRateValue = function(br) {
+	Public.changeBitRateValue = function(br) {
 		bit_rate = br;
 	};
 	var changeMyBitRate = function(br) {
 		constraints.video.mandatory.minFrameRate = br != '' ? br : bit_rate;
     constraints.video.mandatory.maxFrameRate = br != '' ? br : bit_rate;
 	};
-	this.call = function(peer_id) {
+	Public.call = function(peer_id) {
 		var call = peer.call(peer_id,localStream);
 		partner_peer = peer_id;
 		window.existingCall = call;
 		call.on('stream',function(stream){setPartnerVideo(stream);})
 		receiveMessage(call.peer);
 	};
-	this.save_chat = function() {
-		myEmit.save_chat();
+	Public.save_chat = function() {
+		RoomEmit.save_chat();
 	};
 	var closePreviousConnection = function() {
 		var conns = peer.connections;
@@ -133,9 +134,9 @@ var Room = function() {
       }
     }
 	};
-	this.sendMessage = function(msg) {
+	Public.sendMessage = function(msg) {
 		if(!jQuery.isEmptyObject(peer.connections)){
-			myEmit.sendMessage(partner_peer,msg);
+			RoomEmit.sendMessage(partner_peer,msg);
 		}
 	};
 	var receiveMessage = function(peer_id) {
@@ -147,7 +148,7 @@ var Room = function() {
 			});
 		})
 	};
-	this.startTime = function(s) {
+	Public.startTime = function(s) {
 		sec = s;
 		if(timer != null)clearInterval(timer);		
 		timer = setInterval(function() {
@@ -155,20 +156,19 @@ var Room = function() {
 			setRemainingTime(sec);
 		},1000);
 	};
-	this.endChat = function() {
+	Public.endChat = function() {
 		peer.connections = {};
     peer._cleanup();
     sec = chat_time;
     endChat();
     clearInterval(timer);
 	};
-	this.leaveRoom = function() {
-		myEmit.leaveRoom();
+	Public.leaveRoom = function() {
+		RoomEmit.leaveRoom();
 	};
-	this.getPeer = function() {
+	Public.getPeer = function() {
 		return peer;
 	};
-	this.receiveMessage = receiveMessage;
 	setVideoControls();
-
-};
+	return Public;
+})();

@@ -1,42 +1,48 @@
-var RoomEmit = function() {
-	var user_id = my_id;
+var RoomEmit = (function() {
+  var Public = {}; //Public or Accesible outside
+	var Room;
+  var user_id = my_id;
 	var chat_hash = null;
 	var onchat = false;
 	var query = {query:"user_id="+my_id+"&room_id="+room_id+"&name="+my_name+"&partner_type="+partner_type};
 	var socket = io.connect(location.origin+':4000',query);
 
+
 	// Add user onair table
-	this.addOnAir = function(peer_id) {
+	Public.initRoom = function(r) {
+    Room = r;
+  };
+  Public.addOnAir = function(peer_id) {
 		socket.emit('add_onair_user',{user_id:user_id,peer_id:peer_id});
 	};
-	this.toggle_video = function(t) {
+	Public.toggle_video = function(t) {
 		socket.emit('toggle_video',{user_id:user_id,enable:t});
 	};
-	this.changeVideoQuality = function(data) {
+	Public.changeVideoQuality = function(data) {
     socket.emit('change_video_quality',data);
 	};
-	this.changeBitRate = function(data) {
+	Public.changeBitRate = function(data) {
 		socket.emit('change_video_quality',data);
 	}
-	this.save_chat = function() {
+	Public.save_chat = function() {
 		var params = {
 			sender_id: user_id,
 			recipient_id: partner_id
 		}
 		socket.emit('save_chat',params);
 	};
-	this.onchat = function() {
+	Public.onchat = function() {
 		return onchat;
 	};
-	this.sendMessage = function(peer_id,msg) {
-		var peer = myRoom.getPeer();
+	Public.sendMessage = function(peer_id,msg) {
+		var peer = Room.getPeer();
 		var conns = peer.connections;
 		conns = conns[peer_id];
 		var last_index = conns.length - 1;
     var dist = conns[last_index];
     dist.send(msg);
 	};
-	this.leaveRoom = function() {
+	Public.leaveRoom = function() {
 		if(onchat){
 	  	var flag = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
 	  	if(flag)leave();
@@ -48,7 +54,7 @@ var RoomEmit = function() {
 	var leave = function() {
     socket.emit('leave_room',{user_id:my_id});
     socket.emit('disconnect_chat',{chat_hash:chat_hash});
-    $(location).attr('href','../');
+    redirectToMain();
 	}
 	socket.on('connect_server',function(data) {
     if(chat_hash && data['chat_hash'] == chat_hash){
@@ -61,10 +67,10 @@ var RoomEmit = function() {
     }
     if(data['user_id'] == user_id && data['chat_hash'] != ''){
       ReconnectMeServer();
-      myRoom.init();
+      Room.init();
     }else if(data['user_id'] == user_id){
       hideReconnectLoader();
-      myRoom.init();
+      Room.init();
     }else if(data['user_id'] == partner_id){
       enableStart(true);
     }
@@ -80,7 +86,7 @@ var RoomEmit = function() {
   socket.on('start_chattime',function(data) {
   	if(data['chat_hash'] == chat_hash){
   		onchat = true;
-  		myRoom.startTime(data['remaining_time']);
+  		Room.startTime(data['remaining_time']);
       window.onbeforeunload = leaveChatValidation;
     }
   });
@@ -88,12 +94,12 @@ var RoomEmit = function() {
   	if(data['chat_hash'] == chat_hash){
   		chat_hash = null;
       onchat = false;
-  		myRoom.endChat();
+  		Room.endChat();
   	}
   });
   socket.on('reconnect_chat_partner',function(data) {
     if(data['user_id'] == partner_id){
-    	myRoom.call(data['peer']);
+    	Room.call(data['peer']);
 			reconnectPartner();
 		}else if(data['user_id'] == my_id){
 			var message = '<div class="message">Server: You are now reconnected to the chat...</div>';
@@ -109,7 +115,7 @@ var RoomEmit = function() {
      	enableStart(true);
     	chat_hash = null;
 		  onchat = false;
-		  myRoom.endChat();
+		  Room.endChat();
   	}
   });
   socket.on('toggle_video',function(data) {
@@ -129,7 +135,8 @@ var RoomEmit = function() {
   });
   socket.on('change_video_quality',function(data) {
     if(data['partner_id'] == my_id){
-    	myRoom.changeVideoQuality({resolution:data['resolution'],bit_rate:data['bit_rate'],peer:data['peer']});
+    	Room.changeVideoQuality({resolution:data['resolution'],bit_rate:data['bit_rate'],peer:data['peer']});
     }
   });
-};
+  return Public;
+})();
