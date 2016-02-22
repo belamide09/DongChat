@@ -4,10 +4,10 @@ var fs 					= require('fs');
 var express 		= require('express');
 var app 				= express();
 var mysql       = require("mysql");
-var options = {
-	key: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/inn-devel.key'),
-  cert: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/STAR_inn-devel_com.crt'),
-  ca: fs.readFileSync('/etc/httpd/ssl/fdc-signal/STAR_inn-devel_com/STAR_inn-devel_com.cer')
+var options 		= {
+	key: fs.readFileSync('C:/xampp/apache/conf/ssl.key/server.key'),
+  cert: fs.readFileSync('C:/xampp/apache/conf/ssl.crt/server.crt'),
+  ca: fs.readFileSync('C:/xampp/apache/conf/ssl.csr/server.csr')
 };
 var PeerServer 	= require('peer').PeerServer;
 var https				= require('https').createServer(options,app);
@@ -143,6 +143,7 @@ io.on('connection',function(socket) {
 		if ( typeof user_id != 'undefined' ) {
 			io.emit('remove_room_mate',{partner:user_id});
 		}
+		io.emit('disable_start',{user_id:user_id});
 	})
 
 	function delete_empty_rooms() {

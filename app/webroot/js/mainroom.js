@@ -30,7 +30,7 @@ $(document).ready(function() {
   setVideoSettings();
 
   peer = new Peer({
-    host: location.origin.split('//')[1],
+    host: 'localhost',
     port: '4500',
     path: '/',
     debug: 2

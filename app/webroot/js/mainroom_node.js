@@ -1,5 +1,5 @@
 
-var socket = io.connect(location.origin+':4000');
+var socket = io.connect('https://localhost:4000');
 $(document).ready(function () {
 
 	$( "#my-webcam-container" ).resizable({
@@ -50,6 +50,6 @@ $(document).ready(function () {
 
 function JoinRoom(room_id) {
 	socket.emit('join_room',{room_id: room_id,user_id: my_id,name: my_name});
-	$(location).attr('href','/dongdong/VideoCall');
+	$(location).attr('href','https://dongchat.local/DongChat/VideoCall');
 	$('.room_id-'+room_id).remove();
 }

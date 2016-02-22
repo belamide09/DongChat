@@ -10,7 +10,7 @@ var Room = (function() {
 	var bit_rate = 30;
 	var partner_peer = '';
 	var config = {
-    host: location.origin.split('//')[1],
+    host: 'localhost',
     port: '4500',
     path: '/',
     debug: 2

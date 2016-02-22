@@ -1,17 +1,13 @@
 var RoomEmit = (function() {
   var Public = {}; //Public or Accesible outside
-	var Room;
   var user_id = my_id;
 	var chat_hash = null;
 	var onchat = false;
 	var query = {query:"user_id="+my_id+"&room_id="+room_id+"&name="+my_name+"&partner_type="+partner_type};
-	var socket = io.connect(location.origin+':4000',query);
+	var socket = io.connect('https://localhost:4000',query);
 
 
 	// Add user onair table
-	Public.initRoom = function(r) {
-    Room = r;
-  };
   Public.addOnAir = function(peer_id) {
 		socket.emit('add_onair_user',{user_id:user_id,peer_id:peer_id});
 	};
@@ -57,7 +53,7 @@ var RoomEmit = (function() {
     redirectToMain();
 	}
 	socket.on('connect_server',function(data) {
-    if(chat_hash && data['chat_hash'] == chat_hash){
+    if(chat_hash && data['chat_hash'] == chat_hash && partner_id != ""){
       enableStart(false);
     }
     if(data['user_id'] == user_id || data['user_id'] != partner_id){
@@ -76,6 +72,13 @@ var RoomEmit = (function() {
     }
     
 	})
+  socket.on('append_new_member',function(data){
+    if(data.room_id == room_id){
+      partner_name = data.name;
+      partner_id = data.user_id;
+      enableStart(true);
+    }
+  });
   socket.on('append_chathash',function(data) {
   	var condition = data['sender_id'] == user_id || data['recipient_id'] == user_id;
   	if(condition){;
@@ -88,12 +91,14 @@ var RoomEmit = (function() {
   		onchat = true;
   		Room.startTime(data['remaining_time']);
       window.onbeforeunload = leaveChatValidation;
+      enableStart(false);
     }
   });
   socket.on('end_chat',function(data) {
   	if(data['chat_hash'] == chat_hash){
   		chat_hash = null;
       onchat = false;
+      enableStart(true);
   		Room.endChat();
   	}
   });
@@ -101,18 +106,29 @@ var RoomEmit = (function() {
     if(data['user_id'] == partner_id){
     	Room.call(data['peer']);
 			reconnectPartner();
+      enableStart(false);
 		}else if(data['user_id'] == my_id){
 			var message = '<div class="message">Server: You are now reconnected to the chat...</div>';
 			$("#conversations .reconnecting").after(message);
       if(data['partner'] == null)NotifyDisconnectPartner();
 		}
   })
+  socket.on('disable_start',function(data){
+    console.log(user_id);
+    if(data.user_id == partner_id){
+      enableStart(false);
+    }
+  })
+  socket.on('notify_disconnect_chat_partner',function(data){
+    if(data['user_id'] == partner_id){
+      NotifyDisconnectPartner();
+    }
+  });
   socket.on('notify_disconnect_chat',function(data) {
   	if(data['chat_hash'] == chat_hash && chat_hash){
   		if(data['user_id'] == partner_id){
   			alert(data['name']+' has forcely end the chat');
   		}
-     	enableStart(true);
     	chat_hash = null;
 		  onchat = false;
 		  Room.endChat();

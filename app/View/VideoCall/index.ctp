@@ -15,7 +15,7 @@ localStorage.setItem('my_camera',<?php echo $enable_camera ? 'true' : 'false'?>)
 	<a class="btn btn-sm btn-leave disable" rel="modal" href="#dialog_logout">LEAVE</a>
 	<div id="remaining-time-container">
 		<span class="cnt_time" id="remaining-time">--:--</span>
-		<a href="#" class="btn btn-default btn-xs btn-start-chat <?php echo empty($partner_id) ? 'disabled' : 'onn'?>" title="Start chat" <?php if (empty($partner_id)) echo ' disabled'?>>
+		<a href="#" class="btn btn-default btn-xs btn-start-chat <?php echo empty($partner_id) ? 'disable' : 'onn'?>" title="Start chat" <?php if (empty($partner_id)) echo ' disabled'?>>
 			<div></div>
 		</a>
 	</div>
@@ -89,8 +89,6 @@ $(function() {
 var timer;
 var end;
 window.existingCall = null;
-var myEmit = new RoomEmit();
-var myRoom = new Room();
 function setMyVideo() {
 	var has_displayed = typeof $("#my-webcam").attr('src') != 'undefined' ? true : false;
 	var enable = localStorage.my_camera == 'true' ? true : false;
@@ -103,8 +101,8 @@ function setMyVideo() {
 function StartCall(peer_id) {
 	$(".btn-start-chat").attr('disabled','disabled');
   $(".btn-start-chat").addClass('disable');
-	myRoom.call(peer_id)
-	myRoom.save_chat();
+	Room.call(peer_id)
+	Room.save_chat();
 }
 function displayErrorMedia(error) {
 	console.warn(error);
@@ -124,10 +122,10 @@ function SendMessage() {
   var msg = $("#txt-message").val();
   $("#txt-message").val("");
   $("#txt-message")[0].focus();
-  if(msg.trim() && myEmit.onchat()){
+  if(msg.trim() && RoomEmit.onchat()){
     var message = '<div class="message">'+my_name+' : '+msg+'</div>';
     $("#conversations .reconnecting").after(message);
-    myRoom.sendMessage(msg);
+    Room.sendMessage(msg);
   }
 }
 function ReceiveMessage(data) {
@@ -195,7 +193,9 @@ function enableMyCamera() {
 	if(enable){
 		target.attr('class','btn btn-default btn-xs btn-enable-camera onn');
     target.find("i").attr('class','fa fa-eye');
-		$('#my-webcam').prop('src', URL.createObjectURL(localStream));
+    if(typeof(localStream) != 'undefined'){	
+			$('#my-webcam').prop('src', URL.createObjectURL(localStream));
+		}
 	}else{
 		target.attr('class','btn btn-default btn-xs btn-enable-camera off');
     target.find("i").attr('class','fa fa-eye-slash');
@@ -204,16 +204,20 @@ function enableMyCamera() {
 }
 function setBitRate() {
   $("#bit-rate-range").hide();
-  myRoom.changeBitRate();
+  Room.changeBitRate();
 }
 function leaveChatValidation() {
 	var msg = 'You are still chatting with someone. You can only leave this page after chatting';
-  if(myEmit.onchat())return msg;
+  if(RoomEmit.onchat())return msg;
 }
+function redirectToMain(){
+	$(location).attr('href','https://dongchat.local/DongChat');
+}
+
 $(function() {
   $(".btn-enable-camera").click(function() {
     var t = parseInt($(this).attr('enable-camera')) ? false : true;
-    myRoom.toggle_video(t);
+    Room.toggle_video(t);
 	});
 	$(".btn-resolution").click(function() {
 		var showed = $("#resolution-list").css('display') == 'none' ? false : true;
@@ -228,7 +232,7 @@ $(function() {
       $("#resolution-list li").removeClass('selected');
       $(this).addClass('selected');
       var resolution = $(this).attr('data-value');
-      myRoom.changeResolution(resolution);
+      Room.changeResolution(resolution);
     }
   })
   $(".btn-bitrate").click(function() {
@@ -242,7 +246,7 @@ $(function() {
     max: 30,
     value: 30,
     slide:function(event,ui) {
-      myRoom.changeBitRateValue(ui.value);
+      Room.changeBitRateValue(ui.value);
     }
   });
   $("#bit-rate-range").mouseup(setBitRate);
@@ -267,8 +271,7 @@ $(function() {
 	});
 	$("#send").click(SendMessage);
   $(".btn-leave").click(function() {
-  	myRoom.leaveRoom();
+  	Room.leaveRoom();
 	});
 });
 </script>
-1111

@@ -17,7 +17,7 @@ class MainRoomController extends AppController {
 	public function index() {
 		if ( $this->hasCurrentRoom() ) {
 			$this->autoRender = false;
-			return $this->redirect('/VideoCall');
+			return $this->redirect('https://dongchat.local/DongChat/VideoCall');
 		}
 		$my_name = $this->Auth->user('name');
 		$this->set(compact('my_name'));
