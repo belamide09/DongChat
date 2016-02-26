@@ -114,7 +114,6 @@ var RoomEmit = (function() {
 		}
   })
   socket.on('disable_start',function(data){
-    console.log(user_id);
     if(data.user_id == partner_id){
       enableStart(false);
     }
