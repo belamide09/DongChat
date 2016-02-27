@@ -14,7 +14,6 @@ var https				= require('https').createServer(options,app);
 var io 					= require('socket.io')(https);
 var router			= express.Router();
 var getIP       = require('ipware')().get_ip;
-var dateFormat  = require('dateformat');
 var seq 				= require('sequelize');
 var md5 				= require('MD5');
 
@@ -42,6 +41,14 @@ var chat_duration = 300;
 
 io.on('connection',function(socket) {
 
+	
+	Number.prototype.padLeft = function (n,str) {
+    return (this < 0 ? '-' : '') + 
+            Array(n-String(Math.abs(this)).length+1)
+             .join(str||'0') + 
+           (Math.abs(this));
+	}
+
 	var ip = function(socket){
     var socketId  = socket.id;
     var clientIp  = socket.request.connection.remoteAddress;
@@ -49,7 +56,11 @@ io.on('connection',function(socket) {
   };
 
   var today = function(){
-    return dateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
+  	var today = new Date();
+  	var date = today.getFullYear()+'-'+(today.getMonth()+1).padLeft(2)+'-'+today.getDate().padLeft(2);
+  	var time = today.getHours().padLeft(2)+':'+today.getMinutes().padLeft(2)+':'+today.getSeconds().padLeft(2);
+  	var datetime = date+' '+time;
+    return datetime;
   };
 
 	if (typeof(socket.handshake.query.user_id) != 'undefined') {
@@ -170,6 +181,7 @@ io.on('connection',function(socket) {
 
 	socket.on('join_room',function(data) {
 		Room.JoinRoom(data,function(result) {
+			console.log(result);
 			io.emit('remove_room',{room_id:data.room_id});
 			io.emit('append_new_member',{
 				room_id: data.room_id,

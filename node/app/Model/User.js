@@ -15,4 +15,11 @@ var User = con.define('users', {
 },
 {timestamps : false});
 
-module.exports = User;
+module.exports = (function(){
+
+	var X = {};
+
+	X.Table = User;
+
+	return X;
+})();

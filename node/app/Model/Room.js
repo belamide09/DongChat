@@ -59,11 +59,15 @@ module.exports = (function(){
 			if(result.dataValues.user_1 == null) {
 				Room.update({user_1:data.user_id},{
 					where: {id: data.room_id}
-				});
+				}).done(function(result){
+					callback(result);
+				})
 			} else {
 				Room.update({user_2:data.user_id},{
 					where: {id: data.room_id}
-				});
+				}).done(function(result){
+					callback(result);
+				})
 			}
 		});
 	};
