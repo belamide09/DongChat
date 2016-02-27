@@ -87,6 +87,7 @@ var RoomEmit = (function() {
   	}
   });
   socket.on('start_chattime',function(data) {
+    console.log(data);
   	if(data['chat_hash'] == chat_hash){
   		onchat = true;
   		Room.startTime(data['remaining_time']);

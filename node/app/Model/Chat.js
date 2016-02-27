@@ -21,13 +21,11 @@ module.exports = (function(){
     if(data.chat_hash != ''){
       var ChatHistory = data.ChatHistory;
       var OnairUser = data.OnairUser;
-      ChatHistory(data.chat_hash,function(result){
-        OnairUser.GetChatPartner({
-          chat_hash: data.chat_hash,
-          user_id: data.user_id
-        },function(result){
-          if(result)callback(result);
-        })
+      OnairUser.GetChatPartner({
+        chat_hash: data.chat_hash,
+        user_id: data.user_id
+      },function(result){
+        if(result)callback(result);
       });
     }
   };

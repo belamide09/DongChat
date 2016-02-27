@@ -42,6 +42,17 @@ var chat_duration = 300;
 
 io.on('connection',function(socket) {
 
+
+	var ip = function(socket){
+    var socketId  = socket.id;
+    var clientIp  = socket.request.connection.remoteAddress;
+    return clientIp;
+  };
+
+  var today = function(){
+    return dateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
+  };
+
 	if (typeof(socket.handshake.query.user_id) != 'undefined') {
 		// Reconnect
 		var user_id = socket.handshake.query.user_id;
@@ -54,13 +65,19 @@ io.on('connection',function(socket) {
 			chathash_arr: chathash_arr,
 			chat_time_arr: chat_time_arr,
 			ChatHistory: ChatHistory,
-			user_id: user_id
+			user_id: user_id,
+			datetime: today()
 		};
 
 		Connection.ReconnectUser(params,function(result){
 			// Can reconnect
 			if(result && result.time > 0){
+				var partner_id = result.partner_id;
+				var sender_id = result.sender_id;
+				var recipient_id = result.recipient_id;
 				var chat_hash = result.chat_hash;
+				var time = result.time;
+
 				chathash_arr[user_id] 	= chat_hash;
 				chathash_arr[partner_id]= chat_hash;
 
@@ -69,22 +86,21 @@ io.on('connection',function(socket) {
 					ChatInterval(chat_hash);
 				}
 				io.emit('append_chathash',{
-					sender_id: result.dataValues.sender_id,
-					recipient_id: result.dataValues.recipient_id,
+					sender_id: sender_id,
+					recipient_id: recipient_id,
 					chat_hash: chat_hash
 				});
 				io.emit('start_chattime',{
 					chat_hash:chat_hash,
 					remaining_time:time
 				});
-			}else{
-				io.emit('connect_server',{
-					user_id: user_id,
-					chat_hash: chat_hash,
-					room_id: room_id,
-					name: name
-				});
 			}
+			io.emit('connect_server',{
+				user_id: user_id,
+				chat_hash: chat_hash,
+				room_id: room_id,
+				name: name
+			});
 		});
 	}
 
@@ -96,8 +112,8 @@ io.on('connection',function(socket) {
 				user_id 	: user_id,
 				peer_id		: data.peer_id,
 				chat_hash : chat_hash,
-				datetime 	: new Date(),
-				ip				: getIp(socket)
+				datetime 	: today(),
+				ip				: ip(socket)
 			},function(){
 				var peer = data.peer_id;
 				var params = {
@@ -106,6 +122,7 @@ io.on('connection',function(socket) {
 					user_id: user_id,
 					chat_hash: chat_hash
 				};
+
 				Chat.ReconnectChat(params,function(result){
 					var data = {
 						user_id: user_id,
@@ -142,8 +159,8 @@ io.on('connection',function(socket) {
 		Room.Add({
 			user_1		: data.user_id,
 			user_id		: null,
-			datetime	: new Date(),
-			ip				: getIp(socket)
+			datetime	: today(),
+			ip				: ip(socket)
 		},function(result) {
 			io.emit('append_new_room',{id:result.dataValues.id});
 		});
@@ -189,12 +206,12 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('generate_chat_hash',function(data) {
-		var chat_hash = md5(new Date());
+		var chat_hash = md5(today());
 		ChatHistory.Add({
 			chat_hash    : chat_hash,
       sender_id    : data.sender_id,
       recipient_id : data.recipient_id,
-      datetime     : data.datetime,
+      datetime     : today(),
       end          : null
 		},function(){
 			OnairUser.AppendChatHash({
@@ -206,12 +223,12 @@ io.on('connection',function(socket) {
 	})
 
 	socket.on('save_chat',function(data) {
-		var chat_hash = md5(new Date());
+		var chat_hash = md5(today());
 		ChatHistory.Add({
 			chat_hash    : chat_hash,
       sender_id    : data.sender_id,
       recipient_id : data.recipient_id,
-      datetime     : data.datetime,
+      datetime     : today(),
       end          : null
 		},function(){
 			OnairUser.AppendChatHash({
@@ -259,7 +276,7 @@ io.on('connection',function(socket) {
     	remaining_time: chat_duration
     });
 		ChatHistory.UpdateChatEndTime({
-			datetime: new Date(),
+			datetime: today(),
 			chat_hash: chat_hash
     });
     OnairUser.RemoveChatHash(chat_hash);
@@ -313,9 +330,3 @@ app.get('/', function(req, res, next) { res.send('Hello world!'); });
 https.listen(4000,function() {
 	OnairUser.Clear();
 });
-
-function getIp(socket) {
-  var socketId  = socket.id;
-  var clientIp  = socket.request.connection.remoteAddress;
-  return clientIp;
-}
