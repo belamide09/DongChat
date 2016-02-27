@@ -38,19 +38,19 @@ var RoomEmit = (function() {
     var dist = conns[last_index];
     dist.send(msg);
 	};
-	Public.leaveRoom = function() {
+	Public.leaveRoom = function(location) {
 		if(onchat){
 	  	var flag = confirm('You are still chatting with someone. You can only leave after chatting.\nAre you sure you want to leave this room?');
-	  	if(flag)leave();
+	  	if(flag)leave(location);
 	  }else{
       var flag = confirm('Are you sure you want to leave this room?');
-      if(flag)leave();
+      if(flag)leave(location);
     }
 	};
-	var leave = function() {
-    socket.emit('leave_room',{user_id:my_id});
+	var leave = function(location) {
+    socket.emit('leave_room',{user_id:my_id,partner_type: partner_type});
     socket.emit('disconnect_chat',{chat_hash:chat_hash});
-    redirectToMain();
+    window.location.href = location;
 	}
 	socket.on('connect_server',function(data) {
     if(chat_hash && data['chat_hash'] == chat_hash && partner_id != ""){
@@ -87,7 +87,6 @@ var RoomEmit = (function() {
   	}
   });
   socket.on('start_chattime',function(data) {
-    console.log(data);
   	if(data['chat_hash'] == chat_hash){
   		onchat = true;
   		Room.startTime(data['remaining_time']);

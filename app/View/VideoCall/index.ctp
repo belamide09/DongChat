@@ -12,7 +12,7 @@ localStorage.setItem('my_camera',<?php echo $enable_camera ? 'true' : 'false'?>)
 <?php echo $this->Html->script('room')?>
 <?php echo $this->Html->script('room_emit')?>
 <div id="header">
-	<a class="btn btn-sm btn-leave disable" rel="modal" href="#dialog_logout">LEAVE</a>
+	<a class="btn btn-sm btn-leave disable" rel="modal" href="<?php echo $this->webroot;?>">LEAVE</a>
 	<div id="remaining-time-container">
 		<span class="cnt_time" id="remaining-time">--:--</span>
 		<a href="#" class="btn btn-default btn-xs btn-start-chat <?php echo empty($partner_id) ? 'disable' : 'onn'?>" title="Start chat" <?php if (empty($partner_id)) echo ' disabled'?>>
@@ -271,7 +271,8 @@ $(function() {
 	});
 	$("#send").click(SendMessage);
   $(".btn-leave").click(function() {
-  	Room.leaveRoom();
+  	Room.leaveRoom($(this).attr('href'));
+  	return false;
 	});
 });
 </script>

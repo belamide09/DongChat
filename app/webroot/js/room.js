@@ -163,8 +163,8 @@ var Room = (function() {
     endChat();
     clearInterval(timer);
 	};
-	Public.leaveRoom = function() {
-		RoomEmit.leaveRoom();
+	Public.leaveRoom = function(location) {
+		RoomEmit.leaveRoom(location);
 	};
 	Public.getPeer = function() {
 		return peer;

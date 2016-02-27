@@ -24,6 +24,7 @@ module.exports = (function(){
             recipient_id: recipient_id,
             partner_id: params.user_id == recipient_id ? sender_id : result.recipient_id,
             started: result.started,
+            chat_hash: chat_hash,
             time: time
           };
           callback(data);

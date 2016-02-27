@@ -42,7 +42,6 @@ var chat_duration = 300;
 
 io.on('connection',function(socket) {
 
-
 	var ip = function(socket){
     var socketId  = socket.id;
     var clientIp  = socket.request.connection.remoteAddress;
@@ -54,6 +53,7 @@ io.on('connection',function(socket) {
   };
 
 	if (typeof(socket.handshake.query.user_id) != 'undefined') {
+
 		// Reconnect
 		var user_id = socket.handshake.query.user_id;
 		var room_id = socket.handshake.query.room_id;
@@ -70,12 +70,13 @@ io.on('connection',function(socket) {
 		};
 
 		Connection.ReconnectUser(params,function(result){
+			var chat_hash = '';
 			// Can reconnect
 			if(result && result.time > 0){
 				var partner_id = result.partner_id;
 				var sender_id = result.sender_id;
 				var recipient_id = result.recipient_id;
-				var chat_hash = result.chat_hash;
+				chat_hash = result.chat_hash;
 				var time = result.time;
 
 				chathash_arr[user_id] 	= chat_hash;
@@ -99,7 +100,8 @@ io.on('connection',function(socket) {
 				user_id: user_id,
 				chat_hash: chat_hash,
 				room_id: room_id,
-				name: name
+				name: name,
+				chat_hash: chat_hash
 			});
 		});
 	}
@@ -179,25 +181,17 @@ io.on('connection',function(socket) {
 
 	socket.on('leave_room',function(data) {
 		if(typeof socket.handshake.query.user_id != 'undefined') {
-			// var partner_type = socket.handshake.query.partner_type;
-			// var user_id 	= socket.handshake.query.user_id;
-			// var chat_hash = chathash_arr[user_id];
-			// io.emit('reconnect_server',{user_id:user_id});
-			// OnairUser.Remove({
-			// 	user_id: user_id,
-			// 	partner_type: partner_type
-			// },function(result){
-			// 	io.emit('notify_disconnect_chat_partner',{
-			// 		chat_hash: chat_hash,
-			// 		user_id: user_id
-			// 	});
-			// })
-			// Room.LeaveRoom(data,function(){
-			// 	Room.RemoveEmptyRooms();
-			// 	Room.GetEmptyRooms(function(results) {
-			// 		io.emit('remove_rooms',results);
-			// 	});
-			// });
+			var partner_type = socket.handshake.query.partner_type;
+			var user_id 	= socket.handshake.query.user_id;
+			var chat_hash = chathash_arr[user_id];
+			OnairUser.Remove(user_id);
+
+			Room.LeaveRoom(data,function(){
+				Room.RemoveEmptyRooms();
+				Room.GetEmptyRooms(function(results) {
+					io.emit('remove_rooms',results);
+				});
+			});
 		}
 	})
 	

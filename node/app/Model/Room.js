@@ -69,7 +69,8 @@ module.exports = (function(){
 	};
 
 	X.LeaveRoom = function(data,callback){
-		if(data.partner_type == 'partner_1'){
+		console.log(data);
+		if(data.partner_type == 'user_1'){
 			Room.update({user_1:null},{
 				where: {user_1: data.user_id}
 			}).done(function(){
